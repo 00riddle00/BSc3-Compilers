@@ -1,0 +1,37 @@
+<START> ::= <DECLS>
+
+<FN_DECL> ::= "fn" <IDENT> <PARAMS> "->" <TYPE> <STMT_BLOCK>
+<PARAMS> ::= "(" ")" | "(" <PARAMS_SEQ> ")"
+<PARAMS_SEQ> ::= ....
+<DECL> ::= <FN_DECL>
+<DECLS> ::= <DECL> | <DECLS> <DECL>
+
+<TYPE> ::= "int" | "void"
+
+<EXPR_STMT> ::= <EXPR>
+<RETURN_STMT> ::= "return" | "return" <EXPR>
+<BREAK_STMT> ::= "break"
+<WHILE_STMT> ::= "while" <EXPR> <STMT_BLOCK>
+<STMT> ::= <BREAK_STMT> | <EXPR_STMT> | <RETURN_STMT> | <WHILE_STMT>
+<STMTS> ::= <STMT> | <STMTS> <STMT>
+<STMT_BLOCK> ::= "{" "}" | "{" <STMTS> "}"
+
+<EXPR> ::= <ADD>
+<ADD> ::= <MULT> | <ADD> "+" <MULT> | <ADD> "-" <MULT> 
+<MULT> ::= <PRIMARY> | <MULT> "*" <PRIMARY> | <MULT> "/" <PRIMARY> 
+<PRIMARY> ::= <LIT_INT> | <VAR> | <PAREN>
+<LIT_INT> ::= <DIGITS>
+<VAR> ::= <IDENT>
+<PAREN> ::= "(" <EXPR> ")"
+
+<COMMENT> ::= "#" <COMMENT_SYMBOLS> <NEWLINE>
+<WHITESPACE> ::= ... 
+
+<LCASE_LETTER> ::= "a" | ... | "z"
+<UCASE_LETTER> ::= "A" | ... | "Z"
+<LETTER> ::= <LCASE_LETTER> | <UCASE_LETTER>
+<IDENT> ::= <LETTER> | <IDENT> <LETTER>
+
+<DIGIT> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+<DIGITS> ::= <DIGIT> | <DIGITS> <DIGIT>
+
