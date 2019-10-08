@@ -103,7 +103,7 @@
 <TYPE_NAME> ::= "int" | "float" | "bool" | "char" | "string" 
 
 /* basic types */
-<STRING> ::= "\"" "\"" | "\"" <ANY_W_ESCAPES> "\""
+<STRING> ::= "\"" "\"" | "\"" <ANY> "\""
 <CHAR> ::= "'" <ANY_SYM> "'" 
 <BOOL> ::= "True" | "False"
 <FLOAT> ::= <FLOAT_WO_E> | <FLOAT_WO_E> "e" <SIGNABLE_DIGITS> | <SIGNABLE_DIGITS> "e" <SIGNABLE_DIGITS>
@@ -136,12 +136,13 @@
 
 /* comments */
 <COMMENT> ::= <COMMENT_LINE> | <COMMENT_BLOCK>
-<COMMENT_LINE> ::= "#" <ANY> <NEWLINE> 
-<COMMENT_BLOCK> ::= "###" <ANY> "###"
+<COMMENT_LINE> ::= "#" <ANY_WO_ESCAPES> <NEWLINE> 
+<COMMENT_BLOCK> ::= "###" <ANY_WO_ESCAPES> "###"
 
 /* molecules */
-<ANY_W_ESCAPES> ::= <ANY_SYM_W_ESCAPES> | <ANY_W_ESCAPES> <ANY_SYM_W_ESCAPES>
 <ANY> ::= <ANY_SYM> | <ANY> <ANY_SYM>
+<ANY_WO_ESCAPES> ::= <ANY_SYM_WO_ESCAPES> | <ANY_WO_ESCAPES> <ANY_SYM_WO_ESCAPES>
+
 <SIGNABLE_DIGITS> ::= <SIGN> <DIGITS> | <DIGITS>
 <DIGITS> ::= <DIGIT> | <DIGITS> <DIGIT>
 
@@ -149,8 +150,8 @@
 <IDENT_TAIL_SYM> ::= <DIGIT> | <IDENT_HEAD_SYM>
 <IDENT_HEAD_SYM> ::= <LETTER> | <UNDERSCORE>
 
-<ANY_SYM_W_ESCAPES> ::= <ANY_SYM> | <ESCAPED_SYM>
-<ANY_SYM> ::= <DIGIT> | <LETTER> | <SPECIAL> 
+<ANY_SYM> ::= <ANY_SYM_WO_ESCAPES> | <ESCAPED_SYM>
+<ANY_SYM_WO_ESCAPES> ::= <DIGIT> | <LETTER> | <SPECIAL>
 
 <ESCAPED_SYM> ::= "\\" <SYM_TO_BE_ESCAPED>
 <SYM_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\""
