@@ -104,7 +104,6 @@
 
 /* basic types */
 <STRING> ::= "\"" "\"" | "\"" <ANY_W_ESCAPES> "\""
-
 <CHAR> ::= "'" <ANY_SYM> "'" 
 <BOOL> ::= "True" | "False"
 <FLOAT> ::= <FLOAT_WO_E> | <FLOAT_WO_E> "e" <SIGNABLE_DIGITS> | <SIGNABLE_DIGITS> "e" <SIGNABLE_DIGITS>
