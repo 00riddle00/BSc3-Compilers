@@ -1,37 +1,173 @@
-<START> ::= <DECLS>
+<PROGRAM> ::= <DECLS>
 
-<FN_DECL> ::= "fn" <IDENT> <PARAMS> "->" <TYPE> <STMT_BLOCK>
-<PARAMS> ::= "(" ")" | "(" <PARAMS_SEQ> ")"
-<PARAMS_SEQ> ::= ....
-<DECL> ::= <FN_DECL>
+/* declarations */
 <DECLS> ::= <DECL> | <DECLS> <DECL>
+<DECL> ::= <FN_DECL> | <VAR_DECL_STMT> | <COMMENT>
 
-<TYPE> ::= "int" | "void"
+/* function declaration */
+<FN_DECL> ::= "fx" <IDENT> "(" <PARAMS> ")" "==>" <RETURN_TYPE> "{" <STMT_BLOCK "}"
 
-<EXPR_STMT> ::= <EXPR>
-<RETURN_STMT> ::= "return" | "return" <EXPR>
-<BREAK_STMT> ::= "break"
-<WHILE_STMT> ::= "while" <EXPR> <STMT_BLOCK>
-<STMT> ::= <BREAK_STMT> | <EXPR_STMT> | <RETURN_STMT> | <WHILE_STMT>
-<STMTS> ::= <STMT> | <STMTS> <STMT>
-<STMT_BLOCK> ::= "{" "}" | "{" <STMTS> "}"
+/* statement block */
+<STMT_BLOCK> ::= "" | <STMTS>
 
-<EXPR> ::= <ADD>
-<ADD> ::= <MULT> | <ADD> "+" <MULT> | <ADD> "-" <MULT> 
-<MULT> ::= <PRIMARY> | <MULT> "*" <PRIMARY> | <MULT> "/" <PRIMARY> 
-<PRIMARY> ::= <LIT_INT> | <VAR> | <PAREN>
-<LIT_INT> ::= <DIGITS>
+/* statements */
+<STMTS> ::= <STMT> | <STMTS> <STMT> 
+
+/* statement */
+<STMT> ::= <STATEMENT_W_DELIM> ";" | <STATEMENT_WO_DELIM>
+
+/* statement types by delimiter */
+<STATEMENT_W_DELIM> ::= <IN_IO_STMT> | <OUT_IO_STMT> | <VAR_DECL_STMT> | <VAR_INIT_STMT> | <VAR_ASSIGN_STMT> | <EXPR_STMT> | <BREAK_STMT> | <CONTINUE_STMT> | <RETURN_STMT>
+<STATEMENT_WO_DELIM> ::= <IF_STMT> | <WHILE_STMT> | <FOR_STMT>
+
+/* statement parts */
+<IN_IO_STMT> ::= "in" "(" <IN_ARG_SEQ> ")"
+<OUT_IO_STMT> ::= "disp" "(" <EXPR_SEQ> ")" 
+<VAR_DECL_STMT> ::= <VAR_DECL>  
+<VAR_INIT_STMT> ::= <VAR_INIT> 
+<VAR_ASSIGN_STMT> ::= <VAR_ASSIGN> 
+<EXPR_STMT> ::= <EXPR> 
+<IF_STMT> ::= <IF_IF> <IF_ELIFS> <IF_ELSE>
+<WHILE_STMT> ::= "while" "(" <EXPR> ")" "{" <STMT_BLOCK "}"
+<FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" "{" <STMT_BLOCK "}"
+<BREAK_STMT> ::= "break" 
+<CONTINUE_STMT> ::= "continue" 
+<RETURN_STMT> ::= "return" | "return" <EXPR> 
+
+/* in-statement parts */
+<IN_ARGS_SEQ> ::= <IN_ARG_CHUNK> | <IN_ARG_SEQ> <IN_ARG_CHUNK>
+<IN_ARG_CHUNK> ::= <IN_VAR_SEQ> | <EXPR_SEQ>
+<IN_VAR_SEQ> ::= "&" <VAR> | <IN_VAR_SEQ> "," "&" <VAR>
+
+/* if-statement parts */
+<IF_IF> ::= "if" "("<EXPR>")" "{" <STMT_BLOCK "}"
+<IF_ELIFS> ::= <IF_ELIF> | <IF_ELIFS> <IF_ELIF> | ""
+<IF_ELIF> ::= "elif" "(" <EXPR> ")" "{" <STMT_BLOCK "}"
+<IF_ELSE> ::= "else" "{" <STMT_BLOCK "}" | ""
+
+/* for-statement parts */
+<FOR_INIT> ::= <VAR_DECL> | <VAR_INIT> | <VAR_ASSIGN> | <EXPR> | ""
+<FOR_CONDITION> ::= <VAR_ASSIGN> | <EXPR> | ""
+<FOR_INCREMENT> ::= <VAR_ASSIGN> | <EXPR> | ""
+
+/* variable assignment */
+<VAR_ASSIGN> ::= <VAR> "=" <EXPR>
+
+/* variable initialization */
+<VAR_INIT> ::= <TYPE_NAME> <IDENT> "=" <EXPR>
+
+/* variable declaration */
+<VAR_DECL> ::= <TYPE_NAME> <IDENT>
+
+/* expressions */
+<EXPR_SEQ> ::= <EXPR> | <EXPR_SEQ> "," <EXPR>
+
+/* expression */
+<EXPR> ::= <OP_LOG_LVL2>
+<OP_LOG_LVL2> ::= <OP_LOG_LVL1> | <OP_LOG_LVL2> <OP_LOG_LVL2> <OP_LOG_LVL1>
+<OP_LOG_LVL1> ::= <CMP_LVL2> | <OP_LOG_LVL1> <OP_LOG_LVL1> <CMP_LVL2>
+<CMP_LVL2> ::= <CMP_LVL1> | <CMP_LVL2> <OP_CMP_LVL2> <CMP_LVL1>
+<CMP_LVL1> ::= <ARITHM_LVL2> | <CMP_LVL1> <OP_CMP_LVL1> <ARITHM_LVL2>
+<ARITHM_LVL2> ::= <ARITHM_LVL1> | <ARITHM_LVL2> <OP_ARITHM_LVL2> <ARITHM_LVL1>
+<ARITHM_LVL1> ::= <UNARY> | <ARITHM_LVL1> <OP_ARITHM_LVL1> <UNARY>
+<UNARY> ::= <PRIMARY> | <OP_UNARY> <UNARY>
+<PRIMARY> ::= <TYPE_MEMBER> | <VAR> | <FN_CALL> | "(" EXPR ")"
+
+/* function call */
+<FN_CALL> ::= <IDENT> "(" <ARGS> ")"
+
+/* arguments */
+<ARGS> ::= "" | <ARGS_SEQ>
+<ARGS_SEQ> ::= <ARG> | <ARGS_SEQ> "," <ARG>
+<ARG> ::= <EXPR>
+
+/* parameters */
+<PARAMS> ::= "" | <PARAMS_SEQ>
+<PARAMS_SEQ> ::= <PARAM> | <PARAMS_SEQ> "," <PARAM>
+<PARAM> ::= <TYPE_NAME> <PARAM_IDENT>
+<PARAM_IDENT> ::= <IDENT>
+
+/* variables */
+<VAR_SEQ> ::= <VAR> | <VAR_SEQ> "," < VAR>
 <VAR> ::= <IDENT>
-<PAREN> ::= "(" <EXPR> ")"
 
-<COMMENT> ::= "#" <COMMENT_SYMBOLS> <NEWLINE>
-<WHITESPACE> ::= ... 
+/* identifiers */
+<IDENT> ::= <IDENT_HEAD_SYM> | <IDENT_HEAD_SYM> <IDENT_TAIL>
 
-<LCASE_LETTER> ::= "a" | ... | "z"
-<UCASE_LETTER> ::= "A" | ... | "Z"
-<LETTER> ::= <LCASE_LETTER> | <UCASE_LETTER>
-<IDENT> ::= <LETTER> | <IDENT> <LETTER>
+/* return type */
+<RETURN_TYPE> ::= <TYPE_NAME> | "void"
 
-<DIGIT> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+/* basic type members */
+<TYPE_MEMBER> ::= <INT> | <FLOAT> | <BOOL> | <CHAR> | <STRING>
+
+/* basic type names */
+<TYPE_NAME> ::= "int" | "float" | "bool" | "char" | "string" 
+
+/* basic types */
+<STRING> ::= ""<ONE_LINE_STRING>"" | '""'<MULTILINE_STRING>'""' /* <- ar vienareiksmiska? */
+<CHAR> ::= "'" <ANY> "'" | "'" <ESCAPED_CHARACTER> "'"
+<BOOL> ::= "True" | "False"
+<FLOAT> ::= <FLOAT_WO_E> | <FLOAT_WO_E> "e" <SIGNABLE_DIGITS> | <SIGNABLE_DIGITS> "e" <SIGNABLE_DIGITS>
+<FLOAT_WO_E> ::= "." <DIGITS> | <SIGNABLE_DIGITS> "." |  <SIGNABLE_DIGITS> "." <DIGITS>
+<INT> ::= <SIGNABLE_DIGITS>
+
+/* string (basic type) types */
+<MULTILINE_STRING> ::= <ANY> | "" /* <- nesiskiria nuo one_line */
+<ONE_LINE_STRING> ::= <ANY> | "" /* <- o kaip del newline? */
+
+/* unary operators (op level0) */
+<OP_UNARY> ::= "+" | "-" | "!" | "++" | "--" /* <- ar reikia sign deti i unary, jeigu jau yra int viduje jis (ir float) */
+
+/* arithmetic operators (op level1) */
+<OP_ARITHM_LVL1> ::= "*" | "/" | "%"
+
+/* arithmetic operators (op level2) */
+<OP_ARITHM_LVL2> ::= "+" | "-"
+
+/* cmp operators (op level3) (op cmp level1) */
+<OP_CMP_LVL1> ::= ">" | "<" | ">=" |"<="
+
+/* cmp operators (op level4) (op cmp level2) */
+<OP_CMP_LVL2> ::= "==" | "!="
+
+/* logical operators (op level5) (logical op level1) */
+<OP_AND_LVL1> ::= "AND"
+
+/* logical operators (op level6) (logical op level2) */
+<OP_OR_LVL2> ::= "OR"
+
+/* assign operators */
+<OP_ASSIGN> ::= "=" | "+=" | "-=" | "*=" | "/=" | "%="
+
+/* comments */
+<COMMENT> ::= <COMMENT_LINE> | <COMMENT_BLOCK>
+<COMMENT_LINE> ::= "#" <ANY> <NEWLINE>
+<COMMENT_BLOCK> ::= "###" <ANY> "###"
+
+/* molecules */
+<ANY> ::= <ANY_SYM> | <ANY> <ANY_SYM>
+<IDENT_TAIL> ::= <IDENT_TAIL_SYM> | <IDENT_TAIL> <IDENT_TAIL_SYM>
+<SIGNABLE_DIGITS> ::= <SIGN> <DIGITS> | <DIGITS>
 <DIGITS> ::= <DIGIT> | <DIGITS> <DIGIT>
+<ESCAPED_CHARACTER> ::= "\" <CHARACTER_TO_BE_ESCAPED>
+<CHARACTER_TO_BE_ESCAPED> ::= <ZERO> | <TAB> | <BACKSLASH> | <QUOT_MARK>
+<NEWLINE> ::= "\n" /* <- ar newline nepadaro gramatikos nevienareiksmes?
+
+/* atoms (redefinition) */
+<IDENT_TAIL_SYM> ::= <DIGIT> | <IDENT_HEAD_SYM>
+<IDENT_HEAD_SYM> ::= <LETTER> | <UNDERSCORE>
+<ANY_SYM> ::= <DIGIT> | <LETTER> | <UNDERSCORE> | <SPECIAL>
+<LETTER> ::= <LCASE_LETTER> | <UCASE_LETTER>
+<ZERO> ::= "0"
+<TAB> ::= "t"
+<BACKSLASH> ::= "\"
+<QUOT_MARK> ::= '"' /* <- ar teisinga syntax? */
+<SIGN> ::= "+" | "-"
+<UNDERSCORE> ::= "_"
+
+/* atoms (distinct) */
+<SPECIAL> ::= "!" | "#" | "@" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "," | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "]" | "^" | "`" | "{" | "}" | "|" | "~" | " " | "_" | "+" | "-" | '"' | "\"
+<UCASE_LETTER> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+<LCASE_LETTER> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+<DIGIT> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 
