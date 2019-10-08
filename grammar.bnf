@@ -104,7 +104,11 @@
 <TYPE_NAME> ::= "int" | "float" | "bool" | "char" | "string" 
 
 /* basic types */
-<STRING> ::= ""<ONE_LINE_STRING>"" | '""'<MULTILINE_STRING>'""' /* <- ar vienareiksmiska? */
+<STRING> ::= "\"<STRING>\""  /*| '""'<MULTILINE_STRING>'""' /* <- ar vienareiksmiska? */
+
+<STRING> ::= "\"" <STRING> "\"" 
+<STRING> ::= "\"" <ONE_LINE_STRING> "\"" | "\"" "\"" "\"" <MULTILINE_STRING> "\"" "\"" "\"" /* <- ar vienareiksmiska? */ 
+
 <CHAR> ::= "'" <ANY> "'" | "'" <ESCAPED_CHARACTER> "'"
 <BOOL> ::= "True" | "False"
 <FLOAT> ::= <FLOAT_WO_E> | <FLOAT_WO_E> "e" <SIGNABLE_DIGITS> | <SIGNABLE_DIGITS> "e" <SIGNABLE_DIGITS>
