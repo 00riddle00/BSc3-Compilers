@@ -153,24 +153,18 @@
 <IDENT_TAIL> ::= <IDENT_TAIL_SYM> | <IDENT_TAIL> <IDENT_TAIL_SYM>
 <SIGNABLE_DIGITS> ::= <SIGN> <DIGITS> | <DIGITS>
 <DIGITS> ::= <DIGIT> | <DIGITS> <DIGIT>
-<ESCAPED_CHARACTER> ::= "\" <CHARACTER_TO_BE_ESCAPED>
-<CHARACTER_TO_BE_ESCAPED> ::= <ZERO> | <TAB> | <BACKSLASH> | <QUOT_MARK>
-<NEWLINE> ::= "\n" /* <- ar newline nepadaro gramatikos nevienareiksmes?
+<ESCAPED_CHARACTER> ::= "\\" <CHARACTER_TO_BE_ESCAPED>
+<CHARACTER_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\""
+<NEWLINE> ::= "\\n" /* <- ar newline nepadaro gramatikos nevienareiksmes?
 
-/* atoms (redefinition) */
+/* atoms */
 <IDENT_TAIL_SYM> ::= <DIGIT> | <IDENT_HEAD_SYM>
 <IDENT_HEAD_SYM> ::= <LETTER> | <UNDERSCORE>
 <ANY_SYM> ::= <DIGIT> | <LETTER> | <UNDERSCORE> | <SPECIAL>
 <LETTER> ::= <LCASE_LETTER> | <UCASE_LETTER>
-<ZERO> ::= "0"
-<TAB> ::= "t"
-<BACKSLASH> ::= "\"
-<QUOT_MARK> ::= '"' /* <- ar teisinga syntax? */
 <SIGN> ::= "+" | "-"
 <UNDERSCORE> ::= "_"
-
-/* atoms (distinct) */
-<SPECIAL> ::= "!" | "#" | "@" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "," | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "]" | "^" | "`" | "{" | "}" | "|" | "~" | " " | "_" | "+" | "-" | '"' | "\"
+<SPECIAL> ::= "!" | "#" | "@" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "," | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "]" | "^" | "`" | "{" | "}" | "|" | "~" | " " | "_" | "+" | "-" 
 <UCASE_LETTER> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 <LCASE_LETTER> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 <DIGIT> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
