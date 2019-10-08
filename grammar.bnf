@@ -27,7 +27,7 @@
 <VAR_INIT_STMT> ::= <VAR_INIT> 
 <VAR_ASSIGN_STMT> ::= <VAR_ASSIGN> 
 <EXPR_STMT> ::= <EXPR> 
-<IF_STMT> ::= <IF_IF> <IF_ELIFS> <IF_ELSE>
+<IF_STMT> ::= <IF_IF> <IF_ELIFS> <IF_ELSE> | <IF_IF> <IF_ELSE> | <IF_IF> <IF_ELIFS> 
 <WHILE_STMT> ::= "while" "(" <EXPR> ")" <STMT_BLOCK>
 <FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" <STMT_BLOCK>
 <BREAK_STMT> ::= "break" 
@@ -40,9 +40,9 @@
 
 /* if-statement parts */
 <IF_IF> ::= "if" "("<EXPR>")" <STMT_BLOCK>
-<IF_ELIFS> ::= <IF_ELIF> | <IF_ELIFS> <IF_ELIF> | ""
+<IF_ELIFS> ::= <IF_ELIF> | <IF_ELIFS> <IF_ELIF> 
 <IF_ELIF> ::= "elif" "(" <EXPR> ")" <STMT_BLOCK>
-<IF_ELSE> ::= "else" <STMT_BLOCK> | ""
+<IF_ELSE> ::= "else" <STMT_BLOCK> 
 
 /* for-statement parts */
 <FOR_INIT> ::= <VAR_DECL> | <VAR_INIT> | <VAR_ASSIGN> | <EXPR> | ""
@@ -103,7 +103,7 @@
 <TYPE_NAME> ::= "int" | "float" | "bool" | "char" | "string" 
 
 /* basic types */
-<STRING> ::= "\"" "\"" | "\"" <ANY> "\""
+<STRING> ::= "\"" "\"" | "\"" <ANY_W_ESCAPES> "\""
 
 <CHAR> ::= "'" <ANY_SYM> "'" 
 <BOOL> ::= "True" | "False"
@@ -141,7 +141,7 @@
 <COMMENT_BLOCK> ::= "###" <ANY> "###"
 
 /* molecules */
-<ANY_COMM> ::= <ANY_SYM> | <ANY> <ANY_SYM>
+<ANY_W_ESCAPES> ::= <ANY_SYM_W_ESCAPES> | <ANY_W_ESCAPES> <ANY_SYM_W_ESCAPES>
 <ANY> ::= <ANY_SYM> | <ANY> <ANY_SYM>
 <IDENT_TAIL> ::= <IDENT_TAIL_SYM> | <IDENT_TAIL> <IDENT_TAIL_SYM>
 <SIGNABLE_DIGITS> ::= <SIGN> <DIGITS> | <DIGITS>
@@ -153,7 +153,8 @@
 /* atoms */
 <IDENT_TAIL_SYM> ::= <DIGIT> | <IDENT_HEAD_SYM>
 <IDENT_HEAD_SYM> ::= <LETTER> | <UNDERSCORE>
-<ANY_SYM> ::= <DIGIT> | <LETTER> | <UNDERSCORE> | <SPECIAL> | <ESCAPED_SYM>
+<ANY_SYM_W_ESCAPES> ::= <ANY_SYM> | <ESCAPED_SYM>
+<ANY_SYM> ::= <DIGIT> | <LETTER> | <UNDERSCORE> | <SPECIAL> | 
 <LETTER> ::= <LCASE_LETTER> | <UCASE_LETTER>
 <SIGN> ::= "+" | "-"
 <UNDERSCORE> ::= "_"
