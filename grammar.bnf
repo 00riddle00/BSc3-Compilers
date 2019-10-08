@@ -17,14 +17,14 @@
 <STMT> ::= <STATEMENT_W_DELIM> ";" | <STATEMENT_WO_DELIM> 
 
 /* statement types by delimiter */
-<STATEMENT_W_DELIM> ::= <IN_IO_STMT> | <OUT_IO_STMT> | <VAR_DECL_STMT> | <VAR_INIT_STMT> | <VAR_ASSIGN_STMT> | <EXPR_STMT> | <BREAK_STMT> | <CONTINUE_STMT> | <RETURN_STMT>
+<STATEMENT_W_DELIM> ::= <IN_IO_STMT> | <OUT_IO_STMT> | <VAR_DECL_STMT> | <VAR_DECL_INIT_STMT> | <VAR_ASSIGN_STMT> | <EXPR_STMT> | <BREAK_STMT> | <CONTINUE_STMT> | <RETURN_STMT>
 <STATEMENT_WO_DELIM> ::= <IF_STMT> | <WHILE_STMT> | <FOR_STMT>
 
 /* statement parts */
 <IN_IO_STMT> ::= "in" "(" <IN_ARG_SEQ> ")"
 <OUT_IO_STMT> ::= "disp" "(" <EXPR_SEQ> ")" 
 <VAR_DECL_STMT> ::= <VAR_DECL>  
-<VAR_INIT_STMT> ::= <VAR_INIT> 
+<VAR_DECL_INIT_STMT> ::= <VAR_DECL_INIT> 
 <VAR_ASSIGN_STMT> ::= <VAR_ASSIGN> 
 <EXPR_STMT> ::= <EXPR> 
 <IF_STMT> ::= <IF_IF> <IF_ELIFS> <IF_ELSE> | <IF_IF> <IF_ELSE> | <IF_IF> <IF_ELIFS> 
@@ -45,7 +45,7 @@
 <IF_ELSE> ::= "else" <STMT_BLOCK> 
 
 /* for-statement parts */
-<FOR_INIT> ::= <VAR_DECL> | <VAR_INIT> | <VAR_ASSIGN> | <EXPR> | ""
+<FOR_INIT> ::= <VAR_DECL> | <VAR_DECL_INIT> | <VAR_ASSIGN> | <EXPR> | ""
 <FOR_CONDITION> ::= <VAR_ASSIGN> | <EXPR> | ""
 <FOR_INCREMENT> ::= <VAR_ASSIGN> | <EXPR> | ""
 
@@ -53,7 +53,7 @@
 <VAR_ASSIGN> ::= <VAR> "=" <EXPR>
 
 /* variable initialization */
-<VAR_INIT> ::= <TYPE_NAME> <IDENT> "=" <EXPR>
+<VAR_DECL_INIT> ::= <TYPE_NAME> <IDENT> "=" <EXPR>
 
 /* variable declaration */
 <VAR_DECL> ::= <TYPE_NAME> <IDENT>
