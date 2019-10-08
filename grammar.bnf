@@ -2,7 +2,7 @@
 
 /* declarations */
 <DECLS> ::= <DECL> | <DECLS> <DECL>
-<DECL> ::= <FN_DECL> | <VAR_DECL_STMT> | <COMMENT>
+<DECL> ::= <FN_DECL> | <VAR_DECL_STMT> 
 
 /* function declaration */
 <FN_DECL> ::= "fx" <IDENT> "(" <PARAMS> ")" "==>" <RETURN_TYPE> "{" <STMT_BLOCK "}"
@@ -28,8 +28,8 @@
 <VAR_ASSIGN_STMT> ::= <VAR_ASSIGN> 
 <EXPR_STMT> ::= <EXPR> 
 <IF_STMT> ::= <IF_IF> <IF_ELIFS> <IF_ELSE>
-<WHILE_STMT> ::= "while" "(" <EXPR> ")" "{" <STMT_BLOCK "}"
-<FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" "{" <STMT_BLOCK "}"
+<WHILE_STMT> ::= "while" "(" <EXPR> ")" "{" <STMT_BLOCK> "}"
+<FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" "{" <STMT_BLOCK> "}"
 <BREAK_STMT> ::= "break" 
 <CONTINUE_STMT> ::= "continue" 
 <RETURN_STMT> ::= "return" | "return" <EXPR> 
