@@ -70,7 +70,7 @@
 <ARITHM_LVL2> ::= <ARITHM_LVL1> | <ARITHM_LVL2> <OP_ARITHM_LVL2> <ARITHM_LVL1>
 <ARITHM_LVL1> ::= <UNARY> | <ARITHM_LVL1> <OP_ARITHM_LVL1> <UNARY>
 <UNARY> ::= <PRIMARY> | <OP_UNARY> <UNARY>
-<PRIMARY> ::= <TYPE_MEMBER> | <VAR> | <FN_CALL> | "(" EXPR ")"
+<PRIMARY> ::= <TYPE_MEMBER> | <VAR> | <FN_CALL> | "(" <EXPR> ")"
 
 /* function call */
 <FN_CALL> ::= <IDENT> <ARGS>
@@ -91,7 +91,7 @@
 <VAR> ::= <IDENT>
 
 /* identifiers */
-<IDENT> ::= <IDENT_HEAD_SYM> | <IDENT_HEAD_SYM> <IDENT_TAIL>
+<IDENT> ::= <IDENT_HEAD_SYM> | <IDENT> <IDENT_TAIL_SYM>
 
 /* return type */
 <RETURN_TYPE> ::= <TYPE_NAME> | "void"
@@ -103,7 +103,7 @@
 <TYPE_NAME> ::= "int" | "float" | "bool" | "char" | "string" 
 
 /* basic types */
-<STRING> ::= "\"" "\"" | "\"" <STRING> "\""
+<STRING> ::= "\"" "\"" | "\"" <ANY> "\""
 
 <CHAR> ::= "'" <ANY_SYM> "'" 
 <BOOL> ::= "True" | "False"
@@ -137,10 +137,11 @@
 
 /* comments */
 <COMMENT> ::= <COMMENT_LINE> | <COMMENT_BLOCK>
-<COMMENT_LINE> ::= "#" <ANY> <NEWLINE> /* <-- ar ambiguity nera?
+<COMMENT_LINE> ::= "#" <ANY> <NEWLINE> /* <-- ar ambiguity nera? */
 <COMMENT_BLOCK> ::= "###" <ANY> "###"
 
 /* molecules */
+<ANY_COMM> ::= <ANY_SYM> | <ANY> <ANY_SYM>
 <ANY> ::= <ANY_SYM> | <ANY> <ANY_SYM>
 <IDENT_TAIL> ::= <IDENT_TAIL_SYM> | <IDENT_TAIL> <IDENT_TAIL_SYM>
 <SIGNABLE_DIGITS> ::= <SIGN> <DIGITS> | <DIGITS>
