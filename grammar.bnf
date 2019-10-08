@@ -109,7 +109,7 @@
 <STRING> ::= "\"" <STRING> "\"" 
 <STRING> ::= "\"" <ONE_LINE_STRING> "\"" | "\"" "\"" "\"" <MULTILINE_STRING> "\"" "\"" "\"" /* <- ar vienareiksmiska? */ 
 
-<CHAR> ::= "'" <ANY> "'" | "'" <ESCAPED_CHARACTER> "'"
+<CHAR> ::= "'" <ANY_SYM> "'" 
 <BOOL> ::= "True" | "False"
 <FLOAT> ::= <FLOAT_WO_E> | <FLOAT_WO_E> "e" <SIGNABLE_DIGITS> | <SIGNABLE_DIGITS> "e" <SIGNABLE_DIGITS>
 <FLOAT_WO_E> ::= "." <DIGITS> | <SIGNABLE_DIGITS> "." |  <SIGNABLE_DIGITS> "." <DIGITS>
@@ -153,14 +153,14 @@
 <IDENT_TAIL> ::= <IDENT_TAIL_SYM> | <IDENT_TAIL> <IDENT_TAIL_SYM>
 <SIGNABLE_DIGITS> ::= <SIGN> <DIGITS> | <DIGITS>
 <DIGITS> ::= <DIGIT> | <DIGITS> <DIGIT>
-<ESCAPED_CHARACTER> ::= "\\" <CHARACTER_TO_BE_ESCAPED>
-<CHARACTER_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\""
+<ESCAPED_SYM> ::= "\\" <SYM_TO_BE_ESCAPED>
+<SYM_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\""
 <NEWLINE> ::= "\\n" /* <- ar newline nepadaro gramatikos nevienareiksmes?
 
 /* atoms */
 <IDENT_TAIL_SYM> ::= <DIGIT> | <IDENT_HEAD_SYM>
 <IDENT_HEAD_SYM> ::= <LETTER> | <UNDERSCORE>
-<ANY_SYM> ::= <DIGIT> | <LETTER> | <UNDERSCORE> | <SPECIAL>
+<ANY_SYM> ::= <DIGIT> | <LETTER> | <UNDERSCORE> | <SPECIAL> | <ESCAPED_SYM>
 <LETTER> ::= <LCASE_LETTER> | <UCASE_LETTER>
 <SIGN> ::= "+" | "-"
 <UNDERSCORE> ::= "_"
