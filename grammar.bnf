@@ -104,7 +104,7 @@
 <TYPE_NAME> ::= "int" | "float" | "bool" | "char" | "string" 
 
 /* basic types */
-<STRING> ::= <EMPTY_QUOT_MARKS> | "\"" <STRING> "\"" 
+<STRING> ::= "\"" "\"" | "\"" <STRING> "\""
 
 <CHAR> ::= "'" <ANY_SYM> "'" 
 <BOOL> ::= "True" | "False"
@@ -149,7 +149,6 @@
 <ESCAPED_SYM> ::= "\\" <SYM_TO_BE_ESCAPED>
 <SYM_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\""
 <NEWLINE> ::= "\\n" /* <- ar newline nepadaro gramatikos nevienareiksmes? */
-<EMPTY_QUOT_MARKS> ::= "\"" "\""
 
 /* atoms */
 <IDENT_TAIL_SYM> ::= <DIGIT> | <IDENT_HEAD_SYM>
