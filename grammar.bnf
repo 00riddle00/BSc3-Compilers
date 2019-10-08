@@ -35,8 +35,7 @@
 <RETURN_STMT> ::= "return" | "return" <EXPR> 
 
 /* in-statement parts */
-<IN_ARGS_SEQ> ::= <IN_ARG_CHUNK> | <IN_ARG_SEQ> <IN_ARG_CHUNK>
-<IN_ARG_CHUNK> ::= <IN_VAR_SEQ> | <EXPR_SEQ>
+<IN_ARG_SEQ> ::= <EXPR_SEQ> <IN_VAR_SEQ>
 <IN_VAR_SEQ> ::= "&" <VAR> | <IN_VAR_SEQ> "," "&" <VAR>
 
 /* if-statement parts */
