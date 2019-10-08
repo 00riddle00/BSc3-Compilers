@@ -62,13 +62,13 @@
 <EXPR_SEQ> ::= <EXPR> | <EXPR_SEQ> "," <EXPR>
 
 /* expression */
-<EXPR> ::= <OP_LOG_LVL2>
-<OP_LOG_LVL2> ::= <OP_LOG_LVL1> | <OP_LOG_LVL2> <OP_LOG_LVL2> <OP_LOG_LVL1>
-<OP_LOG_LVL1> ::= <CMP_LVL2> | <OP_LOG_LVL1> <OP_LOG_LVL1> <CMP_LVL2>
-<CMP_LVL2> ::= <CMP_LVL1> | <CMP_LVL2> <OP_CMP_LVL2> <CMP_LVL1>
-<CMP_LVL1> ::= <ARITHM_LVL2> | <CMP_LVL1> <OP_CMP_LVL1> <ARITHM_LVL2>
-<ARITHM_LVL2> ::= <ARITHM_LVL1> | <ARITHM_LVL2> <OP_ARITHM_LVL2> <ARITHM_LVL1>
-<ARITHM_LVL1> ::= <UNARY> | <ARITHM_LVL1> <OP_ARITHM_LVL1> <UNARY>
+<EXPR> ::= <OR>
+<OR> ::= <AND> | <OR> <OP_OR> <AND>
+<AND> ::= <CMP_EQ_NEQ> | <AND> <OP_AND> <CMP_EQ_NEQ>
+<CMP_EQ_NEQ> ::= <CMP_GT_LT> | <CMP_EQ_NEQ> <OP_CMP_EQ_NEQ> <CMP_GT_LT>
+<CMP_GT_LT> ::= <SUM_SUB> | <CMP_GT_LT> <OP_CMP_GT_LT> <SUM_SUB>
+<SUM_SUB> ::= <MUL_DIV_MOD> | <SUM_SUB> <OP_SUM_SUB> <MUL_DIV_MOD>
+<MUL_DIV_MOD> ::= <UNARY> | <MUL_DIV_MOD> <OP_MUL_DIV_MOD> <UNARY>
 <UNARY> ::= <PRIMARY> | <OP_UNARY> <UNARY>
 <PRIMARY> ::= <TYPE_MEMBER> | <VAR> | <FN_CALL> | "(" <EXPR> ")"
 
@@ -112,53 +112,56 @@
 <INT> ::= <SIGNABLE_DIGITS>
 
 /* unary operators (op level0) */
-<OP_UNARY> ::= "+" | "-" | "!" | "++" | "--" /* <- ar reikia sign deti i unary, jeigu jau yra int viduje jis (ir float) */
+<OP_UNARY> ::= "+" | "-" | "!" | "++" | "--" 
 
 /* arithmetic operators (op level1) */
-<OP_ARITHM_LVL1> ::= "*" | "/" | "%"
+<OP_MUL_DIV_MOD> ::= "*" | "/" | "%"
 
 /* arithmetic operators (op level2) */
-<OP_ARITHM_LVL2> ::= "+" | "-"
+<OP_SUM_SUB> ::= "+" | "-"
 
-/* cmp operators (op level3) (op cmp level1) */
-<OP_CMP_LVL1> ::= ">" | "<" | ">=" |"<="
+/* cmp operators (op level3) */
+<OP_CMP_GT_LT> ::= ">" | "<" | ">=" |"<="
 
-/* cmp operators (op level4) (op cmp level2) */
-<OP_CMP_LVL2> ::= "==" | "!="
+/* cmp operators (op level4) */
+<OP_CMP_EQ_NEQ> ::= "==" | "!="
 
-/* logical operators (op level5) (logical op level1) */
-<OP_AND_LVL1> ::= "AND"
+/* logical operators (op level5) */
+<OP_AND> ::= "AND"
 
-/* logical operators (op level6) (logical op level2) */
-<OP_OR_LVL2> ::= "OR"
+/* logical operators (op level6) */
+<OP_OR> ::= "OR"
 
 /* assign operators */
 <OP_ASSIGN> ::= "=" | "+=" | "-=" | "*=" | "/=" | "%="
 
 /* comments */
 <COMMENT> ::= <COMMENT_LINE> | <COMMENT_BLOCK>
-<COMMENT_LINE> ::= "#" <ANY> <NEWLINE> /* <-- ar ambiguity nera? */
+<COMMENT_LINE> ::= "#" <ANY> <NEWLINE> 
 <COMMENT_BLOCK> ::= "###" <ANY> "###"
 
 /* molecules */
 <ANY_W_ESCAPES> ::= <ANY_SYM_W_ESCAPES> | <ANY_W_ESCAPES> <ANY_SYM_W_ESCAPES>
 <ANY> ::= <ANY_SYM> | <ANY> <ANY_SYM>
-<IDENT_TAIL> ::= <IDENT_TAIL_SYM> | <IDENT_TAIL> <IDENT_TAIL_SYM>
 <SIGNABLE_DIGITS> ::= <SIGN> <DIGITS> | <DIGITS>
 <DIGITS> ::= <DIGIT> | <DIGITS> <DIGIT>
-<ESCAPED_SYM> ::= "\\" <SYM_TO_BE_ESCAPED>
-<SYM_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\""
-<NEWLINE> ::= "\\n" /* <- ar newline nepadaro gramatikos nevienareiksmes? */
 
 /* atoms */
 <IDENT_TAIL_SYM> ::= <DIGIT> | <IDENT_HEAD_SYM>
 <IDENT_HEAD_SYM> ::= <LETTER> | <UNDERSCORE>
+
 <ANY_SYM_W_ESCAPES> ::= <ANY_SYM> | <ESCAPED_SYM>
-<ANY_SYM> ::= <DIGIT> | <LETTER> | <UNDERSCORE> | <SPECIAL> | 
-<LETTER> ::= <LCASE_LETTER> | <UCASE_LETTER>
+<ANY_SYM> ::= <DIGIT> | <LETTER> | <SPECIAL> 
+
+<ESCAPED_SYM> ::= "\\" <SYM_TO_BE_ESCAPED>
+<SYM_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\""
+
+<NEWLINE> ::= "\\n" 
 <SIGN> ::= "+" | "-"
 <UNDERSCORE> ::= "_"
+
 <SPECIAL> ::= "!" | "#" | "@" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "," | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "]" | "^" | "`" | "{" | "}" | "|" | "~" | " " | "_" | "+" | "-" 
+<LETTER> ::= <LCASE_LETTER> | <UCASE_LETTER>
 <UCASE_LETTER> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 <LCASE_LETTER> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 <DIGIT> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
