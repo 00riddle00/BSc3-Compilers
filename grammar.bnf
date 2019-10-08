@@ -5,16 +5,16 @@
 <DECL> ::= <FN_DECL> | <VAR_DECL_STMT> 
 
 /* function declaration */
-<FN_DECL> ::= "fx" <IDENT> "(" <PARAMS> ")" "==>" <RETURN_TYPE> "{" <STMT_BLOCK "}"
+<FN_DECL> ::= "fx" <IDENT> <PARAMS> "==>" <RETURN_TYPE> <STMT_BLOCK>
 
 /* statement block */
-<STMT_BLOCK> ::= "" | <STMTS>
+<STMT_BLOCK> ::= "{" "}" | "{" <STMTS> "}"
 
 /* statements */
 <STMTS> ::= <STMT> | <STMTS> <STMT> 
 
 /* statement */
-<STMT> ::= <STATEMENT_W_DELIM> ";" | <STATEMENT_WO_DELIM>
+<STMT> ::= <STATEMENT_W_DELIM> ";" | <STATEMENT_WO_DELIM> 
 
 /* statement types by delimiter */
 <STATEMENT_W_DELIM> ::= <IN_IO_STMT> | <OUT_IO_STMT> | <VAR_DECL_STMT> | <VAR_INIT_STMT> | <VAR_ASSIGN_STMT> | <EXPR_STMT> | <BREAK_STMT> | <CONTINUE_STMT> | <RETURN_STMT>
@@ -28,8 +28,8 @@
 <VAR_ASSIGN_STMT> ::= <VAR_ASSIGN> 
 <EXPR_STMT> ::= <EXPR> 
 <IF_STMT> ::= <IF_IF> <IF_ELIFS> <IF_ELSE>
-<WHILE_STMT> ::= "while" "(" <EXPR> ")" "{" <STMT_BLOCK> "}"
-<FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" "{" <STMT_BLOCK> "}"
+<WHILE_STMT> ::= "while" "(" <EXPR> ")" <STMT_BLOCK>
+<FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" <STMT_BLOCK>
 <BREAK_STMT> ::= "break" 
 <CONTINUE_STMT> ::= "continue" 
 <RETURN_STMT> ::= "return" | "return" <EXPR> 
@@ -40,10 +40,10 @@
 <IN_VAR_SEQ> ::= "&" <VAR> | <IN_VAR_SEQ> "," "&" <VAR>
 
 /* if-statement parts */
-<IF_IF> ::= "if" "("<EXPR>")" "{" <STMT_BLOCK "}"
+<IF_IF> ::= "if" "("<EXPR>")" <STMT_BLOCK>
 <IF_ELIFS> ::= <IF_ELIF> | <IF_ELIFS> <IF_ELIF> | ""
-<IF_ELIF> ::= "elif" "(" <EXPR> ")" "{" <STMT_BLOCK "}"
-<IF_ELSE> ::= "else" "{" <STMT_BLOCK "}" | ""
+<IF_ELIF> ::= "elif" "(" <EXPR> ")" <STMT_BLOCK>
+<IF_ELSE> ::= "else" <STMT_BLOCK> | ""
 
 /* for-statement parts */
 <FOR_INIT> ::= <VAR_DECL> | <VAR_INIT> | <VAR_ASSIGN> | <EXPR> | ""
@@ -74,15 +74,15 @@
 <PRIMARY> ::= <TYPE_MEMBER> | <VAR> | <FN_CALL> | "(" EXPR ")"
 
 /* function call */
-<FN_CALL> ::= <IDENT> "(" <ARGS> ")"
+<FN_CALL> ::= <IDENT> <ARGS>
 
 /* arguments */
-<ARGS> ::= "" | <ARGS_SEQ>
+<ARGS> ::= "(" ")" | "(" <ARGS_SEQ> ")"
 <ARGS_SEQ> ::= <ARG> | <ARGS_SEQ> "," <ARG>
 <ARG> ::= <EXPR>
 
 /* parameters */
-<PARAMS> ::= "" | <PARAMS_SEQ>
+<PARAMS> ::= "(" ")" | "(" <PARAMS_SEQ> ")"
 <PARAMS_SEQ> ::= <PARAM> | <PARAMS_SEQ> "," <PARAM>
 <PARAM> ::= <TYPE_NAME> <PARAM_IDENT>
 <PARAM_IDENT> ::= <IDENT>
@@ -104,20 +104,13 @@
 <TYPE_NAME> ::= "int" | "float" | "bool" | "char" | "string" 
 
 /* basic types */
-<STRING> ::= "\"<STRING>\""  /*| '""'<MULTILINE_STRING>'""' /* <- ar vienareiksmiska? */
-
-<STRING> ::= "\"" <STRING> "\"" 
-<STRING> ::= "\"" <ONE_LINE_STRING> "\"" | "\"" "\"" "\"" <MULTILINE_STRING> "\"" "\"" "\"" /* <- ar vienareiksmiska? */ 
+<STRING> ::= <EMPTY_QUOT_MARKS> | "\"" <STRING> "\"" 
 
 <CHAR> ::= "'" <ANY_SYM> "'" 
 <BOOL> ::= "True" | "False"
 <FLOAT> ::= <FLOAT_WO_E> | <FLOAT_WO_E> "e" <SIGNABLE_DIGITS> | <SIGNABLE_DIGITS> "e" <SIGNABLE_DIGITS>
 <FLOAT_WO_E> ::= "." <DIGITS> | <SIGNABLE_DIGITS> "." |  <SIGNABLE_DIGITS> "." <DIGITS>
 <INT> ::= <SIGNABLE_DIGITS>
-
-/* string (basic type) types */
-<MULTILINE_STRING> ::= <ANY> | "" /* <- nesiskiria nuo one_line */
-<ONE_LINE_STRING> ::= <ANY> | "" /* <- o kaip del newline? */
 
 /* unary operators (op level0) */
 <OP_UNARY> ::= "+" | "-" | "!" | "++" | "--" /* <- ar reikia sign deti i unary, jeigu jau yra int viduje jis (ir float) */
@@ -145,7 +138,7 @@
 
 /* comments */
 <COMMENT> ::= <COMMENT_LINE> | <COMMENT_BLOCK>
-<COMMENT_LINE> ::= "#" <ANY> <NEWLINE>
+<COMMENT_LINE> ::= "#" <ANY> <NEWLINE> /* <-- ar ambiguity nera?
 <COMMENT_BLOCK> ::= "###" <ANY> "###"
 
 /* molecules */
@@ -155,7 +148,8 @@
 <DIGITS> ::= <DIGIT> | <DIGITS> <DIGIT>
 <ESCAPED_SYM> ::= "\\" <SYM_TO_BE_ESCAPED>
 <SYM_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\""
-<NEWLINE> ::= "\\n" /* <- ar newline nepadaro gramatikos nevienareiksmes?
+<NEWLINE> ::= "\\n" /* <- ar newline nepadaro gramatikos nevienareiksmes? */
+<EMPTY_QUOT_MARKS> ::= "\"" "\""
 
 /* atoms */
 <IDENT_TAIL_SYM> ::= <DIGIT> | <IDENT_HEAD_SYM>
