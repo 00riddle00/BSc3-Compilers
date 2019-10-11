@@ -111,7 +111,7 @@
 <INT> ::= <SIGNABLE_DIGITS>
 
 /* unary operators (op level0) */
-<OP_UNARY> ::= "+" | "-" | "!" | "++" | "--" 
+<OP_UNARY> ::= "!" | "++" | "--" 
 
 /* arithmetic operators (op level1) */
 <OP_MUL_DIV_MOD> ::= "*" | "/" | "%"
