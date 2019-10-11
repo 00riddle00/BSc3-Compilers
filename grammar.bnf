@@ -154,7 +154,8 @@
 <ANY_SYM_WO_ESCAPES> ::= <DIGIT> | <LETTER> | <SPECIAL>
 
 <ESCAPED_SYM> ::= "\\" <SYM_TO_BE_ESCAPED>
-<SYM_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\""
+/* TODO add backslash to quote mark (removed temoporarily so that syntax highlighting is not broken) */
+<SYM_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\"
 
 <NEWLINE> ::= "\\n" 
 <SIGN> ::= "+" | "-"
@@ -179,7 +180,6 @@
 /* List declaration
 <LIST_DECL_INIT> ::= <LIST_DECL> "=" <EXPR>
 <LIST_DECL> ::= <TYPE> "list" "[" <INT> "]"
-
 
 int var1;
 char var2[10];
