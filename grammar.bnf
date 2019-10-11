@@ -2,15 +2,10 @@
 
 /* declarations */
 <DECLS> ::= <DECL> | <DECLS> <DECL>
-<DECL> ::= <FN_DECL> | <VAR_DECL_STMT> ";" | <STRUCT_DECL_STMT> ";" 
+<DECL> ::= <FN_DECL> | <VAR_DECL_STMT> ";" 
 
 /* function declaration */
 <FN_DECL> ::= "fx" <IDENT> <PARAMS> "==>" <RETURN_TYPE> <STMT_BLOCK>
-
-/* struct declaration */
-<STRUCT_DECL_STMT> ::= "struct" <IDENT> <VAR_DECL_STMT_BLOCk>
-<VAR_DECL_STMT_BLOCk> ::= "{" <VAR_DECL_STMTS> ";" "}"
-<VAR_DECL_STMTS> ::= <VAR_DECL_STMT> | <VAR_DECL_STMTS> ";" <VAR_DECL_STMT>
 
 /* statement block */
 <STMT_BLOCK> ::= "{" "}" | "{" <STMTS> "}"
@@ -171,16 +166,67 @@
 <LCASE_LETTER> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 <DIGIT> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 
-<struct_head> 
+----------------------------------
+
+/* declarations */
+<DECL> ::= <FN_DECL> | <VAR_DECL_STMT> ";" | <STRUCT_DECL_STMT> ";" 
+
+/* struct declaration */
+<STRUCT_DECL_STMT> ::= "struct" <IDENT> <VAR_DECL_STMT_BLOCk>
+<VAR_DECL_STMT_BLOCk> ::= "{" <VAR_DECL_STMTS> ";" "}"
+<VAR_DECL_STMTS> ::= <VAR_DECL_STMT> | <VAR_DECL_STMTS> ";" <VAR_DECL_STMT>
+
+/* List declaration
+<LIST_DECL_INIT> ::= <LIST_DECL> "=" <EXPR>
+<LIST_DECL> ::= <TYPE> "list" "[" <INT> "]"
 
 
-struct Test {
-	kajsdflksjd;
-	kljalksdf;
-	klasjdf;
-}
+int var1;
+char var2[10];
+
+&var1
+
+int    *ip;    /* pointer to an integer */
+double *dp;    /* pointer to a double */
+float  *fp;    /* pointer to a float */
+char   *ch     /* pointer to a character */
+
+<POINTER_DECL> ::= <type> "*" <ident>;
+
+<POINTER_DECL_INIT> ::= <type> "*" <ident> "=" &<expr>??
 
 
-struct 
+<POINTER_DEREFERENCE_1> ::= "*" <var>
+<POINTER_DEREFERENCE_2> ::= <var> "[" <int> "]"
+<POINTER_DEREFERENCE_3> ::= "*" "(" <var> <sign> <int> ")"
 
-<FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" <STMT_BLOCK>
+<REFERENCE_VARIABLE> ::= "&" <VAR>
+
+
+(*p).d_ = ...
+
+*p.d_ = ...
+
+
+   /* address stored in pointer variable */
+   printf("Address stored in ip variable: %x\n", ip );
+
+  int  *ptr = NULL;
+
+if(ptr)     /* succeeds if p is not null */
+if(!ptr)    /* succeeds if p is null */
+
+1	Pointer arithmetic
+There are four arithmetic operators that can be used in pointers: ++, --, +, -
+
+2	Array of pointers
+You can define arrays to hold a number of pointers.
+
+3	Pointer to pointer
+C allows you to have pointer on a pointer and so on.
+
+4	Passing pointers to functions in C
+Passing an argument by reference or by address enable the passed argument to be changed in the calling function by the called function.
+
+5	Return pointer from functions in C
+C allows a function to return a pointer to the local variable, static variable, and dynamically allocated memory as well.
