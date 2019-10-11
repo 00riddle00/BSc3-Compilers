@@ -2,10 +2,15 @@
 
 /* declarations */
 <DECLS> ::= <DECL> | <DECLS> <DECL>
-<DECL> ::= <FN_DECL> | <VAR_DECL_STMT> 
+<DECL> ::= <FN_DECL> | <VAR_DECL_STMT> ";" | <STRUCT_DECL_STMT> ";" 
 
 /* function declaration */
 <FN_DECL> ::= "fx" <IDENT> <PARAMS> "==>" <RETURN_TYPE> <STMT_BLOCK>
+
+/* struct declaration */
+<STRUCT_DECL_STMT> ::= "struct" <IDENT> <VAR_DECL_STMT_BLOCk>
+<VAR_DECL_STMT_BLOCk> ::= "{" <VAR_DECL_STMTS> ";" "}"
+<VAR_DECL_STMTS> ::= <VAR_DECL_STMT> | <VAR_DECL_STMTS> ";" <VAR_DECL_STMT>
 
 /* statement block */
 <STMT_BLOCK> ::= "{" "}" | "{" <STMTS> "}"
@@ -166,3 +171,16 @@
 <LCASE_LETTER> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 <DIGIT> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 
+<struct_head> 
+
+
+struct Test {
+	kajsdflksjd;
+	kljalksdf;
+	klasjdf;
+}
+
+
+struct 
+
+<FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" <STMT_BLOCK>
