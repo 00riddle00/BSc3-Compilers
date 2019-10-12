@@ -59,15 +59,15 @@
 <VAR_DECL_STMT> ::= <LIST_DECL> ";" | <VAR_DECL> ";"
 
 /* list declaration */
-<LIST_DECL> ::= <TYPE_3> <LIST_IDENT_W_SIZE>
+<LIST_DECL> ::= <TYPE> <LIST_IDENT_W_SIZE>
 
 /* variable declaration */
-<VAR_DECL> ::= <TYPE_3> <IDENT>
+<VAR_DECL> ::= <TYPE> <IDENT>
 
 /* DECLARATIONS WITH INITIALIZATION */
 
 /* variable declaration with initialization */
-<VAR_DECL_INIT> ::= <TYPE_3> <IDENT> "=" <EXPR_or_null> /* <- be structo!!
+<VAR_DECL_INIT> ::= <TYPE> <IDENT> "=" <EXPR_or_null> /* <- be structo!!
 
 /* list declaration with initialization */
 <LIST_DECL_INIT> ::= <LIST_IDENT_ANY> "=" <LIST_LIT> /* list[2+a] = {1,2,3} ????
@@ -116,7 +116,7 @@
 /* parameters */
 <PARAMS> ::= "(" ")" | "(" <PARAMS_SEQ> ")"
 <PARAMS_SEQ> ::= <PARAM> | <PARAMS_SEQ> "," <PARAM>
-<PARAM> ::= <TYPE_3> <IDENT>
+<PARAM> ::= <TYPE> <IDENT>
 
 /* variables */
 <VAR_SEQ> ::= <VAR> | <VAR_SEQ> "," <VAR>
@@ -126,7 +126,7 @@
 <IDENT> ::= <IDENT_HEAD_SYM> | <IDENT> <IDENT_TAIL_SYM>
 
 /* return type */
-<RETURN_TYPE> ::= <TYPE_3> | VOID_TYPE
+<RETURN_TYPE> ::= <TYPE> | VOID_TYPE
 
 /* List type */
 <LIST_LIT> ::= "[" "]" | "[" <EXPR_SEQ> "]"
@@ -136,20 +136,19 @@
 <LIST_IDENT_WO_SIZE> ::= <IDENT> "[" "]"
 
 /* advanced types */
-<TYPE_3> ::= <TYPE_2> | <POINTER_TYPE>
+<TYPE> ::= <BASIC_N_STRUCT_TYPE> | <POINTER_TYPE>
 
-<POINTER_TYPE> ::= <TYPE_2_W_VOID> "*" | <POINTER_TYPE> "*"
-<TYPE_2_W_VOID> ::= <TYPE_2> | <VOID_TYPE>
+<POINTER_TYPE> ::= <BASIC_N_STRUCT_N_VOID_TYPE> "*" | <POINTER_TYPE> "*"
+<BASIC_N_STRUCT_N_VOID_TYPE> ::= <BASIC_N_STRUCT_TYPE> | <VOID_TYPE>
 
 <VOID_TYPE> ::= "void"
 
-<TYPE_2> ::= <BASIC_TYPE> | <STRUCT_TYPE>
+<BASIC_N_STRUCT_TYPE> ::= <BASIC_TYPE> | <STRUCT_TYPE>
 
 <STRUCT_TYPE> ::= "struct" <IDENT>;
 
 /* basic types */
 <BASIC_TYPE> ::= "int" | "float" | "bool" | "char" | "string" 
-
 <STRING> ::= "\"" "\"" | "\"" <ANY> "\""
 <CHAR> ::= "'" <ANY_SYM> "'" 
 <BOOL> ::= "True" | "False"
