@@ -1,11 +1,9 @@
-<PROGRAM> ::= <DECLS>
+<PROGRAM> ::= <ROOT_ELEMS>
 
-/* declarations */
-<DECLS> ::= <DECL> | <DECLS> <DECL>
-<DECL> ::= <FN_DECL> | <VAR_DECL_STMT> 
+<ROOT_ELEMS> ::= <ROOT_ELEM> | <ROOT_ELEMS> <ROOT_ELEM>
+<ROOT_ELEM> ::= <FN_DECL> | <VAR_DECL_STMT> ";" | <VAR_DECL_INIT_STMT> ";"
 
-/* function declaration */
-<FN_DECL> ::= "fx" <IDENT> <PARAMS> "==>" <RETURN_TYPE> <STMT_BLOCK>
+/* STATEMENTS */
 
 /* statement block */
 <STMT_BLOCK> ::= "{" "}" | "{" <STMTS> "}"
@@ -18,25 +16,26 @@
 
 /* statement types by delimiter */
 <STATEMENT_W_DELIM> ::= <IN_IO_STMT> | <OUT_IO_STMT> | <VAR_DECL_STMT> | <VAR_DECL_INIT_STMT> | <VAR_ASSIGN_STMT> | <EXPR_STMT> | <BREAK_STMT> | <CONTINUE_STMT> | <RETURN_STMT>
-<STATEMENT_WO_DELIM> ::= <IF_STMT> | <WHILE_STMT> | <FOR_STMT>
+<STATEMENT_WO_DELIM> ::= <IF_STMT> | <WHILE_STMT> | <FOR_STMT> 
 
 /* statement parts */
 <IN_IO_STMT> ::= "in" "(" <IN_ARG_SEQ> ")"
-<OUT_IO_STMT> ::= "disp" "(" <EXPR_SEQ> ")" 
-<VAR_DECL_STMT> ::= <VAR_DECL>  
-<VAR_DECL_INIT_STMT> ::= <VAR_DECL_INIT> 
+<OUT_IO_STMT> ::= "disp" "(" <EXPR_OR_NULL_SEQ> ")" 
+<VAR_DECL_STMT> ::= <EXPL_VAR_DECL> | <LIST_DECL> | <STRUCT_DECL> 
+<VAR_DECL_INIT_STMT> ::= <EXPL_VAR_DECL_INIT> | <LIST_DECL_INIT>
 <VAR_ASSIGN_STMT> ::= <VAR_ASSIGN> 
 <EXPR_STMT> ::= <EXPR> 
 <IF_STMT> ::= <IF_IF> <IF_ELIFS> <IF_ELSE> | <IF_IF> <IF_ELSE> | <IF_IF> <IF_ELIFS> 
-<WHILE_STMT> ::= "while" "(" <EXPR> ")" <STMT_BLOCK>
+<WHILE_STMT> ::= "while" "(" <EXPR_OR_NULL> ")" <STMT_BLOCK>
 <FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" <STMT_BLOCK>
 <BREAK_STMT> ::= "break" 
 <CONTINUE_STMT> ::= "continue" 
-<RETURN_STMT> ::= "return" | "return" <EXPR> 
+<RETURN_STMT> ::= "return" | "return" <EXPR_or_null> 
 
 /* in-statement parts */
 <IN_ARG_SEQ> ::= <EXPR_SEQ> <IN_VAR_SEQ>
-<IN_VAR_SEQ> ::= "&" <VAR> | <IN_VAR_SEQ> "," "&" <VAR>
+<IN_VAR_SEQ> ::= <IN_VAR> | <IN_VAR_SEQ> "," <IN_VAR>
+<IN_VAR> ::= "&" <EXPL_VAR> | <VAR>
 
 /* if-statement parts */
 <IF_IF> ::= "if" "("<EXPR>")" <STMT_BLOCK>
@@ -49,17 +48,42 @@
 <FOR_CONDITION> ::= <VAR_ASSIGN> | <EXPR> | ""
 <FOR_INCREMENT> ::= <VAR_ASSIGN> | <EXPR> | ""
 
-/* variable assignment */
-<VAR_ASSIGN> ::= <VAR> "=" <EXPR>
+/* DECLARATIONS */
 
-/* variable initialization */
-<VAR_DECL_INIT> ::= <TYPE_NAME> <IDENT> "=" <EXPR>
+/* function declaration */
+<FN_DECL> ::= "fx" <IDENT> <PARAMS> "==>" <RETURN_TYPE> <STMT_BLOCK>
+
+/* struct declaration */
+<STRUCT_DECL> ::= "struct" <IDENT> <VAR_DECL_STMT_BLOCk>
+<STRUCT_VAR_DECL_STMT_BLOCK> ::= "{" <STRUCT_VAR_DECL_STMTS> "}"
+<STRUCT_VAR_DECL_STMTS> ::= <STRUCT_VAR_DECL_STMT> | <STRUCT_VAR_DECL_STMTS> <STRUCT_VAR_DECL_STMT>
+<STRUCT_VAR_DECL_STMT> ::= <expl_VAR_DECL> ";" | <LIST_DECL> ";"
 
 /* variable declaration */
-<VAR_DECL> ::= <TYPE_NAME> <IDENT>
+<EXPL_VAR_DECL> ::= <EXPL_TYPE> <IDENT>
 
-/* expressions */
+/* list declaration */
+<LIST_DECL> ::= <EXPL_TYPE> <LIST_IDENT_W_SIZE>
+
+
+
+/* DECLARATIONS WITH INITIALIZATION */
+
+/* variable declaration with initialization */
+<EXPL_VAR_DECL_INIT> ::= <EXPL_TYPE> <IDENT> "=" <EXPR_or_null> 
+
+/* list declaration with initialization */
+<LIST_DECL_INIT> ::= <LIST_IDENT_ANY> "=" <LIST_LIT> /* 
+
+
+
+/* variable assignment (implicit and explicit) */
+<VAR_ASSIGN> ::= <VAR> "=" <EXPR_or_null>
+
+/* EXPRESSIONS */
+<EXPR_OR_NULL_SEQ> ::= <EXPR_OR_NULL> | <EXPR_OR_NULL_SEQ> "," <EXPR_OR_NULL>
 <EXPR_SEQ> ::= <EXPR> | <EXPR_SEQ> "," <EXPR>
+<expr_or_null> ::= <EXPR> | <NULL>
 
 /* expression */
 <EXPR> ::= <OR>
@@ -70,7 +94,7 @@
 <SUM_SUB> ::= <MUL_DIV_MOD> | <SUM_SUB> <OP_SUM_SUB> <MUL_DIV_MOD>
 <MUL_DIV_MOD> ::= <UNARY> | <MUL_DIV_MOD> <OP_MUL_DIV_MOD> <UNARY>
 <UNARY> ::= <PRIMARY> | <OP_UNARY> <UNARY>
-<PRIMARY> ::= <TYPE_MEMBER> | <VAR> | <FN_CALL> | "(" <EXPR> ")"
+<PRIMARY> ::= <BASIC_TYPE_MEMBER> | <VAR> | <FN_CALL> | "(" <EXPR> ")"
 
 /* function call */
 <FN_CALL> ::= <IDENT> <ARGS>
@@ -78,31 +102,49 @@
 /* arguments */
 <ARGS> ::= "(" ")" | "(" <ARGS_SEQ> ")"
 <ARGS_SEQ> ::= <ARG> | <ARGS_SEQ> "," <ARG>
-<ARG> ::= <EXPR>
+<ARG> ::= <expr_or_null>
 
 /* parameters */
 <PARAMS> ::= "(" ")" | "(" <PARAMS_SEQ> ")"
 <PARAMS_SEQ> ::= <PARAM> | <PARAMS_SEQ> "," <PARAM>
-<PARAM> ::= <TYPE_NAME> <PARAM_IDENT>
-<PARAM_IDENT> ::= <IDENT>
+<PARAM> ::= <EXPL_TYPE> <IDENT> | <LIST_TYPE>
 
 /* variables */
-<VAR_SEQ> ::= <VAR> | <VAR_SEQ> "," < VAR>
-<VAR> ::= <IDENT>
+<VAR_SEQ> ::= <VAR> | <VAR_SEQ> "," <VAR>
+<VAR> ::= <IE_VAR> | <STRUCT_MEMBER>
+<STRUCT_MEMBER> ::= <IE_VAR> <OP_ACCESS_MEMBER> <IDENT> | <STRUCT_MEMBER> <OP_ACCESS_MEMBER> <IDENT>
+<IE_VAR> ::= <IMPL_VAR> | <EXPL_VAR>
+<IMPL_VAR> ::= <EXPR> | <LIST_ACCESS_ELEM>
+<EXPL_VAR> ::= <IDENT>
 
 /* identifiers */
 <IDENT> ::= <IDENT_HEAD_SYM> | <IDENT> <IDENT_TAIL_SYM>
 
+/* TYPES */
+<TYPE> ::= <EXPL_TYPE> | <LIST_TYPE>
+
 /* return type */
-<RETURN_TYPE> ::= <TYPE_NAME> | "void"
+<RETURN_TYPE> ::= <EXPL_TYPE> | VOID_TYPE
 
-/* basic type members */
-<TYPE_MEMBER> ::= <INT> | <FLOAT> | <BOOL> | <CHAR> | <STRING>
+/* list type (implicit) */
+<LIST_TYPE> ::= <EXPL_TYPE> <LIST_IDENT_W_SIZE> | <EXPL_TYPE> <LIST_IDENT_WO_SIZE>
+<LIST_LIT> ::= "[" "]" | "[" <EXPR_OR_NULL_SEQ> "]"
+<LIST_ACCESS_ELEM> ::= <IDENT> "[" <expr> "]" | <EXPR> "[" <expr> "]"
+<LIST_IDENT_ANY> ::= <LIST_IDENT_WO_SIZE> | <LIST_IDENT_W_SIZE>
+<LIST_IDENT_W_SIZE> ::= <IDENT> "[" <expr> "]"
+<LIST_IDENT_WO_SIZE> ::= <IDENT> "[" "]"
 
-/* basic type names */
-<TYPE_NAME> ::= "int" | "float" | "bool" | "char" | "string" 
+/* advanced types (explicit) */
+<EXPL_TYPE> ::= <BASIC_N_STRUCT_TYPE> | <POINTER_TYPE>
+<POINTER_TYPE> ::= <BASIC_N_STRUCT_N_VOID_TYPE> "*" | <POINTER_TYPE> "*"
+<BASIC_N_STRUCT_N_VOID_TYPE> ::= <BASIC_N_STRUCT_TYPE> | <VOID_TYPE>
+<VOID_TYPE> ::= "void"
+<BASIC_N_STRUCT_TYPE> ::= <BASIC_TYPE> | <STRUCT_TYPE>
+<STRUCT_TYPE> ::= "struct" <IDENT>;
 
 /* basic types */
+<BASIC_TYPE_MEMBER> ::= <INT> | <FLOAT> | <BOOL> | <CHAR> | <STRING> 
+<BASIC_TYPE> ::= "int" | "float" | "bool" | "char" | "string" 
 <STRING> ::= "\"" "\"" | "\"" <ANY> "\""
 <CHAR> ::= "'" <ANY_SYM> "'" 
 <BOOL> ::= "True" | "False"
@@ -110,29 +152,36 @@
 <FLOAT_WO_E> ::= "." <DIGITS> | <SIGNABLE_DIGITS> "." |  <SIGNABLE_DIGITS> "." <DIGITS>
 <INT> ::= <SIGNABLE_DIGITS>
 
-/* unary operators (op level0) */
-<OP_UNARY> ::= "+" | "-" | "!" | "++" | "--" 
 
-/* arithmetic operators (op level1) */
+
+/* OPERATORS */
+<OP_ACCESS_MEMBER> ::= "." | "->"
+
+/* unary operators */
+<OP_UNARY> ::= "!" | "++" | "--" | "*" | "&"
+
+/* arithmetic operators */
 <OP_MUL_DIV_MOD> ::= "*" | "/" | "%"
 
-/* arithmetic operators (op level2) */
+/* arithmetic operators */
 <OP_SUM_SUB> ::= "+" | "-"
 
-/* cmp operators (op level3) */
+/* cmp operators */
 <OP_CMP_GT_LT> ::= ">" | "<" | ">=" |"<="
 
-/* cmp operators (op level4) */
+/* cmp operators */
 <OP_CMP_EQ_NEQ> ::= "==" | "!="
 
-/* logical operators (op level5) */
+/* logical operators */
 <OP_AND> ::= "AND"
 
-/* logical operators (op level6) */
+/* logical operators */
 <OP_OR> ::= "OR"
 
 /* assign operators */
 <OP_ASSIGN> ::= "=" | "+=" | "-=" | "*=" | "/=" | "%="
+
+
 
 /* comments */
 <COMMENT> ::= <COMMENT_LINE> | <COMMENT_BLOCK>
@@ -165,4 +214,3 @@
 <UCASE_LETTER> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 <LCASE_LETTER> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 <DIGIT> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
-
