@@ -15,7 +15,8 @@
 <STMT> ::= <STATEMENT_W_DELIM> ";" | <STATEMENT_WO_DELIM> 
 
 /* statement types by delimiter */
-<STATEMENT_W_DELIM> ::= <IN_IO_STMT> | <OUT_IO_STMT> | <VAR_DECL_STMT> | <VAR_DECL_INIT_STMT> | <VAR_ASSIGN_STMT> | <EXPR_STMT> | <BREAK_STMT> | <CONTINUE_STMT> | <RETURN_STMT>
+<STATEMENT_W_DELIM> ::= <IN_IO_STMT> | <OUT_IO_STMT> | <VAR_DECL_STMT> | <VAR_DECL_INIT_STMT>
+ | <VAR_ASSIGN_STMT> | <EXPR_STMT> | <BREAK_STMT> | <CONTINUE_STMT> | <RETURN_STMT>
 <STATEMENT_WO_DELIM> ::= <IF_STMT> | <WHILE_STMT> | <FOR_STMT> 
 
 /* statement parts */
@@ -83,7 +84,7 @@
 /* EXPRESSIONS */
 <EXPR_OR_NULL_SEQ> ::= <EXPR_OR_NULL> | <EXPR_OR_NULL_SEQ> "," <EXPR_OR_NULL>
 <EXPR_SEQ> ::= <EXPR> | <EXPR_SEQ> "," <EXPR>
-<expr_or_null> ::= <EXPR> | <NULL>
+<expr_or_null> ::= <EXPR> | "NULL"
 
 /* expression */
 <EXPR> ::= <OR>
@@ -143,8 +144,55 @@
 <STRUCT_TYPE> ::= "struct" <IDENT>;
 
 /* basic types */
-<BASIC_TYPE_MEMBER> ::= <INT> | <FLOAT> | <BOOL> | <CHAR> | <STRING> 
-<BASIC_TYPE> ::= "int" | "float" | "bool" | "char" | "string" 
+<BASIC_TYPE_MEMBER> ::= <INT> | <FLOAT> | <BOOL> | <CHAR> | <STRING>
+
+
+int *x;
+
+struct Int *x;
+
+<POINTER_TYPE> ::= <TYPE> ****''<IDENT>
+
+int *x *x;
+
+int **
+
+int **x[10];
+
+int **
+
+<TYPE> =>
+<POINTER_TYPE> =>
+<POINTER_TYPE> '*' =>
+<TYPE> '*' '*' =>
+<BASE_TYPE> '*' '*' =>
+<INT> '*' '*' =>
+'int' '*' '*'
+
+<TYPE> =>
+<POINTER_TYPE> =>
+<TYPE> '*' =>
+<POINTER_TYPE> '*' =>
+<TYPE> '*' '*' =>
+<BASE_TYPE> '*' '*' =>
+<INT> '*' '*' =>
+'int' '*' '*'
+
+<TYPE> =>
+<POINTER_TYPE> =>
+<TYPE> '*' =>
+<POINTER_TYPE> '*' =>
+
+int[3] int[5];
+
+
+
+<TYPE> ::= <BASE_TYPE> | <POINTER_TYPE> | <LIST_TYPE> | <STRUCT_TYPE>
+
+<POINTER_TYPE> ::= <TYPE> "*"
+<LIST_TYPE> ::= <TYPE> <IDENT> "[" <INT> "]" |  <TYPE> <IDENT> "[" "]"
+<STRUCT_TYPE> ::= "struct" <IDENT>
+<BASE_TYPE> ::= "int" | "float" | "bool" | "char" | "string"
 <STRING> ::= "\"" "\"" | "\"" <ANY> "\""
 <CHAR> ::= "'" <ANY_SYM> "'" 
 <BOOL> ::= "True" | "False"
@@ -209,8 +257,11 @@
 <SIGN> ::= "+" | "-"
 <UNDERSCORE> ::= "_"
 
-<SPECIAL> ::= "!" | "#" | "@" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "," | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "]" | "^" | "`" | "{" | "}" | "|" | "~" | " " | "_" | "+" | "-" 
+<SPECIAL> ::= "!" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "," | "." | "/" | ":" | ";" | "<" | "=" | ">"
+ | "?" | "@" | "[" | "]" | "^" | "`" | "{" | "}" | "|" | "~" | " " | "_" | "+" | "-"
 <LETTER> ::= <LCASE_LETTER> | <UCASE_LETTER>
-<UCASE_LETTER> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
-<LCASE_LETTER> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+<UCASE_LETTER> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P"
+ | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+<LCASE_LETTER> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p"
+ | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 <DIGIT> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
