@@ -24,7 +24,7 @@
 <VAR_DECL_STMT> ::= <VAR_DECL>
 <VAR_DECL_AND_INIT_STMT> ::= <VAR_DECL_AND_INIT>
 <ASSIGNMENT_STMT> ::= <ASSIGNMENT>
-<EXPR_STMT> ::= <EXPR> 
+<EXPR_STMT> ::= <EXPR>
 <IF_STMT> ::= <IF_IF> <IF_ELIFS> <IF_ELSE> | <IF_IF> <IF_ELSE> | <IF_IF> <IF_ELIFS> 
 <WHILE_STMT> ::= "while" "(" <EXPR> ")" <STMT_BLOCK>
 <FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" <STMT_BLOCK>
@@ -47,12 +47,12 @@
 <FN_DECL> ::= "fx" <IDENT> <PARAMS> "==>" <RETURN_TYPE> <STMT_BLOCK>
 
 /* struct declaration */
-<STRUCT_DECL> ::= "struct" <IDENT> <VAR_DECL_STMT_BLOCK>
+<STRUCT_DECL> ::= <STRUCT_TYPE> <VAR_DECL_STMT_BLOCK>
 <VAR_DECL_STMT_BLOCK> ::= "{" <VAR_DECL_STMTS> "}"
-<VAR_DECL_STMTS> ::= <VAR_DECL_STMT> ";" | <VAR_DECL_STMTS> <VAR_DECL_STMT> ";"
+<VAR_DECL_STMTS> ::= <VAR_DECL> ";" | <VAR_DECL_STMTS> <VAR_DECL> ";"
 
 /* variable declaration */
-<VAR_DECL> ::= <TYPE> <IDENT> | <STRUCT_DECL>
+<VAR_DECL> ::= <TYPE> <IDENT>
 
 /* variable declaration with initialization */
 <VAR_DECL_AND_INIT> ::= <TYPE> <IDENT> "=" <EXPR>
