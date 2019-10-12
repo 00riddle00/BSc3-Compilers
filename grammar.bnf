@@ -96,10 +96,6 @@
 <UNARY> ::= <PRIMARY> | <OP_UNARY> <UNARY>
 <PRIMARY> ::= <BASIC_TYPE_MEMBER> | <VAR> | <FN_CALL> | "(" <EXPR> ")"
 
-
-OP_DEREFERENCE_PTR
-
-
 /* function call */
 <FN_CALL> ::= <IDENT> <ARGS>
 
@@ -207,8 +203,7 @@ OP_DEREFERENCE_PTR
 <ANY_SYM_WO_ESCAPES> ::= <DIGIT> | <LETTER> | <SPECIAL>
 
 <ESCAPED_SYM> ::= "\\" <SYM_TO_BE_ESCAPED>
-/* TODO add backslash to quote mark (removed temoporarily so that syntax highlighting is not broken) */
-<SYM_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\"
+<SYM_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\""
 
 <NEWLINE> ::= "\\n" 
 <SIGN> ::= "+" | "-"
