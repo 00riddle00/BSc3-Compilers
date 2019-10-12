@@ -16,7 +16,7 @@
 
 /* statement types by delimiter */
 <STATEMENT_W_DELIM> ::= <IN_IO_STMT> | <OUT_IO_STMT> | <VAR_DECL_STMT> | <VAR_DECL_AND_INIT_STMT> | <ASSIGNMENT_STMT> | <EXPR_STMT> | <BREAK_STMT> | <CONTINUE_STMT> | <RETURN_STMT>
-<STATEMENT_WO_DELIM> ::= <IF_STMT> | <WHILE_STMT> | <FOR_STMT> 
+<STATEMENT_WO_DELIM> ::= <IF_STMT> | <WHILE_STMT> | <FOR_STMT>
 
 /* statement parts */
 <IN_IO_STMT> ::= "in" "(" <EXPR_SEQ> ")"
@@ -26,7 +26,7 @@
 <ASSIGNMENT_STMT> ::= <ASSIGNMENT>
 <EXPR_STMT> ::= <EXPR> 
 <IF_STMT> ::= <IF_IF> <IF_ELIFS> <IF_ELSE> | <IF_IF> <IF_ELSE> | <IF_IF> <IF_ELIFS> 
-<WHILE_STMT> ::= "while" "(" <EXPR_OR_NULL> ")" <STMT_BLOCK>
+<WHILE_STMT> ::= "while" "(" <EXPR> ")" <STMT_BLOCK>
 <FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" <STMT_BLOCK>
 <BREAK_STMT> ::= "break" 
 <CONTINUE_STMT> ::= "continue" 
@@ -58,7 +58,7 @@
 <VAR_DECL_AND_INIT> ::= <TYPE> <IDENT> "=" <EXPR>
 
 /* assignment */
-<ASSIGNMENT> ::= <LVALUE> <OP_ASSIGN> <EXPR> | <LVALUE> "=" "[" <EXPR_SEQ> "]"
+<ASSIGNMENT> ::= <LVALUE> <OP_ASSIGN> <EXPR>
 
 /* lvalues */
 <LVALUE> ::= <VAR_LVALUE> | <STRUCT_MEMBER_LVALUE> | <POINTER_DEREF_LVALUE> | <LIST_ACCESS_LVALUE>
@@ -68,11 +68,8 @@
 <POINTER_DEREF_LVALUE> ::= "*" <EXPR>
 <LIST_ACCESS_LVALUE> ::= <EXPR> "[" <EXPR> "]"
 
-/* expression sequence */
-<EXPR_SEQ> ::= <EXPR_OR_NULL> | <EXPR_SEQ> "," <EXPR_OR_NULL>
-<EXPR_OR_NULL> ::= <EXPR> | <NULL_LIT>
-
 /* expression */
+<EXPR_SEQ> ::= <EXPR> | <EXPR_SEQ> "," <EXPR>
 <EXPR> ::= <OR>
 <OR> ::= <AND> | <OR> <OP_OR> <AND>
 <AND> ::= <CMP_EQ_NEQ> | <AND> <OP_AND> <CMP_EQ_NEQ>
@@ -81,7 +78,9 @@
 <SUM_SUB> ::= <MUL_DIV_MOD> | <SUM_SUB> <OP_SUM_SUB> <MUL_DIV_MOD>
 <MUL_DIV_MOD> ::= <UNARY> | <MUL_DIV_MOD> <OP_MUL_DIV_MOD> <UNARY>
 <UNARY> ::= <PRIMARY> | <OP_UNARY> <UNARY>
-<PRIMARY> ::= <BASE_TYPE_LITERAL> | <VAR> | <FN_CALL> | "(" <EXPR> ")"
+<PRIMARY> ::= <BASE_TYPE_LIT> | <NULL_LIT> | <VAR> | <FN_CALL> | <LIST_EXPR> | "(" <EXPR> ")"
+
+<LIST_EXPR> ::= "[" <EXPR_SEQ> "]"
 
 /* function call */
 <FN_CALL> ::= <IDENT> <ARGS>
@@ -110,7 +109,7 @@
 <POINTER_TYPE> ::= <TYPE> "*"
 <LIST_TYPE> ::= <TYPE> "[" <INT_LIT> "]" |  <TYPE> "[" "]"
 <STRUCT_TYPE> ::= "struct" <IDENT>
-<BASE_TYPE_LITERAL> ::= <INT_LIT> | <FLOAT_LIT> | <BOOL_LIT> | <CHAR_LIT> | <STRING_LIT>
+<BASE_TYPE_LIT> ::= <INT_LIT> | <FLOAT_LIT> | <BOOL_LIT> | <CHAR_LIT> | <STRING_LIT>
 <BASE_TYPE> ::= "int" | "float" | "bool" | "char" | "string"
 <NULL_LIT> ::= "NULL"
 <STRING_LIT> ::= "\"" "\"" | "\"" <ANY> "\""
@@ -173,11 +172,8 @@
 <SIGN> ::= "+" | "-"
 <UNDERSCORE> ::= "_"
 
-<SPECIAL> ::= "!" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "," | "." | "/" | ":" | ";" | "<" | "=" | ">"
- | "?" | "@" | "[" | "]" | "^" | "`" | "{" | "}" | "|" | "~" | " " | "_" | "+" | "-"
+<SPECIAL> ::= "!" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "," | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "]" | "^" | "`" | "{" | "}" | "|" | "~" | " " | "_" | "+" | "-"
 <LETTER> ::= <LCASE_LETTER> | <UCASE_LETTER>
-<UCASE_LETTER> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P"
- | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
-<LCASE_LETTER> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p"
- | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+<UCASE_LETTER> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+<LCASE_LETTER> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 <DIGIT> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
