@@ -74,19 +74,11 @@
 
 /* ASSIGNMENTS */
 
-/* variable assignment */
+/* variable assignment (implicit and explicit) */
 <VAR_ASSIGN> ::= <VAR> "=" <EXPR_or_null>
-
-/* struct member assignment */
-<STRUCT_MEMBER_ASSIGN> ::= <STRUCT_MEMBER> "=" <EXPR_or_null>
-<STRUCT_MEMBER> ::= <VAR> "." <IDENT> | <STRUCT_MEMBER> "." <IDENT>
 
 /* list element assignment */
 <LIST_ELEM_ASSIGN> ::= <LIST_ACCESS_ELEM> "=" <EXPR>
-
-/* assignment using pointer */
-<ASSIGN_PTR> ::= <expr_using_pointers_resulting_in_pointer> "=" <expr_or_null>; 
-<ASSIGN_PTR_VALUE> ::= <expr_using_pointers_resulting_in_value> "=" <EXPR>; 
 
 /* expressions */
 <EXPR_SEQ> ::= <EXPR> | <EXPR_SEQ> "," <EXPR>
@@ -111,25 +103,29 @@
 /* arguments */
 <ARGS> ::= "(" ")" | "(" <ARGS_SEQ> ")"
 <ARGS_SEQ> ::= <ARG> | <ARGS_SEQ> "," <ARG>
-<ARG> ::= <expr_adr_or_val>
+<ARG> ::= <expr_or_null>
 
 /* parameters */
 <PARAMS> ::= "(" ")" | "(" <PARAMS_SEQ> ")"
 <PARAMS_SEQ> ::= <PARAM> | <PARAMS_SEQ> "," <PARAM>
-<PARAM> ::= <TYPE> <IDENT>
+<PARAM> ::= <EXPL_TYPE> <IDENT> | <LIST_TYPE>
 
 /* variables */
 <VAR_SEQ> ::= <VAR> | <VAR_SEQ> "," <VAR>
-<VAR> ::= <IDENT>
+<VAR> ::= <IE_VAR> | <STRUCT_MEMBER>
+<STRUCT_MEMBER> ::= <IE_VAR> "." <IDENT> | <STRUCT_MEMBER> "." <IDENT>
+<IE_VAR> ::= <IMPL_VAR> | <EXPL_VAR>
+<IMPL_VAR> ::= <EXPR>
+<EXPL_VAR> ::= <IDENT>
 
 /* identifiers */
 <IDENT> ::= <IDENT_HEAD_SYM> | <IDENT> <IDENT_TAIL_SYM>
 
-/* return type */
-<RETURN_TYPE> ::= <EXPL_TYPE> | VOID_TYPE
-
 /* TYPES */
 <TYPE> ::= <EXPL_TYPE> | <LIST_TYPE>
+
+/* return type */
+<RETURN_TYPE> ::= <EXPL_TYPE> | VOID_TYPE
 
 /* list type (implicit) */
 <LIST_TYPE> ::= <EXPL_TYPE> <LIST_IDENT_W_SIZE> | <EXPL_TYPE> <LIST_IDENT_WO_SIZE>
