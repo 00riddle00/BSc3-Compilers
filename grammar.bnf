@@ -94,13 +94,52 @@
 <IDENT> ::= <IDENT_HEAD_SYM> | <IDENT> <IDENT_TAIL_SYM>
 
 /* return type */
-<RETURN_TYPE> ::= <TYPE_NAME> | "void"
+<RETURN_TYPE> ::= <BASIC_TYPE_NAME> | "void"
 
-/* basic type members */
-<TYPE_MEMBER> ::= <INT> | <FLOAT> | <BOOL> | <CHAR> | <STRING>
 
-/* basic type names */
-<TYPE_NAME> ::= "int" | "float" | "bool" | "char" | "string" 
+
+<LIST_INIT> ::= <LIST_DECL_START> "[" "]" | <LIST_DECL_START2> "=" "{"
+<LIST_DECL> ::= <LIST_DECL_START2> ";"
+<LIST_DECL_START2> ::= <LIST_DECL_START> "[" <expr> "]"
+<LIST_DECL_START> ::= <TYPE_2> "list" <IDENT>;
+
+
+
+<LIST_INIT> ::= <LIST_IDENT_ANY> "=" <LIST_LIT> ";"
+<LIST_LIT> ::= "[" "]" | "[" <ARGS_SEQ> "]"
+<LIST_DECL> ::= <TYPE_2> "list" <LIST_IDENT_W_SIZE> ";"
+
+<LIST_IDENT_ANY> :: <LIST_IDENT_WO_SIZE> | <LIST_IDENT_W_SIZE>
+<LIST_IDENT_W_SIZE> ::= <IDENT> "[" <expr> "]"
+<LIST_IDENT_WO_SIZE> ::= <IDENT> "[" "]"
+
+
+/* declarations */
+<DECL> ::= <FN_DECL> | <VAR_DECL_STMT> ";" | <STRUCT_DECL_STMT> ";" 
+
+/* struct declaration */
+<STRUCT_DECL_STMT> ::= "struct" <IDENT> <VAR_DECL_STMT_BLOCk>
+<VAR_DECL_STMT_BLOCk> ::= "{" <VAR_DECL_STMTS> ";" "}"
+<VAR_DECL_STMTS> ::= <VAR_DECL_STMT> | <VAR_DECL_STMTS> ";" <VAR_DECL_STMT>
+
+/* List declaration */
+<LIST_INIT> ::= <LIST_IDENT_ANY> "=" <LIST_LIT> ";"
+<LIST_LIT> ::= "[" "]" | "[" <EXPR_SEQ> "]"
+<LIST_DECL> ::= <TYPE_3> <LIST_IDENT_W_SIZE> ";"
+
+<LIST_IDENT_ANY> :: <LIST_IDENT_WO_SIZE> | <LIST_IDENT_W_SIZE>
+<LIST_IDENT_W_SIZE> ::= <IDENT> "[" <expr> "]"
+<LIST_IDENT_WO_SIZE> ::= <IDENT> "[" "]"
+
+<TYPE_3> ::= <TYPE_2> | <POINTER_TYPE>
+
+<POINTER_TYPE> ::= "*" <TYPE_2> | "*" <POINTER_TYPE>
+
+<TYPE_2> ::= <BASIC_TYPE> | <STRUCT_TYPE>
+
+<STRUCT_TYPE> ::= "struct" <IDENT>;
+
+<BASIC_TYPE> ::= "int" | "float" | "bool" | "char" | "string" 
 
 /* basic types */
 <STRING> ::= "\"" "\"" | "\"" <ANY> "\""
@@ -168,21 +207,16 @@
 <DIGIT> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 
 ----------------------------------
+----------------------------------
+----------------------------------
+----------------------------------
+----------------------------------
+----------------------------------
 
-/* exprs */
-++(**p.name);
 
-/* declarations */
-<DECL> ::= <FN_DECL> | <VAR_DECL_STMT> ";" | <STRUCT_DECL_STMT> ";" 
 
-/* struct declaration */
-<STRUCT_DECL_STMT> ::= "struct" <IDENT> <VAR_DECL_STMT_BLOCk>
-<VAR_DECL_STMT_BLOCk> ::= "{" <VAR_DECL_STMTS> ";" "}"
-<VAR_DECL_STMTS> ::= <VAR_DECL_STMT> | <VAR_DECL_STMTS> ";" <VAR_DECL_STMT>
 
-/* List declaration */
-<LIST_DECL_INIT> ::= <LIST_DECL> "=" <EXPR>
-<LIST_DECL> ::= <TYPE> "list" "[" <INT> "]"
+
 
 listas[3] = 3;
 
@@ -299,41 +333,3 @@ assert(++p);           // Advance p by sizeof(double)
 assert(*p == 13.4);    // The double at memory beginning at address p has value 13.4
 *(p + 2) = 29.8;       // Change sizes[3] from 19.4 to 29.8
                        // Note: earlier ++p and + 2 here => sizes[3]
-
-/* expression */
-<EXPR> ::= <OR>
-
-/* function call */
-<FN_CALL> ::= <IDENT> <ARGS>
-
-/* variables */
-<VAR> ::= <IDENT>
-
-/* identifiers */
-<IDENT> ::= <IDENT_HEAD_SYM> | <IDENT> <IDENT_TAIL_SYM>
-
-/* unary operators (op level0) */
-<OP_UNARY> ::= "!" | "++" | "--" 
-
-/* arithmetic operators (op level1) */
-<OP_MUL_DIV_MOD> ::= "*" | "/" | "%"
-
-/* arithmetic operators (op level2) */
-<OP_SUM_SUB> ::= "+" | "-"
-
-/* cmp operators (op level3) */
-<OP_CMP_GT_LT> ::= ">" | "<" | ">=" |"<="
-
-/* cmp operators (op level4) */
-<OP_CMP_EQ_NEQ> ::= "==" | "!="
-
-/* logical operators (op level5) */
-<OP_AND> ::= "AND"
-
-/* logical operators (op level6) */
-<OP_OR> ::= "OR"
-
-/* assign operators */
-<OP_ASSIGN> ::= "=" | "+=" | "-=" | "*=" | "/=" | "%="
-
-
