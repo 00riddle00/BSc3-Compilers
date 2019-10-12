@@ -2,9 +2,7 @@
 
 /* declarations */
 <DECLS> ::= <DECL> | <DECLS> <DECL>
-<DECL> ::= <FN_DECL> | <VAR2_DECL_STMT> ";"
-
-
+<DECL> ::= <FN_DECL> | <VAR_DECL_STMT> ";" | VAR_DECL_INIT_STMT ";"
 
 /* statement block */
 <STMT_BLOCK> ::= "{" "}" | "{" <STMTS> "}"
@@ -22,16 +20,16 @@
 /* statement parts */
 <IN_IO_STMT> ::= "in" "(" <IN_ARG_SEQ> ")"
 <OUT_IO_STMT> ::= "disp" "(" <EXPR_SEQ> ")" 
-<VAR_DECL_STMT> ::= <VAR_DECL>  
-<VAR_DECL_INIT_STMT> ::= <VAR_DECL_INIT> 
-<VAR_ASSIGN_STMT> ::= <VAR_ASSIGN> 
+<VAR_DECL_STMT> ::= <VAR_DECL> | <LIST_DECL> | <STRUCT_DECL> 
+<VAR_DECL_INIT_STMT> ::= <VAR_DECL_INIT> | <LIST_DECL_INIT>
+<VAR_ASSIGN_STMT> ::= <VAR_ASSIGN> | <STRUCT_MEMBER_ASSIGN> | <LIST_ELEM_ASSIGN> | <ASSIGN_PTR> | <ASSIGN_PTR_VALUE>
 <EXPR_STMT> ::= <EXPR> 
 <IF_STMT> ::= <IF_IF> <IF_ELIFS> <IF_ELSE> | <IF_IF> <IF_ELSE> | <IF_IF> <IF_ELIFS> 
 <WHILE_STMT> ::= "while" "(" <EXPR> ")" <STMT_BLOCK>
 <FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" <STMT_BLOCK>
 <BREAK_STMT> ::= "break" 
 <CONTINUE_STMT> ::= "continue" 
-<RETURN_STMT> ::= "return" | "return" <EXPR> 
+<RETURN_STMT> ::= "return" | "return" <EXPR_or_null> 
 
 /* in-statement parts */
 <IN_ARG_SEQ> ::= <EXPR_SEQ> <IN_VAR_SEQ>
@@ -49,59 +47,52 @@
 <FOR_INCREMENT> ::= <VAR_ASSIGN> | <EXPR> | ""
 
 
-
-
-
-
-
-/* variable declaration */
+/* DECLARATIONS */
 
 /* function declaration */
 <FN_DECL> ::= "fx" <IDENT> <PARAMS> "==>" <RETURN_TYPE> <STMT_BLOCK>
 
-
-<VAR_DECL> ::= <TYPE_NAME> <IDENT>
-
-
-/* declarations */
-<VAR2_DECL_STMT> ::= <VAR_DECL_STMT> | <struct_Decl_stmt>
-<LIST_DECL> ::= <TYPE_3> <LIST_IDENT_W_SIZE> ";"
-<LIST_INIT> ::= <LIST_IDENT_ANY> "=" <LIST_LIT> ";"
-
 /* struct declaration */
-<STRUCT_DECL_STMT> ::= "struct" <IDENT> <VAR_DECL_STMT_BLOCk>
-<VAR_DECL_STMT_BLOCk> ::= "{" <VAR_DECL_STMTS> ";" "}"
-<VAR_DECL_STMTS> ::= <VAR_DECL_STMT> | <VAR_DECL_STMTS> ";" <VAR_DECL_STMT>
+<STRUCT_DECL> ::= "struct" <IDENT> <VAR_DECL_STMT_BLOCk>
+<VAR_DECL_STMT_BLOCk> ::= "{" <VAR_DECL_STMTS> "}"
+<VAR_DECL_STMTS> ::= <VAR_DECL_STMT> | <VAR_DECL_STMTS> <VAR_DECL_STMT>
+<VAR_DECL_STMT> ::= <LIST_DECL> ";" | <VAR_DECL> ";"
 
+/* list declaration */
+<LIST_DECL> ::= <TYPE_3> <LIST_IDENT_W_SIZE>
+
+/* variable declaration */
+<VAR_DECL> ::= <TYPE_3> <IDENT>
+
+/* DECLARATIONS WITH INITIALIZATION */
 
 /* variable declaration with initialization */
-<VAR_DECL_INIT> ::= <TYPE_3> <IDENT> "=" <EXPR>
+<VAR_DECL_INIT> ::= <TYPE_3> <IDENT> "=" <EXPR_or_null> /* <- be structo!!
 
-/* assignments */
+/* list declaration with initialization */
+<LIST_DECL_INIT> ::= <LIST_IDENT_ANY> "=" <LIST_LIT> /* list[2+a] = {1,2,3} ????
+
+/* ASSIGNMENTS */
 
 /* variable assignment */
-<VAR_ASSIGN> ::= <VAR> "=" <EXPR>
+<VAR_ASSIGN> ::= <VAR> "=" <EXPR_or_null>
 
 /* struct member assignment */
-<STRUCT_MEMBER_ASSIGN> ::= <STRUCT>_MEMBER> "=" <EXPR>
+<STRUCT_MEMBER_ASSIGN> ::= <STRUCT_MEMBER> "=" <EXPR_or_null>
 <STRUCT_MEMBER> ::= <VAR> "." <IDENT> | <STRUCT_MEMBER> "." <IDENT>
 
 /* list element assignment */
-<LIST_ACCESS_ELEM> ::= <EXPR>
+<LIST_ELEM_ASSIGN> ::= <LIST_ACCESS_ELEM> "=" <EXPR>
 
 /* assignment using pointer */
-<ASSIGN_PTR> ::= <expr_using_pointers_resulting_in_pointer> "=" <expr_resulting_in_address>; 
-<ASSIGN_PTR_VALUE> ::= <expr_using_pointers_resulting_in_value> "=" <expr_resulting_in_value>; 
+<ASSIGN_PTR> ::= <expr_using_pointers_resulting_in_pointer> "=" <expr_or_null>; 
+<ASSIGN_PTR_VALUE> ::= <expr_using_pointers_resulting_in_value> "=" <EXPR>; 
 
-<expr_adr_or_val> ::= <EXPR> | <NULL>
-
-<expr_using_pointers_resulting_in_pointer> ::= <EXPR>
-<expr_resulting_in_address> ::= <EXPR> | <NULL>
-<expr_using_pointers_resulting_in_value> ::= <EXPR>
-<expr_resulting_in_value> ::= <EXPR>
- 
 /* expressions */
 <EXPR_SEQ> ::= <EXPR> | <EXPR_SEQ> "," <EXPR>
+<expr_or_null> ::= <EXPR> | <NULL>
+<expr_using_pointers_resulting_in_pointer> ::= <EXPR>
+<expr_using_pointers_resulting_in_value> ::= <EXPR>
 
 /* expression */
 <EXPR> ::= <OR>
