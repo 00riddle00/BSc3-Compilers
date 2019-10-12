@@ -169,6 +169,9 @@
 
 ----------------------------------
 
+/* exprs */
+++(**p.name);
+
 /* declarations */
 <DECL> ::= <FN_DECL> | <VAR_DECL_STMT> ";" | <STRUCT_DECL_STMT> ";" 
 
@@ -177,41 +180,67 @@
 <VAR_DECL_STMT_BLOCk> ::= "{" <VAR_DECL_STMTS> ";" "}"
 <VAR_DECL_STMTS> ::= <VAR_DECL_STMT> | <VAR_DECL_STMTS> ";" <VAR_DECL_STMT>
 
-/* List declaration
+/* List declaration */
 <LIST_DECL_INIT> ::= <LIST_DECL> "=" <EXPR>
 <LIST_DECL> ::= <TYPE> "list" "[" <INT> "]"
 
-int var1;
-char var2[10];
+listas[3] = 3;
 
-&var1
+<list_access> ::= <var> | <struct_var> |  <expr_resulting_in_pointer>  + [ <expr> ];
 
+/* pointers */ 
 int    *ip;    /* pointer to an integer */
 double *dp;    /* pointer to a double */
 float  *fp;    /* pointer to a float */
 char   *ch     /* pointer to a character */
+struct *strt;
+int * arr[4];
 
-<POINTER_DECL> ::= <type> "*" <ident>;
+int *a = NULL;
+int *ptr = &num;
+int *ptr = num;
+char *ptr3 = &b - 11;
 
-<POINTER_DECL_INIT> ::= <type> "*" <ident> "=" &<expr>??
+struct Test {
+	...
+};
+
+struct *Test;
+struct *Test = ...;
+
+ip = &var;  /* store address of var in pointer variable*/
+int *ptr = 123;
+
+<POINTER_DECL> ::= <any_type_iskaitant_void> "****" ( <ident> | <list_ident> );
+<POINTER_DECL_INIT> ::= <POINTER_DECL> "=" <EXPR> | NULL;
+
+<ASSIGN_PTR> ::= <expr_using_pointers_resulting_in_pointer> "=" <expr_resulting_in_address>; | NULL;
+<ASSIGN_PTR_VALUE> ::= <expr_using_pointers_resulting_in_value> "=" <expr_resulting_in_value>; 
+
+&var = 
+**var = &var;
+**(var) = &var;
+**(ptr.name) = &var;
+**(ptr.name+1) = &var;
 
 
-<POINTER_DEREFERENCE_1> ::= "*" <var>
-<POINTER_DEREFERENCE_2> ::= <var> "[" <int> "]"
-<POINTER_DEREFERENCE_3> ::= "*" "(" <var> <sign> <int> ")"
+
+<POINTER_DEREFERENCE_1> ::= "*" <++ or -- > <var>
+<POINTER_DEREFERENCE_2> ::= <var> "[" <int>??? "]"
+<POINTER_DEREFERENCE_3> ::= "*" "(" < ++ or -- > <var> <sign> <int>??? ")"
 
 <REFERENCE_VARIABLE> ::= "&" <VAR>
 
 
-(*p).d_ = ...
-
-*p.d_ = ...
 
 
-   /* address stored in pointer variable */
-   printf("Address stored in ip variable: %x\n", ip );
 
-  int  *ptr = NULL;
+printf("Address of var variable: %x\n", &var  );
+/* address stored in pointer variable */
+printf("Address stored in ip variable: %x\n", ip );
+/* access the value using the pointer */
+printf("Value of *ip variable: %d\n", *ip );
+
 
 if(ptr)     /* succeeds if p is not null */
 if(!ptr)    /* succeeds if p is null */
@@ -230,3 +259,81 @@ Passing an argument by reference or by address enable the passed argument to be 
 
 5	Return pointer from functions in C
 C allows a function to return a pointer to the local variable, static variable, and dynamically allocated memory as well.
+
+
+assert(*p == 'a');  // The first character at address p will be 'a'
+assert(p[1] == 'b'); // p[1] actually dereferences a pointer created by adding
+                     // p and 1 times the size of the things to which p points:
+                     // In this case they're char which are 1 byte in C...
+assert(*(p + 1) == 'b');  // Another notation for p[1]
+++p;  // Increment p so it's now 0x1001
+assert(*p == 'b');  // p == 0x1001 which is where the 'b' is...
+
+int x = 2;
+int* p_x = &x;  // Put the address of the x variable into the pointer p_x
+*p_x = 4;       // Change the memory at the address in p_x to be 4
+assert(x == 4); // Check x is now 4
+
+typedef struct X { int i_; double d_; } X;
+X x;
+X* p = &x;
+p->d_ = 3.14159;  // Dereference and access data member x.d_
+(*p).d_ *= -1;    // Another equivalent notation for accessing x.d_
+
+<var>.<attr>
+(<var>).<attr>
+(*<var>).<attr>
+(list[2].attr)
+
+(*p).d_ = ...
+
+*p.d_ = ...
+
+/*Multi-byte data types*/
+double sizes[] = { 10.3, 13.4, 11.2, 19.4 };
+double* p = sizes;
+assert(p[0] == 10.3);  // Knows to look at all the bytes in the first double value
+assert(p[1] == 13.4);  // Actually looks at bytes from address p + 1 * sizeof(double)
+                       // (sizeof(double) is almost always eight bytes)
+assert(++p);           // Advance p by sizeof(double)
+assert(*p == 13.4);    // The double at memory beginning at address p has value 13.4
+*(p + 2) = 29.8;       // Change sizes[3] from 19.4 to 29.8
+                       // Note: earlier ++p and + 2 here => sizes[3]
+
+/* expression */
+<EXPR> ::= <OR>
+
+/* function call */
+<FN_CALL> ::= <IDENT> <ARGS>
+
+/* variables */
+<VAR> ::= <IDENT>
+
+/* identifiers */
+<IDENT> ::= <IDENT_HEAD_SYM> | <IDENT> <IDENT_TAIL_SYM>
+
+/* unary operators (op level0) */
+<OP_UNARY> ::= "!" | "++" | "--" 
+
+/* arithmetic operators (op level1) */
+<OP_MUL_DIV_MOD> ::= "*" | "/" | "%"
+
+/* arithmetic operators (op level2) */
+<OP_SUM_SUB> ::= "+" | "-"
+
+/* cmp operators (op level3) */
+<OP_CMP_GT_LT> ::= ">" | "<" | ">=" |"<="
+
+/* cmp operators (op level4) */
+<OP_CMP_EQ_NEQ> ::= "==" | "!="
+
+/* logical operators (op level5) */
+<OP_AND> ::= "AND"
+
+/* logical operators (op level6) */
+<OP_OR> ::= "OR"
+
+/* assign operators */
+<OP_ASSIGN> ::= "=" | "+=" | "-=" | "*=" | "/=" | "%="
+
+
