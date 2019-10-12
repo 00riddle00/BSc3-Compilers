@@ -34,7 +34,8 @@
 
 /* in-statement parts */
 <IN_ARG_SEQ> ::= <EXPR_SEQ> <IN_VAR_SEQ>
-<IN_VAR_SEQ> ::= "&" <VAR> | <IN_VAR_SEQ> "," "&" <VAR>
+<IN_VAR_SEQ> ::= <IN_VAR> | <IN_VAR_SEQ> "," <IN_VAR>
+<IN_VAR> ::= "&" <EXPL_VAR> | <VAR>
 
 /* if-statement parts */
 <IF_IF> ::= "if" "("<EXPR>")" <STMT_BLOCK>
