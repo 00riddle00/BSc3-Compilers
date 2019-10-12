@@ -94,8 +94,10 @@
 <SUM_SUB> ::= <MUL_DIV_MOD> | <SUM_SUB> <OP_SUM_SUB> <MUL_DIV_MOD>
 <MUL_DIV_MOD> ::= <UNARY> | <MUL_DIV_MOD> <OP_MUL_DIV_MOD> <UNARY>
 <UNARY> ::= <PRIMARY> | <OP_UNARY> <UNARY>
-<PRIMARY> ::= <TYPE_MEMBER> | <VAR> | <FN_CALL> | "(" <EXPR> ")"
+<PRIMARY> ::= <BASIC_TYPE_MEMBER> | <VAR> | <FN_CALL> | "(" <EXPR> ")"
 
+
+OP_DEREFERENCE_PTR
 
 
 /* function call */
@@ -114,7 +116,7 @@
 /* variables */
 <VAR_SEQ> ::= <VAR> | <VAR_SEQ> "," <VAR>
 <VAR> ::= <IE_VAR> | <STRUCT_MEMBER>
-<STRUCT_MEMBER> ::= <IE_VAR> "." <IDENT> | <STRUCT_MEMBER> "." <IDENT>
+<STRUCT_MEMBER> ::= <IE_VAR> <OP_ACCESS_MEMBER> <IDENT> | <STRUCT_MEMBER> <OP_ACCESS_MEMBER> <IDENT>
 <IE_VAR> ::= <IMPL_VAR> | <EXPL_VAR>
 <IMPL_VAR> ::= <EXPR> | <LIST_ACCESS_ELEM>
 <EXPL_VAR> ::= <IDENT>
@@ -145,6 +147,7 @@
 <STRUCT_TYPE> ::= "struct" <IDENT>;
 
 /* basic types */
+<BASIC_TYPE_MEMBER> ::= <INT> | <FLOAT> | <BOOL> | <CHAR> | <STRING> 
 <BASIC_TYPE> ::= "int" | "float" | "bool" | "char" | "string" 
 <STRING> ::= "\"" "\"" | "\"" <ANY> "\""
 <CHAR> ::= "'" <ANY_SYM> "'" 
@@ -156,9 +159,10 @@
 
 
 /* OPERATORS */
+<OP_ACCESS_MEMBER> ::= "." | "->"
 
 /* unary operators */
-<OP_UNARY> ::= "!" | "++" | "--" 
+<OP_UNARY> ::= "!" | "++" | "--" | "*" | "&"
 
 /* arithmetic operators */
 <OP_MUL_DIV_MOD> ::= "*" | "/" | "%"
@@ -215,130 +219,3 @@
 <UCASE_LETTER> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 <LCASE_LETTER> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 <DIGIT> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
-
-----------------------------------
-----------------------------------
-----------------------------------
-----------------------------------
-----------------------------------
-----------------------------------
-
-
-
-
-
-
-listas[3] = 3;
-
-<list_access> ::= <var> | <struct_var> |  <expr_resulting_in_pointer>  + [ <expr> ];
-
-/* pointers */ 
-int    *ip;    /* pointer to an integer */
-double *dp;    /* pointer to a double */
-float  *fp;    /* pointer to a float */
-char   *ch     /* pointer to a character */
-struct *strt;
-int * arr[4];
-
-int *a = NULL;
-int *ptr = &num;
-int *ptr = num;
-char *ptr3 = &b - 11;
-
-struct Test {
-	...
-};
-
-struct *Test;
-struct *Test = ...;
-
-ip = &var;  /* store address of var in pointer variable*/
-int *ptr = 123;
-
-<POINTER_DECL> ::= <any_type_iskaitant_void> "****" ( <ident> | <list_ident> );
-<POINTER_DECL_INIT> ::= <POINTER_DECL> "=" <EXPR> | NULL;
-
-
-
-&var = 
-**var = &var;
-**(var) = &var;
-**(ptr.name) = &var;
-**(ptr.name+1) = &var;
-
-
-
-<POINTER_DEREFERENCE_1> ::= "*" <++ or -- > <var>
-<POINTER_DEREFERENCE_2> ::= <var> "[" <int>??? "]"
-<POINTER_DEREFERENCE_3> ::= "*" "(" < ++ or -- > <var> <sign> <int>??? ")"
-
-<REFERENCE_VARIABLE> ::= "&" <VAR>
-
-
-
-
-
-printf("Address of var variable: %x\n", &var  );
-/* address stored in pointer variable */
-printf("Address stored in ip variable: %x\n", ip );
-/* access the value using the pointer */
-printf("Value of *ip variable: %d\n", *ip );
-
-
-if(ptr)     /* succeeds if p is not null */
-if(!ptr)    /* succeeds if p is null */
-
-1	Pointer arithmetic
-There are four arithmetic operators that can be used in pointers: ++, --, +, -
-
-2	Array of pointers
-You can define arrays to hold a number of pointers.
-
-3	Pointer to pointer
-C allows you to have pointer on a pointer and so on.
-
-4	Passing pointers to functions in C
-Passing an argument by reference or by address enable the passed argument to be changed in the calling function by the called function.
-
-5	Return pointer from functions in C
-C allows a function to return a pointer to the local variable, static variable, and dynamically allocated memory as well.
-
-
-assert(*p == 'a');  // The first character at address p will be 'a'
-assert(p[1] == 'b'); // p[1] actually dereferences a pointer created by adding
-                     // p and 1 times the size of the things to which p points:
-                     // In this case they're char which are 1 byte in C...
-assert(*(p + 1) == 'b');  // Another notation for p[1]
-++p;  // Increment p so it's now 0x1001
-assert(*p == 'b');  // p == 0x1001 which is where the 'b' is...
-
-int x = 2;
-int* p_x = &x;  // Put the address of the x variable into the pointer p_x
-*p_x = 4;       // Change the memory at the address in p_x to be 4
-assert(x == 4); // Check x is now 4
-
-typedef struct X { int i_; double d_; } X;
-X x;
-X* p = &x;
-p->d_ = 3.14159;  // Dereference and access data member x.d_
-(*p).d_ *= -1;    // Another equivalent notation for accessing x.d_
-
-<var>.<attr>
-(<var>).<attr>
-(*<var>).<attr>
-(list[2].attr)
-
-(*p).d_ = ...
-
-*p.d_ = ...
-
-/*Multi-byte data types*/
-double sizes[] = { 10.3, 13.4, 11.2, 19.4 };
-double* p = sizes;
-assert(p[0] == 10.3);  // Knows to look at all the bytes in the first double value
-assert(p[1] == 13.4);  // Actually looks at bytes from address p + 1 * sizeof(double)
-                       // (sizeof(double) is almost always eight bytes)
-assert(++p);           // Advance p by sizeof(double)
-assert(*p == 13.4);    // The double at memory beginning at address p has value 13.4
-*(p + 2) = 29.8;       // Change sizes[3] from 19.4 to 29.8
-                       // Note: earlier ++p and + 2 here => sizes[3]
