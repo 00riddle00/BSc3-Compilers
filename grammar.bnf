@@ -62,29 +62,26 @@
 <LIST_DECL> ::= <EXPL_TYPE> <LIST_IDENT_W_SIZE>
 
 /* variable declaration */
-<VAR_DECL> ::= <EXPL_TYPE> <IDENT>
+<EXPL_VAR_DECL> ::= <EXPL_TYPE> <IDENT>
+
 
 /* DECLARATIONS WITH INITIALIZATION */
 
 /* variable declaration with initialization */
-<VAR_DECL_INIT> ::= <EXPL_TYPE> <IDENT> "=" <EXPR_or_null> /* <- be structo!!
+<EXPL_VAR_DECL_INIT> ::= <EXPL_TYPE> <IDENT> "=" <EXPR_or_null> 
 
 /* list declaration with initialization */
-<LIST_DECL_INIT> ::= <LIST_IDENT_ANY> "=" <LIST_LIT> /* list[2+a] = {1,2,3} ????
+<LIST_DECL_INIT> ::= <LIST_IDENT_ANY> "=" <LIST_LIT> /* 
 
-/* ASSIGNMENTS */
 
 /* variable assignment (implicit and explicit) */
 <VAR_ASSIGN> ::= <VAR> "=" <EXPR_or_null>
 
-/* list element assignment */
-<LIST_ELEM_ASSIGN> ::= <LIST_ACCESS_ELEM> "=" <EXPR>
-
 /* expressions */
+<EXPR_OR_NULL_SEQ> ::= <EXPR_OR_NULL> | <EXPR_OR_NULL_SEQ> "," <EXPR_OR_NULL>
 <EXPR_SEQ> ::= <EXPR> | <EXPR_SEQ> "," <EXPR>
 <expr_or_null> ::= <EXPR> | <NULL>
-<expr_using_pointers_resulting_in_pointer> ::= <EXPR>
-<expr_using_pointers_resulting_in_value> ::= <EXPR>
+
 
 /* expression */
 <EXPR> ::= <OR>
@@ -115,8 +112,9 @@
 <VAR> ::= <IE_VAR> | <STRUCT_MEMBER>
 <STRUCT_MEMBER> ::= <IE_VAR> "." <IDENT> | <STRUCT_MEMBER> "." <IDENT>
 <IE_VAR> ::= <IMPL_VAR> | <EXPL_VAR>
-<IMPL_VAR> ::= <EXPR>
+<IMPL_VAR> ::= <EXPR> | <LIST_ACCESS_ELEM>
 <EXPL_VAR> ::= <IDENT>
+
 
 /* identifiers */
 <IDENT> ::= <IDENT_HEAD_SYM> | <IDENT> <IDENT_TAIL_SYM>
@@ -130,8 +128,8 @@
 /* list type (implicit) */
 <LIST_TYPE> ::= <EXPL_TYPE> <LIST_IDENT_W_SIZE> | <EXPL_TYPE> <LIST_IDENT_WO_SIZE>
 <LIST_LIT> ::= "[" "]" | "[" <EXPR_SEQ> "]"
+<LIST_ACCESS_ELEM> ::= <IDENT> "[" <expr> "]" | <EXPR> "[" <expr> "]"
 <LIST_IDENT_ANY> ::= <LIST_IDENT_WO_SIZE> | <LIST_IDENT_W_SIZE>
-<LIST_ACCESS_ELEM> ::= <LIST_IDENT_W_SIZE>
 <LIST_IDENT_W_SIZE> ::= <IDENT> "[" <expr> "]"
 <LIST_IDENT_WO_SIZE> ::= <IDENT> "[" "]"
 
