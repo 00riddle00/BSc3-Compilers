@@ -1,6 +1,5 @@
 
-
-keywords = {
+KEYWORDS = {
   'if': ':KW_IF',
   'return': ':KW_RETURN',
   'while': ':KW_WHILE',
@@ -28,6 +27,7 @@ class Lexer:
     tokens: list
     token_start: int
     running: bool
+    curr_char: str
 
     def __init__(self, _input) -> None:
         self.buffer = ''
@@ -49,6 +49,8 @@ class Lexer:
 
         self.running = True
 
+        self.curr_char = ''
+
         assert len(_input)
 
     def add(self):
@@ -59,23 +61,24 @@ class Lexer:
         self.state = new_state
 
     def complete_ident(self):
-        if kw_type == keywords[self.buffer]:
+        if self.buffer in KEYWORDS:
+            kw_type = KEYWORDS[self.buffer]
             self.buffer = ''
             self.complete_token(kw_type, False)
         else:
             self.complete_token(':IDENT', False)
 
-    def complete_token(self, token_type, advance = True):
+    def complete_token(self, token_type, advance=True):
         self.tokens.append(Token(token_type, self.buffer, self.token_start))
         # print(f'token: {token_type} {self.buffer}')
         self.buffer = ''
-        state = ':START'
+        self.state = ':START'
         if not advance:
             self.offset -= 1
 
     def dump_tokens(self):
         print(f'{"ID":>3}| {"LN":>3}| {"TYPE":<10} | {"VALUE":<10}')
-        for index, token in enumerate(self.token):
+        for index, token in enumerate(self.tokens):
             print(f'{index:>3}| {token.line_no:>3}| {token.type:<10} | {token.value:<10}')
 
     def error(self, msg=None):
@@ -114,7 +117,7 @@ class Lexer:
         elif self.state == ':LIT_STR':
             self.lex_lit_str()
         elif self.state == ':LIT_STR_ESCAPE':
-            self.lex_list_str_escape()
+            self.lex_lit_str_escape()
         elif self.state == ':OP_L':
             self.lex_op_l()
         elif self.state == ':START':
@@ -124,10 +127,10 @@ class Lexer:
 
     def lex_comment_sl(self):
         if self.curr_char == '\n':
-            self.line_no += 1;
+            self.line_no += 1
             self.state = ':START'
         else:
-            pass # ignore
+            pass  # ignore
 
     def lex_ident(self):
         # TODO regexp
@@ -190,13 +193,13 @@ class Lexer:
             self.begin_token(':IDENT')
         elif self.curr_char in ['0', '9']:
             self.add()
-            self.begin_token(':LIT_INT') #FIX
+            self.begin_token(':LIT_INT')  # FIX
         elif self.curr_char == '"':
             self.begin_token(':LIT_STR')
         elif self.curr_char == '#':
             self.state = ':COMMENT_SL'
         elif self.curr_char == ' ':
-            pass # ignore
+            pass  # ignore
         elif self.curr_char == '\n':
             self.line_no += 1
         elif self.curr_char == '+':
