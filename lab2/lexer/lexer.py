@@ -1,4 +1,23 @@
 
+keywords = {
+  'if': 'KW_IF',
+  'return': 'KW_RETURN',
+  'while': 'KW_WHILE',
+}
+
+
+class Token:
+
+    type_: str
+    value: str
+    line_no: int
+
+    def __init__(self, type_, value, line_no):
+        self.type = type
+        self.value = value
+        self.line_no = line_no
+
+
 class Lexer:
     tokens: list = ["2", "+", "3"]
     text: str = "2+3"
@@ -23,3 +42,12 @@ class Lexer:
 
     def print_tokens(self):
         pass
+
+
+
+
+
+
+
+
+
