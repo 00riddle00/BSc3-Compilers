@@ -78,7 +78,7 @@ class Lexer:
         for index, token in enumerate(self.token):
             print(f'{index:>3}| {token.line_no:>3}| {token.type:<10} | {token.value:<10}')
 
-    def error(self, msg = None):
+    def error(self, msg=None):
         if not msg:
             msg = f'unexpected input character {self.curr_char}'
 
@@ -86,25 +86,126 @@ class Lexer:
         self.running = False
 
     def lex_all(self):
-            try:
-                while self.offset < len(self._input):
-                    pass
+        while self.offset and self.offset < len(self._input):
+            self.curr_char = self._input[self.offset]
+            # if self.curr_char == '\n':
+            #     self.line_no += 1; # BAAAAD!!!!
+            self.offset += 1
+            self.lex_char()
+            self.offset += 1
 
-            except BufferError as e:
-                print(str(e))
-                raise ValueError()
+        self.curr_char = 'EOF'
+        self.lex_char()
 
-            return self.tokens
+        if self.state == ':START':
+            self.complete_token(':EOF')
+        elif self.state == ':LIT_STR':
+            self.error('unterminated string')
+        else:
+            self.error(f'unterminated token: {self.state}')
 
-    def print_tokens(self):
-        print("TEST")
-        pass
+    def lex_char(self):
+        if self.state == ':COMMENT_SL':
+            self.lex_comment_sl()
+        elif self.state == ':IDENT':
+            self.lex_ident()
+        elif self.state == ':LIT_INT':
+            self.lex_lit_int()
+        elif self.state == ':LIT_STR':
+            self.lex_lit_str()
+        elif self.state == ':LIT_STR_ESCAPE':
+            self.lex_list_str_escape()
+        elif self.state == ':OP_L':
+            self.lex_op_l()
+        elif self.state == ':START':
+            self.lex_start()
+        else:
+            raise Exception(f'bad state {self.state}')
 
+    def lex_comment_sl(self):
+        if self.curr_char == '\n':
+            self.line_no += 1;
+            self.state = ':START'
+        else:
+            pass # ignore
 
+    def lex_ident(self):
+        # TODO regexp
+        if self.curr_char in ['a', 'z']:
+            self.add()
+        elif self.curr_char in ['A', 'Z']:
+            self.add()
+        elif self.curr_char in ['0', '9']:
+            self.add()
+        elif self.curr_char == '_':
+            self.add()
+        else:
+            self.complete_ident()
 
+    def lex_lit_int(self):
+        # TODO regexp
+        if self.curr_char in ['0', '9']:
+            self.add()
+        else:
+            self.complete_token(':LIT_INT', False)
 
+    def lex_lit_str(self):
+        if self.curr_char == '"':
+            self.complete_token(':LIT_STR')
+        elif self.curr_char == '\\':
+            self.state = ':LIT_STR_ESCAPE'
+        elif self.curr_char == '\n':
+            self.add()
+            self.line_no += 1
+        else:
+            self.add()
 
+    def lex_lit_str_escape(self):
+        if self.curr_char == '"':
+            self.buffer += "\""
+        elif self.curr_char == 't':
+            self.buffer += "\t"
+        elif self.curr_char == 'n':
+            self.buffer += "\n"
+        else:
+            self.error(f'invalid escape sequence "\\{self.curr_char}"')
+        self.state = ':LIT_STR'
 
+    def lex_op_l(self):
+        if self.curr_char == '=':
+            self.complete_token(':OP_LE')
+        else:
+            self.complete_token(':OP_L', False)
 
-
-
+    def lex_start(self):
+        # TODO regexp
+        if self.curr_char in ['a', 'z']:
+            self.add()
+            self.begin_token(':IDENT')
+        elif self.curr_char in ['A', 'Z']:
+            self.add()
+            self.begin_token(':IDENT')
+        elif self.curr_char == '_':
+            self.add()
+            self.begin_token(':IDENT')
+        elif self.curr_char in ['0', '9']:
+            self.add()
+            self.begin_token(':LIT_INT') #FIX
+        elif self.curr_char == '"':
+            self.begin_token(':LIT_STR')
+        elif self.curr_char == '#':
+            self.state = ':COMMENT_SL'
+        elif self.curr_char == ' ':
+            pass # ignore
+        elif self.curr_char == '\n':
+            self.line_no += 1
+        elif self.curr_char == '+':
+            self.begin_token(':START')
+            self.complete_token(':OP_PLUS')
+        elif self.curr_char == '<':
+            self.begin_token(':OP_L')
+        elif self.curr_char == '=':
+            self.begin_token(':START')
+            self.complete_token(':OP_E')
+        else:
+            self.error()

@@ -14,6 +14,6 @@ with open(file_to_lex) as f:
         lexer = Lexer(content)
         lexer.lex_all()
 
-        lexer.print_tokens()
+        lexer.dump_tokens()
     except ValueError:
         pass
