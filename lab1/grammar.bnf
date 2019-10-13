@@ -62,13 +62,14 @@
 <LVALUE> ::= <VAR_LVALUE> | <STRUCT_MEMBER_LVALUE> | <POINTER_DEREF_LVALUE> | <LIST_ACCESS_LVALUE>
 
 <VAR_LVALUE> ::= <IDENT>
-<STRUCT_MEMBER_LVALUE> ::= <STRUCT_MEMBER> | <STRUCT_MEMBER_LVALUE> <OP_ACCESS_MEMBER> <EXPR>
-<STRUCT_MEMBER> ::= <EXPR> <OP_ACCESS_MEMBER> <EXPR>
-<POINTER_DEREF_LVALUE> ::= "*" <EXPR>
-<LIST_ACCESS_LVALUE> ::= <EXPR> "[" <EXPR> "]"
+<STRUCT_MEMBER_LVALUE> ::= <STRUCT_MEMBER> | <STRUCT_MEMBER_LVALUE> <OP_ACCESS_MEMBER> <IDENT>
+<STRUCT_MEMBER> ::= <EXPR> <OP_ACCESS_MEMBER> <IDENT>
+<POINTER_DEREF_LVALUE> ::= "*" <UNARY>
+<LIST_ACCESS_LVALUE> ::= <UNARY> "[" <EXPR> "]"
 
 /* expression */
 <LIST_EXPR> ::= "[" <EXPR_SEQ> "]"
+<LIST_ACCESS_EXPR> ::= <PRIMARY> "[" <EXPR> "]"
 <EXPR_SEQ> ::= <EXPR> | <EXPR_SEQ> "," <EXPR>
 <EXPR> ::= <OR>
 <OR> ::= <AND> | <OR> <OP_OR> <AND>
@@ -78,7 +79,7 @@
 <SUM_SUB> ::= <MUL_DIV_MOD> | <SUM_SUB> <OP_SUM_SUB> <MUL_DIV_MOD>
 <MUL_DIV_MOD> ::= <UNARY> | <MUL_DIV_MOD> <OP_MUL_DIV_MOD> <UNARY>
 <UNARY> ::= <PRIMARY> | <OP_UNARY> <UNARY>
-<PRIMARY> ::= <BASE_TYPE_LIT> | <NULL_LIT> | <VAR> | <FN_CALL> | <LIST_EXPR> | "(" <EXPR> ")"
+<PRIMARY> ::= <BASE_TYPE_LIT> | <NULL_LIT> | <VAR> | <FN_CALL> | <LIST_ACCESS_EXPR> | <LIST_EXPR> | "(" <EXPR> ")"
 
 /* function call */
 <FN_CALL> ::= <IDENT> <ARGS>
@@ -107,10 +108,12 @@
 <POINTER_TYPE> ::= <TYPE> "*"
 <LIST_TYPE> ::= <TYPE> "[" <INT_LIT> "]" |  <TYPE> "[" "]"
 <STRUCT_TYPE> ::= "struct" <IDENT>
-<BASE_TYPE_LIT> ::= <INT_LIT> | <FLOAT_LIT> | <BOOL_LIT> | <CHAR_LIT> | <STRING_LIT>
 <BASE_TYPE> ::= "int" | "float" | "bool" | "char" | "string"
+
+/* literals */
 <NULL_LIT> ::= "NULL"
 <VOID_LIT> ::= "void"
+<BASE_TYPE_LIT> ::= <INT_LIT> | <FLOAT_LIT> | <BOOL_LIT> | <CHAR_LIT> | <STRING_LIT>
 <STRING_LIT> ::= "\"" "\"" | "\"" <ANY> "\""
 <CHAR_LIT> ::= "'" <ANY_SYM> "'"
 <BOOL_LIT> ::= "True" | "False"
@@ -167,7 +170,12 @@
 <ESCAPED_SYM> ::= "\\" <SYM_TO_BE_ESCAPED>
 <SYM_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\""
 
-<NEWLINE> ::= "\\n" 
+<NEWLINE> ::= "\n"
+<CARRIAGE_RETURN> ::= "\r"
+<TABSTOP> ::= "\t"
+<BACKSLASH> ::= "\\"
+<QUOTE> ::= "\""
+
 <SIGN> ::= "+" | "-"
 <UNDERSCORE> ::= "_"
 
