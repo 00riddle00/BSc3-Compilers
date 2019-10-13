@@ -31,7 +31,7 @@
 <RETURN_STMT> ::= "return" | "return" <EXPR>
 
 /* if-statement parts */
-<IF_IF> ::= "if" "("<EXPR>")" <STMT_BLOCK>
+<IF_IF> ::= "if" "(" <EXPR> ")" <STMT_BLOCK>
 <IF_ELIFS> ::= <IF_ELIF> | <IF_ELIFS> <IF_ELIF> 
 <IF_ELIF> ::= "elif" "(" <EXPR> ")" <STMT_BLOCK>
 <IF_ELSE> ::= "else" <STMT_BLOCK> 
