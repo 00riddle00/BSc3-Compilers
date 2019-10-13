@@ -16,6 +16,9 @@ class Token
   end
 end
 
+
+
+
 class Lexer
   def initialize(input)
     @buffer = ""
@@ -69,7 +72,7 @@ class Lexer
       msg = 'unexpected input character %s' % [@curr_char]
     end
 
-    STDERR.puts 'program.tm:%i: lexer error: %s' % [@line_no, msg]
+    STDERR.puts 'sample.fx:%i: lexer error: %s' % [@line_no, msg]
     @running = false
   end
 
@@ -173,7 +176,7 @@ class Lexer
   end
 end
 
-input = File.read('program.tm')
+input = File.read('../sample.fx')
 lexer = Lexer.new(input)
 lexer.lex_all
 lexer.dump_tokens
