@@ -1,6 +1,6 @@
 from sys import argv
 
-from lexer.lexer import Lexer
+from lexer import Lexer
 
 file_to_lex = 'test.fx'
 if len(argv) == 2:

@@ -1,8 +1,8 @@
 
 class Lexer:
-    tokens: list
-    text: str
-    offset: int
+    tokens: list = ["2", "+", "3"]
+    text: str = "2+3"
+    offset: int = 4
 
     def __init__(self, text: str) -> None:
         assert len(text)
