@@ -125,7 +125,7 @@
 <OP_ACCESS_MEMBER> ::= "." | "->"
 
 /* unary operators */
-<OP_UNARY> ::= "!" | "++" | "--" | "*" | "&"
+<OP_UNARY> ::= "!" | "++" | "--" | "*" | "&" | <SIGN>
 
 /* arithmetic operators */
 <OP_MUL_DIV_MOD> ::= "*" | "/" | "%"
