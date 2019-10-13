@@ -131,7 +131,7 @@
 <OP_SUM_SUB> ::= "+" | "-"
 
 /* cmp operators */
-<OP_CMP_GT_LT> ::= ">" | "<" | ">=" |"<="
+<OP_CMP_GT_LT> ::= ">" | "<" | ">=" | "<="
 
 /* cmp operators */
 <OP_CMP_EQ_NEQ> ::= "==" | "!="
