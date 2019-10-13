@@ -1,7 +1,7 @@
 <PROGRAM> ::= <ROOT_ELEMS>
 
 <ROOT_ELEMS> ::= <ROOT_ELEM> | <ROOT_ELEMS> <ROOT_ELEM>
-<ROOT_ELEM> ::= <FN_DECL> | <STRUCT_DECL> | <VAR_DECL_STMT> ";" | <VAR_DECL_AND_INIT_STMT> ";"
+<ROOT_ELEM> ::= <FN_DECL> | <STRUCT_DECL> ";" | <VAR_DECL_STMT> ";" | <VAR_DECL_AND_INIT_STMT> ";"
 
 /* statement block */
 <STMT_BLOCK> ::= "{" "}" | "{" <STMTS> "}"
@@ -23,7 +23,7 @@
 <VAR_DECL_AND_INIT_STMT> ::= <VAR_DECL_AND_INIT>
 <ASSIGNMENT_STMT> ::= <ASSIGNMENT>
 <EXPR_STMT> ::= <EXPR>
-<IF_STMT> ::= <IF_IF> <IF_ELIFS> <IF_ELSE> | <IF_IF> <IF_ELSE> | <IF_IF> <IF_ELIFS> 
+<IF_STMT> ::= <IF_IF> | <IF_IF> <IF_ELSE> | <IF_IF> <IF_ELIFS> | <IF_IF> <IF_ELIFS> <IF_ELSE>
 <WHILE_STMT> ::= "while" "(" <EXPR> ")" <STMT_BLOCK>
 <FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" <STMT_BLOCK>
 <BREAK_STMT> ::= "break" 
@@ -47,7 +47,7 @@
 /* struct declaration */
 <STRUCT_DECL> ::= <STRUCT_TYPE> <VAR_DECL_STMT_BLOCK>
 <VAR_DECL_STMT_BLOCK> ::= "{" <VAR_DECL_STMTS> "}"
-<VAR_DECL_STMTS> ::= <VAR_DECL> ";" | <VAR_DECL_STMTS> <VAR_DECL> ";"
+<VAR_DECL_STMTS> ::= <VAR_DECL_STMT> ";" | <VAR_DECL_STMTS> <VAR_DECL_STMT> ";"
 
 /* variable declaration */
 <VAR_DECL> ::= <TYPE> <IDENT>
@@ -62,11 +62,13 @@
 <LVALUE> ::= <VAR_LVALUE> | <STRUCT_MEMBER_LVALUE> | <POINTER_DEREF_LVALUE> | <LIST_ACCESS_LVALUE>
 
 <VAR_LVALUE> ::= <IDENT>
-<STRUCT_MEMBER_LVALUE> ::= <EXPR> | <STRUCT_MEMBER_LVALUE> <OP_ACCESS_MEMBER> <EXPR>
+<STRUCT_MEMBER_LVALUE> ::= <STRUCT_MEMBER> | <STRUCT_MEMBER_LVALUE> <OP_ACCESS_MEMBER> <EXPR>
+<STRUCT_MEMBER> ::= <EXPR> <OP_ACCESS_MEMBER> <EXPR>
 <POINTER_DEREF_LVALUE> ::= "*" <EXPR>
 <LIST_ACCESS_LVALUE> ::= <EXPR> "[" <EXPR> "]"
 
 /* expression */
+<LIST_EXPR> ::= "[" <EXPR_SEQ> "]"
 <EXPR_SEQ> ::= <EXPR> | <EXPR_SEQ> "," <EXPR>
 <EXPR> ::= <OR>
 <OR> ::= <AND> | <OR> <OP_OR> <AND>
@@ -77,8 +79,6 @@
 <MUL_DIV_MOD> ::= <UNARY> | <MUL_DIV_MOD> <OP_MUL_DIV_MOD> <UNARY>
 <UNARY> ::= <PRIMARY> | <OP_UNARY> <UNARY>
 <PRIMARY> ::= <BASE_TYPE_LIT> | <NULL_LIT> | <VAR> | <FN_CALL> | <LIST_EXPR> | "(" <EXPR> ")"
-
-<LIST_EXPR> ::= "[" <EXPR_SEQ> "]"
 
 /* function call */
 <FN_CALL> ::= <IDENT> <ARGS>
@@ -100,7 +100,7 @@
 <IDENT> ::= <IDENT_HEAD_SYM> | <IDENT> <IDENT_TAIL_SYM>
 
 /* return type */
-<RETURN_TYPE> ::= <TYPE> | "void"
+<RETURN_TYPE> ::= <TYPE> | <VOID_LIT>
 
 /* types */
 <TYPE> ::= <BASE_TYPE> | <POINTER_TYPE> | <LIST_TYPE> | <STRUCT_TYPE>
@@ -110,6 +110,7 @@
 <BASE_TYPE_LIT> ::= <INT_LIT> | <FLOAT_LIT> | <BOOL_LIT> | <CHAR_LIT> | <STRING_LIT>
 <BASE_TYPE> ::= "int" | "float" | "bool" | "char" | "string"
 <NULL_LIT> ::= "NULL"
+<VOID_LIT> ::= "void"
 <STRING_LIT> ::= "\"" "\"" | "\"" <ANY> "\""
 <CHAR_LIT> ::= "'" <ANY_SYM> "'"
 <BOOL_LIT> ::= "True" | "False"
