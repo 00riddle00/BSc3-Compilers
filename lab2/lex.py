@@ -2,7 +2,6 @@ from sys import argv
 
 from lexer import Lexer
 
-# file_to_lex = 'test.fx'
 file_to_lex = 'sample.fx'
 if len(argv) == 2:
     file_to_lex = argv[1]
@@ -13,7 +12,6 @@ with open(file_to_lex) as f:
     try:
         lexer = Lexer(content)
         lexer.lex_all()
-
         lexer.dump_tokens()
     except ValueError:
         pass

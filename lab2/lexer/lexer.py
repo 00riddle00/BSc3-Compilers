@@ -13,7 +13,7 @@ class Token:
     line_no: int
 
     def __init__(self, type_, value, line_no):
-        self.type = type
+        self.type = type_
         self.value = value
         self.line_no = line_no
 
@@ -69,8 +69,10 @@ class Lexer:
             self.complete_token(':IDENT', False)
 
     def complete_token(self, token_type, advance=True):
+        print('bf')
         self.tokens.append(Token(token_type, self.buffer, self.token_start))
         # print(f'token: {token_type} {self.buffer}')
+        print('af')
         self.buffer = ''
         self.state = ':START'
         if not advance:
@@ -82,6 +84,7 @@ class Lexer:
             print(f'{index:>3}| {token.line_no:>3}| {token.type:<10} | {token.value:<10}')
 
     def error(self, msg=None):
+        print('err')
         if not msg:
             msg = f'unexpected input character {self.curr_char}'
 
@@ -89,7 +92,8 @@ class Lexer:
         self.running = False
 
     def lex_all(self):
-        while self.offset and self.offset < len(self._input):
+        while self.running and self.offset < len(self._input):
+            print("OFFSET")
             self.curr_char = self._input[self.offset]
             # if self.curr_char == '\n':
             #     self.line_no += 1; # BAAAAD!!!!
@@ -100,7 +104,10 @@ class Lexer:
         self.curr_char = 'EOF'
         self.lex_char()
 
+        print('here')
+
         if self.state == ':START':
+            print('h1')
             self.complete_token(':EOF')
         elif self.state == ':LIT_STR':
             self.error('unterminated string')
@@ -108,6 +115,8 @@ class Lexer:
             self.error(f'unterminated token: {self.state}')
 
     def lex_char(self):
+        print("lc")
+        print(self.state)
         if self.state == ':COMMENT_SL':
             self.lex_comment_sl()
         elif self.state == ':IDENT':
@@ -133,12 +142,13 @@ class Lexer:
             pass  # ignore
 
     def lex_ident(self):
-        # TODO regexp
-        if self.curr_char in ['a', 'z']:
+        if self.curr_char in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+                              'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']:
             self.add()
-        elif self.curr_char in ['A', 'Z']:
+        elif self.curr_char in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
+                                'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']:
             self.add()
-        elif self.curr_char in ['0', '9']:
+        elif self.curr_char in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
             self.add()
         elif self.curr_char == '_':
             self.add()
@@ -146,8 +156,7 @@ class Lexer:
             self.complete_ident()
 
     def lex_lit_int(self):
-        # TODO regexp
-        if self.curr_char in ['0', '9']:
+        if self.curr_char in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
             self.add()
         else:
             self.complete_token(':LIT_INT', False)
@@ -181,17 +190,18 @@ class Lexer:
             self.complete_token(':OP_L', False)
 
     def lex_start(self):
-        # TODO regexp
-        if self.curr_char in ['a', 'z']:
+        if self.curr_char in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+                              'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']:
             self.add()
             self.begin_token(':IDENT')
-        elif self.curr_char in ['A', 'Z']:
+        elif self.curr_char in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
+                                'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']:
             self.add()
             self.begin_token(':IDENT')
         elif self.curr_char == '_':
             self.add()
             self.begin_token(':IDENT')
-        elif self.curr_char in ['0', '9']:
+        elif self.curr_char in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
             self.add()
             self.begin_token(':LIT_INT')  # FIX
         elif self.curr_char == '"':

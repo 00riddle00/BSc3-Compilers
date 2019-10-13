@@ -42,8 +42,7 @@ class Lexer
 
   def complete_ident
     if kw_type = $KEYWORDS[@buffer]
-      puts "kw_type", kw_type
-      @buffer = ""; complete_token(kw_type, false) 
+      @buffer = ""; complete_token(kw_type, false)
     else
       complete_token(:IDENT, false) 
     end
