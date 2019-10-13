@@ -1,25 +1,32 @@
-# this text is not very reada# @$ % & \tn\
+# this text is not very reada#@$%&\t\n###
+
 int glob;
 
 ###
 this comment spans
 
-many lines\ n\ n\ n\ n
-
+three lines \n \n \n \n \n \n \n
 ###
 
-fx get_all_atoms() => string {
-  return '""'
-  "!" | "#" | "@" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "," | "." | "/" | ":"
-  ";" | "<" | "=" | ">" | "?" | "@" | "[" | "]" | "^" | "`" | "{" | "}" | "|" | "~"
-  " " | "_" | "+" | "-" | '"' | "\"
-  "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
-  "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
-  "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
-  '""'
+struct Test {
+  int[4] list_of_ints;
+  (char **)[] list_of_pointers_to_pointers_to_char;
 }
 
-fx print_info(int p, int q, char s) => void {
+fx get_all_atoms() => string {
+  return "
+    ! | # | @ | $ | % | & | ' | ( | ) | * | , | . | / | : |
+    ; | < | = | > | ? | @ | [ | ] | ^ | ` | { | } | | | ~ |
+    | _ | + | - | '' | \ | \" | \\ | (space) | \\n | \\r | \\t
+    A | B | C | D | E | F | G | H | I | J | K | L | M | N |
+    O | P | Q | R | S | T | U | V | W | X | Y | Z
+    a | b | c | d | e | f | g | h | i | j | k | l | m | n |
+    o | p | q | r | s | t | u | v | w | x | y | z
+    0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+  "
+}
+
+fx print_info(int p, int q, char *separator) => void {
 
   string insight = "some r@ndom \"w\\sdom\"\0";
 
@@ -34,7 +41,7 @@ fx print_info(int p, int q, char s) => void {
   }
 
   # finish line
-  disp(10 * sep);
+  disp(10*(*separator));
 }
 
 fx calc(int a, int b, float c, bool e) == > int {
@@ -68,9 +75,9 @@ fx calc(int a, int b, float c, bool e) == > int {
 
 fx negative(int num) == > bool {
   if (num > 0) {
-    return False
+    return False;
   } else {
-    return True
+    return True;
   }
 }
 
@@ -78,17 +85,17 @@ fx main() == > int {
 
   glob = -1;
 
-  char sep = '\t'
+  char *sep[2];
 
-    in ("Enter two numbers separated by comma > ", & num1, & num2);
+  *(sep[0]) = '\t';
+  *(sep[1]) = '@@@';
 
-  int N_0 = num1 %= num2;
+  disp("Enter two numbers separated by comma > ");
+  in(num1, "," num2);
 
-  int N_1 =
+  int N_1 = num1 %= num2;
 
-    calc(N_1, )
-
-  print_info(N_1, calc(N_0, -145, (+1.e10 - (-.3e-3) + glob), !(N_0 > 14)));
+  print_info(N_1, calc(N_1, -145, (+1.e10 - (-.3e-3) + glob), !(N_1 > 14)), sep[0]);
 
   glob = 1;
 
