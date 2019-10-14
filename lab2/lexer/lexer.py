@@ -72,11 +72,12 @@ class Lexer:
         else:
             self.complete_token(':IDENT')  # , False)
 
-    def complete_token(self, token_type, advance=True):
+    def complete_token(self, token_type, advance=True, delta=0):
         self.tokens.append(Token(token_type, self.buffer, self.token_start_ln))
         # print(f'token: {token_type} {self.buffer}')
         self.buffer = ''
         self.state = ':START'
+        self.offset += delta
         # arba viskas be advance
         if not advance:
             self.offset -= 1
@@ -169,11 +170,15 @@ class Lexer:
 
     def lex_lit_str_escape(self):
         if self.curr_char == '"':
+            # TODO pythonic syntax
             self.buffer += "\""
         elif self.curr_char == 't':
             self.buffer += "\t"
         elif self.curr_char == 'n':
             self.buffer += "\n"
+        # TODO is it right
+        elif self.curr_char == "\\":
+            self.buffer += "\\"
         else:
             # self.lexer_error('invalid_escape symbol \\', self.curr_char)
             self.lexer_error('invalid_escape symbol', self.curr_char)
@@ -209,14 +214,45 @@ class Lexer:
             pass  # ignore
         elif self.curr_char == '\n':
             self.line_no += 1
+        elif self.curr_char == '\t':
+            pass # ignore?
         elif self.curr_char == '+':
             self.begin_token(':START')
             self.complete_token(':OP_PLUS')
         elif self.curr_char == '<':
-            self.begin_token(':OP_L')
+            self.begin_token(':OP_L') # delta = -1
+        elif self.curr_char == '<':
+            self.begin_token(':OP_G') # delta = -1
         elif self.curr_char == '=':
             self.begin_token(':START')
             self.complete_token(':OP_E')
+        elif self.curr_char == '-':
+            self.begin_token(':START')
+            self.complete_token(':OP_SUB')
+        elif self.curr_char == '*':
+            self.begin_token(':START')
+            self.complete_token(':OP_MUL')
+        elif self.curr_char == '/':
+            self.begin_token(':START')
+            self.complete_token(':OP_DIV')
+        elif self.curr_char == '(':
+            self.begin_token(':START')
+            self.complete_token(':OP_PAREN_O')
+        elif self.curr_char == ')':
+            self.begin_token(':START')
+            self.complete_token(':OP_PAREN_C')
+        elif self.curr_char == '{':
+            self.begin_token(':START')
+            self.complete_token(':OP_BRACE_O')
+        elif self.curr_char == '}':
+            self.begin_token(':START')
+            self.complete_token(':OP_BRACE_C')
+        elif self.curr_char == ';':
+            self.begin_token(':START')
+            self.complete_token(':OP_SEMICOLON')
+        elif self.curr_char == ',':
+            self.begin_token(':START')
+            self.complete_token(':OP_COMMA')
         else:
             self.error()
 
