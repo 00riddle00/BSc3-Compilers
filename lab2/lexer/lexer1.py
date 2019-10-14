@@ -27,6 +27,7 @@ class Lexer:
     state: str
     tokens: list
     token_start: int
+    token_start_ln: int
     running: bool
     curr_char: str
 
@@ -38,6 +39,7 @@ class Lexer:
         self.state = ':START'
         self.tokens = []
         self.token_start = 0
+        self.token_start_ln = 1
         self.running = True
         self.curr_char = ''
 
@@ -46,21 +48,26 @@ class Lexer:
 
     def begin_token(self, new_state):
         self.token_start = self.line_no
+        # arba self.token_start_ln = self.line_no
+
         self.state = new_state
 
     def complete_ident(self):
+        self.rewind()
+
         if self.buffer in KEYWORDS:
             kw_type = KEYWORDS[self.buffer]
             self.buffer = ''
-            self.complete_token(kw_type, False)
+            self.complete_token(kw_type)  # , False)
         else:
-            self.complete_token(':IDENT', False)
+            self.complete_token(':IDENT')  # , False)
 
     def complete_token(self, token_type, advance=True):
         self.tokens.append(Token(token_type, self.buffer, self.token_start))
         # print(f'token: {token_type} {self.buffer}')
         self.buffer = ''
         self.state = ':START'
+        # arba viskas be advance
         if not advance:
             self.offset -= 1
 
@@ -68,13 +75,6 @@ class Lexer:
         print(f'{"ID":>3}| {"LN":>3}| {"TYPE":<10} | {"VALUE":<10}')
         for index, token in enumerate(self.tokens):
             print(f'{index:>3}| {token.line_no:>3}| {token.type:<10} | {token.value:<10}')
-
-    def error(self, msg=None):
-        if not msg:
-            msg = f'unexpected input character {self.curr_char}'
-
-        print(f'sample.fx:{self.line_no} lexer error: {msg}')
-        self.running = False
 
     def lex_all(self):
         while self.running and self.offset < len(self._input):
@@ -137,7 +137,8 @@ class Lexer:
         if self.curr_char in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
             self.add()
         else:
-            self.complete_token(':LIT_INT', False)
+            self.rewind()
+            self.complete_token(':LIT_INT')
 
     def lex_lit_str(self):
         if self.curr_char == '"':
@@ -158,14 +159,16 @@ class Lexer:
         elif self.curr_char == 'n':
             self.buffer += "\n"
         else:
-            self.error(f'invalid escape sequence "\\{self.curr_char}"')
+            # self.lexer_error('invalid_escape symbol \\', self.curr_char)
+            self.lexer_error('invalid_escape symbol', self.curr_char)
         self.state = ':LIT_STR'
 
     def lex_op_l(self):
         if self.curr_char == '=':
             self.complete_token(':OP_LE')
         else:
-            self.complete_token(':OP_L', False)
+            self.rewind()
+            self.complete_token(':OP_L')
 
     def lex_start(self):
         if self.curr_char in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
@@ -200,3 +203,17 @@ class Lexer:
             self.complete_token(':OP_E')
         else:
             self.error()
+
+    def error(self, msg=None):
+        if not msg:
+            msg = f'unexpected input character'
+
+        self.lexer_error(msg, self.curr_char)
+        self.running = False
+
+    def lexer_error(self, msg, var_to_pprint):
+        print(f'[program_name.fx]:{self.line_no}: lexer error: {msg}'),
+        pprint(var_to_pprint)
+
+    def rewind(self):
+        self.offset -= 1
