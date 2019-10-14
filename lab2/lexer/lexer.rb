@@ -84,7 +84,7 @@ class Lexer
       @offset += 1
     end
 
-    @curr_char = ' '
+    @curr_char = 'EOF'
     lex_char
 
     case @state

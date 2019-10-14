@@ -31,27 +31,14 @@ class Lexer:
 
     def __init__(self, _input) -> None:
         self.buffer = ''
-
         self._input = _input
-        # self._input = '2+3'
-
         self.line_no = 1
-
         self.offset = 0
-        # self.offset = 4
-
         self.state = ':START'
-
         self.tokens = []
-        # self.tokens = ['2', '+', '3']
-
         self.token_start = 0
-
         self.running = True
-
         self.curr_char = ''
-
-        assert len(_input)
 
     def add(self):
         self.buffer += self.curr_char
@@ -69,10 +56,8 @@ class Lexer:
             self.complete_token(':IDENT', False)
 
     def complete_token(self, token_type, advance=True):
-        print('bf')
         self.tokens.append(Token(token_type, self.buffer, self.token_start))
         # print(f'token: {token_type} {self.buffer}')
-        print('af')
         self.buffer = ''
         self.state = ':START'
         if not advance:
@@ -84,7 +69,6 @@ class Lexer:
             print(f'{index:>3}| {token.line_no:>3}| {token.type:<10} | {token.value:<10}')
 
     def error(self, msg=None):
-        print('err')
         if not msg:
             msg = f'unexpected input character {self.curr_char}'
 
@@ -93,21 +77,17 @@ class Lexer:
 
     def lex_all(self):
         while self.running and self.offset < len(self._input):
-            print("OFFSET")
             self.curr_char = self._input[self.offset]
             # if self.curr_char == '\n':
             #     self.line_no += 1; # BAAAAD!!!!
-            self.offset += 1
             self.lex_char()
             self.offset += 1
 
         self.curr_char = 'EOF'
         self.lex_char()
 
-        print('here')
 
         if self.state == ':START':
-            print('h1')
             self.complete_token(':EOF')
         elif self.state == ':LIT_STR':
             self.error('unterminated string')
@@ -115,8 +95,6 @@ class Lexer:
             self.error(f'unterminated token: {self.state}')
 
     def lex_char(self):
-        print("lc")
-        print(self.state)
         if self.state == ':COMMENT_SL':
             self.lex_comment_sl()
         elif self.state == ':IDENT':
