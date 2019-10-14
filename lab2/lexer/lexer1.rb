@@ -16,9 +16,6 @@ class Token
   end
 end
 
-
-
-
 class Lexer
   def initialize(input)
     @buffer = ""
@@ -44,7 +41,7 @@ class Lexer
     if kw_type = $KEYWORDS[@buffer]
       @buffer = ""; complete_token(kw_type, false)
     else
-      complete_token(:IDENT, false) 
+      complete_token(:IDENT, false)
     end
   end
 
@@ -72,7 +69,7 @@ class Lexer
       msg = 'unexpected input character %s' % [@curr_char]
     end
 
-    STDERR.puts 'sample1.tm:%i: lexer error: %s' % [@line_no, msg]
+    STDERR.puts 'sample3.tm:%i: lexer error: %s' % [@line_no, msg]
     @running = false
   end
 
@@ -84,7 +81,7 @@ class Lexer
       @offset += 1
     end
 
-    @curr_char = 'EOF'
+    @curr_char = ' '
     lex_char
 
     case @state
@@ -176,10 +173,7 @@ class Lexer
   end
 end
 
-input = File.read('../sample1.tm')
+input = File.read('../sample3.tm')
 lexer = Lexer.new(input)
 lexer.lex_all
 lexer.dump_tokens
-
-
-

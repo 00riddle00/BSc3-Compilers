@@ -163,7 +163,7 @@ class Lexer
   end
 end
 
-input = File.read('../sample2.tm')
+input = File.read('../sample3.tm')
 lexer = Lexer.new(input)
 lexer.lex_all
 lexer.dump_tokens

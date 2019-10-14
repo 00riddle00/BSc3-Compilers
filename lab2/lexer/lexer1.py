@@ -1,3 +1,4 @@
+from pprint import pprint
 
 KEYWORDS = {
   'if': ':KW_IF',
@@ -85,7 +86,6 @@ class Lexer:
 
         self.curr_char = 'EOF'
         self.lex_char()
-
 
         if self.state == ':START':
             self.complete_token(':EOF')
