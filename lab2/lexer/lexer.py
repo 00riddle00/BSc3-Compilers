@@ -86,7 +86,6 @@ class Lexer:
         self.curr_char = ' '
         self.lex_char()
 
-
         if self.state == ':START':
             self.complete_token(':EOF')
         elif self.state == ':LIT_STR':
