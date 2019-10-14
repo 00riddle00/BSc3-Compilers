@@ -1,22 +1,51 @@
 from pprint import pprint
 
 KEYWORDS = {
-    'fx': ':KW_FN',
-    'if': ':KW_IF',
-    'elif': ':KW_ELIF',
-    'else': ':KW_ELSE',
-    'for': ':KW_FOR',
-    'while': ':KW_WHILE',
-    'break': ':KW_BREAK',
-    'continue': ':KW_CONTINUE',
-    'return': ':KW_RETURN',
-    'int': ':KW_INT',
-    'float': ':KW_FLOAT',
-    'bool': ':KW_BOOL',
-    'char': ':KW_CHAR',
-    'string': ':KW_STRING',
-    'struct': ':KW_STRUCT',
+    'fx': 'KW_FN',
+    'if': 'KW_IF',
+    'elif': 'KW_ELIF',
+    'else': 'KW_ELSE',
+    'for': 'KW_FOR',
+    'while': 'KW_WHILE',
+    'break': 'KW_BREAK',
+    'continue': 'KW_CONTINUE',
+    'return': 'KW_RETURN',
+    'int': 'KW_INT',
+    'float': 'KW_FLOAT',
+    'bool': 'KW_BOOL',
+    'char': 'KW_CHAR',
+    'string': 'KW_STRING',
+    'struct': 'KW_STRUCT',
 }
+
+
+class Input:
+
+    name: str
+    text: str
+    offset: int
+    curr_ln: int
+    first_ln: int
+    size: int
+
+    def __init__(self, name, text):
+        self.name = name
+        self.text = text
+        self.size = len(text)
+        self.offset = 0
+        self.curr_ln = 1
+        self.first_ln = 1
+
+    def read_char(self):
+        char = self.text[self.offset]
+        self.offset += 1
+        return char
+
+    def reverse_read(self, delta=1):
+        self.offset -= delta
+
+    def is_input_read(self):
+        return self.offset >= self.size
 
 
 class Token:
@@ -32,23 +61,26 @@ class Token:
 
 
 class Lexer:
+    inputs: list
+    curr_input: Input
     buffer: str
-    _input: str
-    line_no: int
-    offset: int
     state: str
     tokens: list
-    token_start: int
-    token_start_ln: int
     running: bool
     curr_char: str
 
-    def __init__(self, _input) -> None:
+    def __init__(self, inputs) -> None:
+        if type(inputs) == list:
+            self.inputs = [inputs]
+        elif type(inputs) == Input:
+            self.inputs = [inputs]
+        else:
+            self.lexer_error('Wrong input passed to lexer constructor.')
+
         self.buffer = ''
-        self._input = _input
         self.line_no = 1
         self.offset = 0
-        self.state = ':START'
+        self.state = 'START'
         self.tokens = []
         self.token_start = 0
         self.token_start_ln = 1
@@ -63,87 +95,90 @@ class Lexer:
         self.state = new_state
 
     def complete_ident(self):
-        self.rewind()
+        self.curr_input.reverse_read()
 
         if self.buffer in KEYWORDS:
             kw_type = KEYWORDS[self.buffer]
             self.buffer = ''
-            self.complete_token(kw_type)  # , False)
+            self.complete_token(kw_type)
         else:
-            self.complete_token(':IDENT')  # , False)
+            self.complete_token('IDENT')
 
-    def complete_token(self, token_type, advance=True, delta=0):
-        self.tokens.append(Token(token_type, self.buffer, self.token_start_ln))
-        # print(f'token: {token_type} {self.buffer}')
+    def complete_token(self, token_type, reverse=False, delta=0):
+        self.tokens.append(
+            Token(token_type, self.buffer, self.curr_input.first_ln))
         self.buffer = ''
-        self.state = ':START'
-        self.offset += delta
-        # arba viskas be advance
-        if not advance:
-            self.offset -= 1
+        self.state = 'START'
+        if reverse:
+            self.curr_input.reverse_read(delta)
 
     def dump_tokens(self):
-        print(f'{"ID":>3}| {"LN":>3}| {"TYPE":<10} | {"VALUE":<10}')
+        print(f'{"ID":>3}| {"LN":>3}| {"TYPE":<14} | {"VALUE":<14}')
         for index, token in enumerate(self.tokens):
-            print(f'{index:>3}| {token.line_no:>3}| {token.type:<10} | {token.value:<10}')
+            print(f'{index:>3}|'
+                  f' {token.line_no:>3}|'
+                  f' {token.type:<14} |'
+                  f' {token.value:<14}')
 
     def lex_all(self):
-        while self.running and self.offset < len(self._input):
-            self.curr_char = self._input[self.offset]
-            # if self.curr_char == '\n':
-            #     self.line_no += 1; # BAAAAD!!!!
+
+        for _input in self.inputs:
+            self.curr_input = _input
+
+            # uncomment for debugging
+            print(81*'#')
+            pprint(self.curr_input.text)
+            print(81*'#')
+
+            while self.running and not self.curr_input.is_input_read():
+                self.curr_char = self.curr_input.read_char()
+                self.lex_char()
+
+            self.curr_char = 'EOF'
             self.lex_char()
-            self.offset += 1
 
-        self.curr_char = 'EOF'
-        self.lex_char()
+            # if self.running:
+            #     self.curr_char = '\n'
+            #     self.lex_char()
+            # if self.state != 'START'
+            #     self.lexer_error(f'unterminated something {self.state}', None)
 
-        # if self.running:
-        #     self.curr_char = '\n'
-        #     self.lex_char()
-        # if self.state != ':START':
-        #     self.lexer_error(f'unterminated something {self.state}', None)
-
-        if self.state == ':START':
-            self.complete_token(':EOF')
-        elif self.state == ':LIT_STR':
-            self.error('unterminated string')
-        else:
-            self.error(f'unterminated token: {self.state}')
+            if self.state == 'START':
+                self.complete_token('EOF')
+            elif self.state == 'LIT_STR':
+                self.lexer_error('unterminated string')
+            else:
+                self.lexer_error(f'unterminated token: {self.state}')
 
     def lex_char(self):
-        if self.state == ':COMMENT_SL':
+        if self.state == 'COMMENT_SL':
             self.lex_comment_sl()
-        elif self.state == ':IDENT':
+        elif self.state == 'IDENT':
             self.lex_ident()
-        elif self.state == ':LIT_INT':
+        elif self.state == 'LIT_INT':
             self.lex_lit_int()
-        elif self.state == ':LIT_STR':
+        elif self.state == 'LIT_STR':
             self.lex_lit_str()
-        elif self.state == ':LIT_STR_ESCAPE':
+        elif self.state == 'LIT_STR_ESCAPE':
             self.lex_lit_str_escape()
-        elif self.state == ':OP_L':
+        elif self.state == 'OP_L':
             self.lex_op_l()
-        elif self.state == ':START':
+        elif self.state == 'START':
             self.lex_start()
         else:
-            raise Exception(f'bad state {self.state}')
+            raise Exception(f'invalid state {self.state}')
 
     def lex_comment_sl(self):
         if self.curr_char == '\n':
             self.line_no += 1
-            self.state = ':START'
+            self.state = 'START'
         else:
             pass  # ignore
 
     def lex_ident(self):
-        if self.curr_char in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-                              'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']:
+        if self.is_letter():
             self.add()
-        elif self.curr_char in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-                                'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']:
-            self.add()
-        elif self.curr_char in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+        elif self.is_digit():
             self.add()
         elif self.curr_char == '_':
             self.add()
@@ -151,17 +186,17 @@ class Lexer:
             self.complete_ident()
 
     def lex_lit_int(self):
-        if self.curr_char in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+        if self.is_digit():
             self.add()
         else:
-            self.rewind()
-            self.complete_token(':LIT_INT')
+            self.curr_input.reverse_read()
+            self.complete_token('LIT_INT')
 
     def lex_lit_str(self):
         if self.curr_char == '"':
-            self.complete_token(':LIT_STR')
+            self.complete_token('LIT_STR')
         elif self.curr_char == '\\':
-            self.state = ':LIT_STR_ESCAPE'
+            self.state = 'LIT_STR_ESCAPE'
         elif self.curr_char == '\n':
             self.add()
             self.line_no += 1
@@ -170,102 +205,106 @@ class Lexer:
 
     def lex_lit_str_escape(self):
         if self.curr_char == '"':
-            # TODO pythonic syntax
-            self.buffer += "\""
+            self.buffer += '"'
         elif self.curr_char == 't':
             self.buffer += "\t"
         elif self.curr_char == 'n':
             self.buffer += "\n"
-        # TODO is it right
         elif self.curr_char == "\\":
             self.buffer += "\\"
         else:
-            # self.lexer_error('invalid_escape symbol \\', self.curr_char)
             self.lexer_error('invalid_escape symbol', self.curr_char)
-        self.state = ':LIT_STR'
+        self.state = 'LIT_STR'
 
     def lex_op_l(self):
         if self.curr_char == '=':
-            self.complete_token(':OP_LE')
+            self.complete_token('OP_LE')
         else:
-            self.rewind()
-            self.complete_token(':OP_L')
+            self.curr_input.reverse_read()
+            self.complete_token('OP_L')
 
     def lex_start(self):
-        if self.curr_char in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-                              'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']:
+        if self.is_letter():
             self.add()
-            self.begin_token(':IDENT')
-        elif self.curr_char in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-                                'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']:
-            self.add()
-            self.begin_token(':IDENT')
+            self.begin_token('IDENT')
         elif self.curr_char == '_':
             self.add()
-            self.begin_token(':IDENT')
-        elif self.curr_char in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+            self.begin_token('IDENT')
+        elif self.is_digit():
             self.add()
-            self.begin_token(':LIT_INT')  # FIX
+            self.begin_token('LIT_INT')  # FIX
         elif self.curr_char == '"':
-            self.begin_token(':LIT_STR')
+            self.begin_token('LIT_STR')
         elif self.curr_char == '#':
-            self.state = ':COMMENT_SL'
+            self.state = 'COMMENT_SL'
         elif self.curr_char == ' ':
             pass  # ignore
         elif self.curr_char == '\n':
             self.line_no += 1
         elif self.curr_char == '\t':
-            pass # ignore?
+            pass  # ignore
         elif self.curr_char == '+':
-            self.begin_token(':START')
-            self.complete_token(':OP_PLUS')
+            self.begin_token('START')
+            self.complete_token('OP_PLUS')
         elif self.curr_char == '<':
-            self.begin_token(':OP_L') # delta = -1
+            self.begin_token('OP_L')  # delta = -1
         elif self.curr_char == '<':
-            self.begin_token(':OP_G') # delta = -1
+            self.begin_token('OP_G')  # delta = -1
         elif self.curr_char == '=':
-            self.begin_token(':START')
-            self.complete_token(':OP_E')
+            self.begin_token('START')
+            self.complete_token('OP_E')
         elif self.curr_char == '-':
-            self.begin_token(':START')
-            self.complete_token(':OP_SUB')
+            self.begin_token('START')
+            self.complete_token('OP_SUB')
         elif self.curr_char == '*':
-            self.begin_token(':START')
-            self.complete_token(':OP_MUL')
+            self.begin_token('START')
+            self.complete_token('OP_MUL')
         elif self.curr_char == '/':
-            self.begin_token(':START')
-            self.complete_token(':OP_DIV')
+            self.begin_token('START')
+            self.complete_token('OP_DIV')
         elif self.curr_char == '(':
-            self.begin_token(':START')
-            self.complete_token(':OP_PAREN_O')
+            self.begin_token('START')
+            self.complete_token('OP_PAREN_O')
         elif self.curr_char == ')':
-            self.begin_token(':START')
-            self.complete_token(':OP_PAREN_C')
+            self.begin_token('START')
+            self.complete_token('OP_PAREN_C')
         elif self.curr_char == '{':
-            self.begin_token(':START')
-            self.complete_token(':OP_BRACE_O')
+            self.begin_token('START')
+            self.complete_token('OP_BRACE_O')
         elif self.curr_char == '}':
-            self.begin_token(':START')
-            self.complete_token(':OP_BRACE_C')
+            self.begin_token('START')
+            self.complete_token('OP_BRACE_C')
         elif self.curr_char == ';':
-            self.begin_token(':START')
-            self.complete_token(':OP_SEMICOLON')
+            self.begin_token('START')
+            self.complete_token('OP_SEMICOLON')
         elif self.curr_char == ',':
-            self.begin_token(':START')
-            self.complete_token(':OP_COMMA')
+            self.begin_token('START')
+            self.complete_token('OP_COMMA')
         else:
-            self.error()
+            self.lexer_error(item=self.curr_char)
 
-    def error(self, msg=None):
+    def is_letter(self):
+        c = self.curr_char
+        return len(c) == 1 and (ord(c) in range(ord('A'), ord('Z')+1) or ord(c) in range(ord('a'), ord('z')+1))
+
+    def is_digit(self):
+        return len(self.curr_char) == 1 and ord(self.curr_char) in range(ord('0'), ord('9')+1)
+
+    def lexer_error(self, msg=None, item=None):
+        top_right_delim = 33 * '!'
+        top_left_delim = 33 * '!'
+        v_delim = 5 * '!'
+        bottom_delim = 81 * '!'
+
+        print(f'{top_left_delim} [Lexer error] {top_right_delim}')
+        print(f'{v_delim} [@] [inputName: {self.curr_input.name} '
+              f'line: {self.curr_input.curr_ln} '
+              f'position: {self.curr_input.offset}]')
         if not msg:
-            msg = f'unexpected input character'
+            msg = 'Something went wrong'
+        print(f'{v_delim} [Error message]: {msg}'),
+        if item:
+            print(f'{v_delim} [Item being lexed]:\n')
+            pprint(item)
+        print(bottom_delim)
 
-        self.lexer_error(msg, self.curr_char)
-        self.running = False
-
-    def lexer_error(self, msg, var_to_pprint):
-        print(f'[program_name.fx]:{self.line_no}: lexer error: {msg}'),
-        pprint(var_to_pprint)
-
-    def rewind(self):
-        self.offset -= 1
