@@ -155,7 +155,7 @@ class Lexer
   end
 
   def lexer_error(msg)
-    STDERR.puts "program.tm:%i: lexer error: %s" % [@line_no, msg]
+    STDERR.puts "sample2.tm:%i: lexer error: %s" % [@line_no, msg]
   end
 
   def rewind
@@ -163,7 +163,7 @@ class Lexer
   end
 end
 
-input = File.read('program.tm')
+input = File.read('sample2.tm')
 lexer = Lexer.new(input)
 lexer.lex_all
 lexer.dump_tokens

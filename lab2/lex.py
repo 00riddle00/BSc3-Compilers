@@ -2,7 +2,7 @@ from sys import argv
 
 from lexer import Lexer
 
-file_to_lex = 'sample.fx'
+file_to_lex = 'sample1.tm'
 if len(argv) == 2:
     file_to_lex = argv[1]
 
