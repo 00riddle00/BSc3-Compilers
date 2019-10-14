@@ -1,9 +1,21 @@
 from pprint import pprint
 
 KEYWORDS = {
+    'fx': ':KW_FN',
     'if': ':KW_IF',
-    'return': ':KW_RETURN',
+    'elif': ':KW_ELIF',
+    'else': ':KW_ELSE',
+    'for': ':KW_FOR',
     'while': ':KW_WHILE',
+    'break': ':KW_BREAK',
+    'continue': ':KW_CONTINUE',
+    'return': ':KW_RETURN',
+    'int': ':KW_INT',
+    'float': ':KW_FLOAT',
+    'bool': ':KW_BOOL',
+    'char': ':KW_CHAR',
+    'string': ':KW_STRING',
+    'struct': ':KW_STRUCT',
 }
 
 
