@@ -204,6 +204,12 @@ class Lexer:
             self.lex_op_l()
         elif self.state == 'OP_G':
             self.lex_op_g()
+        elif self.state == 'OP_EXCL':
+            self.lex_op_excl()
+        elif self.state == 'OP_ASSIGN_EQ':
+            self.lex_op_assign_eq()
+
+
         elif self.state == 'START':
             self.lex_start()
         else:
@@ -334,6 +340,23 @@ class Lexer:
             self.curr_input.reverse_read()
             self.complete_token('OP_G')
 
+    def lex_op_excl(self):
+        if self.curr_char == '=':
+            self.buffer = ''
+            self.complete_token('OP_IS_NEQ')
+        else:
+            self.curr_input.reverse_read()
+            self.complete_token('OP_EXCL')
+
+    def lex_op_assign_eq(self):
+        if self.curr_char == '=':
+            self.buffer = ''
+            self.complete_token('OP_IS_EQ')
+        else:
+            self.curr_input.reverse_read()
+            self.buffer = ''
+            self.complete_token('OP_ASSIGN_EQ')
+
     def lex_start(self):
         if self.is_letter():
             self.add()
@@ -366,9 +389,6 @@ class Lexer:
             self.begin_token('OP_L')
         elif self.curr_char == '>':
             self.begin_token('OP_G')
-        elif self.curr_char == '=':
-            self.begin_token('START')
-            self.complete_token('OP_E')
         elif self.curr_char == '-':
             self.begin_token('START')
             self.complete_token('OP_SUB')
@@ -405,6 +425,12 @@ class Lexer:
         elif self.curr_char == ',':
             self.begin_token('START')
             self.complete_token('OP_COMMA')
+        elif self.curr_char == '!':
+            self.add()
+            self.begin_token('OP_EXCL')
+        elif self.curr_char == '=':
+            self.add()
+            self.begin_token('OP_ASSIGN_EQ')
         else:
             self.lexer_error(item=self.curr_char)
 
