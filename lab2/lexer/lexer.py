@@ -300,6 +300,12 @@ class Lexer:
         elif self.curr_char == '}':
             self.begin_token('START')
             self.complete_token('OP_BRACE_C')
+        elif self.curr_char == '[':
+            self.begin_token('START')
+            self.complete_token('OP_BRACKET_O')
+        elif self.curr_char == ']':
+            self.begin_token('START')
+            self.complete_token('OP_BRACKET_C')
         elif self.curr_char == ';':
             self.begin_token('START')
             self.complete_token('OP_SEMICOLON')
