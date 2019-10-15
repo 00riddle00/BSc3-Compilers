@@ -243,16 +243,8 @@ class Lexer:
             self.complete_token('OP_ACCESS_MEMBER_DOT')
             self.add()
             self.state = 'IDENT'
-        elif self.is_digit():
-            self.add()
-        elif self.curr_char == '_':
-            self.add()
-        elif self.curr_char == '.':
-            self.complete_token('IDENT')
-            self.add()
-            self.state = 'STRUCT_MEMBER'
         else:
-            self.complete_ident()
+            raise self.lexer_error('invalid struct member ident', self.buffer)
 
     def lex_lit_int(self):
         if self.is_digit():
@@ -475,7 +467,7 @@ class Lexer:
     def is_digit(self):
         return len(self.curr_char) == 1 and ord(self.curr_char) in range(ord('0'), ord('9') + 1)
 
-    def lexer_error(self, msg=None, item=None):
+    def lexer_error(self, msg=None, buffer=False):
         top_right_delim = 33 * '!'
         top_left_delim = 33 * '!'
         v_delim = 5 * '!'
@@ -488,9 +480,9 @@ class Lexer:
         if not msg:
             msg = 'Something went wrong'
         print(f'{v_delim} [Error message]: {msg}'),
-        if item:
+        if buffer:
             print(f'{v_delim} [Item being lexed]:'),
-            pprint(item)
+            pprint(self.buffer + self.curr_char)
         print(f'{v_delim} [state]: {self.state}')
         print(f'{v_delim} [output so far]:')
         self.dump_tokens()
