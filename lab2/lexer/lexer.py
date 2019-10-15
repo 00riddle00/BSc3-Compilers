@@ -430,6 +430,7 @@ class Lexer:
             self.state = 'LIT_INT'
         else:
             self.curr_input.reverse_read()
+            self.buffer = ''
             self.complete_token('OP_SUB')
 
     def lex_op_mul(self):
@@ -499,25 +500,18 @@ class Lexer:
         elif self.curr_char == '>':
             self.begin_token('OP_G')
         elif self.curr_char == '+':
-            self.add()
             self.begin_token('OP_SUM')
         elif self.curr_char == '-':
-            self.add()
             self.begin_token('OP_SUB')
         elif self.curr_char == '*':
-            self.add()
             self.begin_token('OP_MUL')
         elif self.curr_char == '/':
-            self.add()
             self.begin_token('OP_DIV')
         elif self.curr_char == '%':
-            self.add()
             self.begin_token('OP_MOD')
         elif self.curr_char == '=':
-            self.add()
             self.begin_token('OP_ASSIGN_EQ')
         elif self.curr_char == '!':
-            self.add()
             self.begin_token('OP_NOT')
         elif self.curr_char == '(':
             self.begin_token('START')
