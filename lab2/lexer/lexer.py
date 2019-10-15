@@ -35,7 +35,6 @@ OPERATORS = {
 
 
 class Input:
-
     name: str
     text: str
     offset: int
@@ -69,7 +68,6 @@ class Input:
 
 
 class Token:
-
     type_: str
     value: str
     line_no: int
@@ -151,9 +149,9 @@ class Lexer:
             self.curr_input = _input
 
             # uncomment for debugging
-            print(81*'#')
+            print(81 * '#')
             pprint(self.curr_input.text)
-            print(81*'#')
+            print(81 * '#')
 
             while self.running and not self.curr_input.is_input_read():
                 self.curr_char = self.curr_input.read_char()
@@ -374,10 +372,10 @@ class Lexer:
 
     def is_letter(self):
         c = self.curr_char
-        return len(c) == 1 and (ord(c) in range(ord('A'), ord('Z')+1) or ord(c) in range(ord('a'), ord('z')+1))
+        return len(c) == 1 and (ord(c) in range(ord('A'), ord('Z') + 1) or ord(c) in range(ord('a'), ord('z') + 1))
 
     def is_digit(self):
-        return len(self.curr_char) == 1 and ord(self.curr_char) in range(ord('0'), ord('9')+1)
+        return len(self.curr_char) == 1 and ord(self.curr_char) in range(ord('0'), ord('9') + 1)
 
     def lexer_error(self, msg=None, item=None):
         top_right_delim = 33 * '!'
