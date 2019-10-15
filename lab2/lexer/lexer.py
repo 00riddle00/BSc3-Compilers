@@ -106,7 +106,7 @@ class Lexer:
 
     def complete_token(self, token_type, reverse=False, delta=0):
         self.tokens.append(
-            Token(token_type, self.buffer, self.curr_input.first_ln))
+            Token(token_type, self.buffer, self.token_start_ln))
         self.buffer = ''
         self.state = 'START'
         if reverse:
