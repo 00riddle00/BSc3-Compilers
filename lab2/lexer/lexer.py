@@ -135,7 +135,7 @@ class Lexer:
                 self.lex_char()
 
             self.curr_char = 'EOF'
-            self.lex_char()
+            # self.lex_char()
 
             # if self.running:
             #     self.curr_char = '\n'
