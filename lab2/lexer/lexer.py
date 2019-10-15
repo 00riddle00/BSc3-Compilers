@@ -155,6 +155,11 @@ class Lexer:
 
             while self.running and not self.curr_input.is_input_read():
                 self.curr_char = self.curr_input.read_char()
+
+                # print(self.curr_char)
+                # print(self.state)
+
+
                 self.lex_char()
 
             self.curr_char = 'EOF'
@@ -179,6 +184,8 @@ class Lexer:
             #     self.lexer_error(f'unterminated token: {self.state}')
 
     def lex_char(self):
+        if self.state == 'COMMENT_START':
+            self.lex_comment_start()
         if self.state == 'COMMENT_SL':
             self.lex_comment_sl()
         elif self.state == 'COMMENT_SL_PLUS_2':
@@ -234,12 +241,19 @@ class Lexer:
         else:
             raise self.lexer_error(f'invalid state {self.state}')
 
-    def lex_comment_sl(self):
+    def lex_comment_start(self):
         if self.curr_char == '\n':
             self.curr_input.next_line()
             self.state = 'START'
         elif self.curr_char == '#':
             self.state = 'COMMENT_SL_PLUS_2'
+        else:
+            self.state = 'COMMENT_SL'
+
+    def lex_comment_sl(self):
+        if self.curr_char == '\n':
+            self.curr_input.next_line()
+            self.state = 'START'
         else:
             pass  # ignore
 
@@ -486,7 +500,7 @@ class Lexer:
         elif self.curr_char == '"':
             self.begin_token('LIT_STR')
         elif self.curr_char == '#':
-            self.state = 'COMMENT_SL'
+            self.state = 'COMMENT_START'
         elif self.curr_char == ' ':
             pass  # ignore
         elif self.curr_char == '\n':

@@ -1,4 +1,4 @@
-# this text is not very reada#@$%&\t\n###
+# this text is not very reada#@$%&\t\n##
 
 int glob;
 
@@ -88,7 +88,7 @@ fx main() == > int {
   char *sep[2];
 
   *(sep[0]) = '\t';
-  *(sep[1]) = '@@@';
+  *(sep[1]) = '@';
 
   disp("Enter two numbers separated by comma > ");
   in(num1, "," num2);
