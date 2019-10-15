@@ -180,6 +180,14 @@ class Lexer:
     def lex_char(self):
         if self.state == 'COMMENT_SL':
             self.lex_comment_sl()
+        if self.state == 'COMMENT_SL_PLUS_2':
+            self.lex_comment_sl_plus_2()
+        if self.state == 'COMMENT_ML':
+            self.lex_comment_ml()
+        if self.state == 'COMMENT_ML_MINUS_1':
+            self.lex_comment_ml_minus_1()
+        if self.state == 'COMMENT_ML_MINUS_2':
+            self.lex_comment_ml_minus_2()
         elif self.state == 'IDENT':
             self.lex_ident()
         elif self.state == 'LIT_INT':
@@ -229,8 +237,37 @@ class Lexer:
         if self.curr_char == '\n':
             self.curr_input.next_line()
             self.state = 'START'
+        elif self.curr_char == '#':
+            self.state = 'COMMENT_SL_PLUS_2'
         else:
             pass  # ignore
+
+    def lex_comment_sl_plus_2(self):
+        if self.curr_char == '\n':
+            self.curr_input.next_line()
+            self.state = 'START'
+        elif self.curr_char == '#':
+            self.state = 'COMMENT_ML'
+        else:
+            self.state = 'COMMENT_SL_PLUS_2'
+
+    def lex_comment_ml(self):
+        if self.curr_char == '#':
+            self.state = 'COMMENT_ML_MINUS_1'
+        else:
+            pass  # ignore
+
+    def lex_comment_ml_minus_1(self):
+        if self.curr_char == '#':
+            self.state = 'COMMENT_ML_MINUS_2'
+        else:
+            self.state = 'COMMENT_ML'
+
+    def lex_comment_ml_minus_2(self):
+        if self.curr_char == '#':
+            self.state = 'START'
+        else:
+            self.state = 'COMMENT_ML'
 
     def lex_ident(self):
         if self.is_letter():
@@ -439,6 +476,7 @@ class Lexer:
         elif self.curr_char == '"':
             self.begin_token('LIT_STR')
         elif self.curr_char == '#':
+            print("comsl")
             self.state = 'COMMENT_SL'
         elif self.curr_char == ' ':
             pass  # ignore
@@ -452,7 +490,6 @@ class Lexer:
             self.begin_token('OP_L')
         elif self.curr_char == '>':
             self.begin_token('OP_G')
-
         elif self.curr_char == '+':
             self.add()
             self.begin_token('OP_SUM')
@@ -468,14 +505,12 @@ class Lexer:
         elif self.curr_char == '%':
             self.add()
             self.begin_token('OP_MOD')
-
         elif self.curr_char == '=':
             self.add()
             self.begin_token('OP_ASSIGN_EQ')
         elif self.curr_char == '!':
             self.add()
             self.begin_token('OP_NOT')
-
         elif self.curr_char == '(':
             self.begin_token('START')
             self.complete_token('OP_PAREN_O')
