@@ -90,7 +90,6 @@ class Lexer:
             self.lexer_error('Wrong input passed to lexer constructor.')
 
         self.buffer = ''
-        self.offset = 0
         self.state = 'START'
         self.tokens = []
         self.token_start_ln = 1
@@ -136,6 +135,8 @@ class Lexer:
         for _input in self.inputs:
             self.curr_input = _input
 
+            print(self.curr_input.size)
+
             # uncomment for debugging
             print(81 * '#')
             pprint(self.curr_input.text)
@@ -144,15 +145,13 @@ class Lexer:
             while self.running and not self.curr_input.is_input_read():
                 self.curr_char = self.curr_input.read_char()
                 self.lex_char()
+                print(self.curr_input.offset)
 
             self.curr_char = 'EOF'
 
             if self.state == 'START':
                 self.complete_token('EOF')
-            else:
-                self.lex_char()
-
-            if self.state in ('COMMENT_ML', 'COMMENT_ML_MINUS_1', 'COMMENT_ML_MINUS_2'):
+            elif self.state in ('COMMENT_ML', 'COMMENT_ML_MINUS_1', 'COMMENT_ML_MINUS_2'):
                 self.lexer_error('unterminated comment')
             elif self.state == 'LIT_FLOAT_E':
                 self.lexer_error('unterminated float expression')
@@ -163,7 +162,7 @@ class Lexer:
             elif self.state in ('LIT_CHAR_ESC', 'LIT_STR_ESCAPE'):
                 self.lexer_error('unterminated escape symbol')
             else:
-                self.curr_char = 'EOF'
+                self.lex_char()
                 self.complete_token('EOF')
 
     def lex_char(self):
