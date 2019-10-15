@@ -168,7 +168,7 @@ class Lexer:
 
             if self.state == 'LIT_STR':
                 self.lexer_error('unterminated string')
-
+            # TODO lit_char?
             # if self.running:
             #     self.curr_char = '\n'
             #     self.lex_char()
@@ -192,6 +192,10 @@ class Lexer:
             self.lex_ident()
         elif self.state == 'LIT_INT':
             self.lex_lit_int()
+        elif self.state == 'LIT_CHAR':
+            self.lex_lit_char()
+        elif self.state == 'LIT_CHAR_ADDED':
+            self.lex_lit_char_added()
         elif self.state == 'LIT_STR':
             self.lex_lit_str()
         elif self.state == 'LIT_STR_ESCAPE':
@@ -228,6 +232,19 @@ class Lexer:
         else:
             self.curr_input.reverse_read()
             self.complete_token('LIT_INT')
+
+    def lex_lit_char(self):
+        if self.curr_char == '\'':
+            self.complete_token('LIT_CHAR')
+        else:
+            self.add()
+        self.state = 'LIT_CHAR_ADDED'
+
+    def lex_lit_char_added(self):
+        if self.curr_char == '\'':
+            self.complete_token('LIT_CHAR')
+        else:
+            self.lexer_error('char type cannot consist of multiple chars')
 
     def lex_lit_str(self):
         if self.curr_char == '"':
@@ -281,6 +298,9 @@ class Lexer:
         elif self.is_digit():
             self.add()
             self.begin_token('LIT_INT')
+        elif self.curr_char == '\'':
+            self.add()
+            self.begin_token('LIT_CHAR')
         elif self.curr_char == '"':
             self.begin_token('LIT_STR')
         elif self.curr_char == '#':
