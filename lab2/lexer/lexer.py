@@ -285,7 +285,6 @@ class Lexer:
         else:
             self.buffer += "\\"
             self.curr_input.reverse_read()
-            # self.lexer_error('invalid_escape symbol', self.curr_char)
         self.state = 'LIT_STR'
 
     def lex_op_l(self):
