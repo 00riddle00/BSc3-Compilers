@@ -145,6 +145,13 @@ class Lexer:
                 self.curr_char = self.curr_input.read_char()
                 self.lex_char()
 
+            self.curr_char = 'EOF'
+
+            if self.state == 'START':
+                self.complete_token('EOF')
+            else:
+                self.lex_char()
+
             if self.state in ('COMMENT_ML', 'COMMENT_ML_MINUS_1', 'COMMENT_ML_MINUS_2'):
                 self.lexer_error('unterminated comment')
             elif self.state == 'LIT_FLOAT_E':
@@ -156,6 +163,7 @@ class Lexer:
             elif self.state in ('LIT_CHAR_ESC', 'LIT_STR_ESCAPE'):
                 self.lexer_error('unterminated escape symbol')
             else:
+                self.curr_char = 'EOF'
                 self.complete_token('EOF')
 
     def lex_char(self):
