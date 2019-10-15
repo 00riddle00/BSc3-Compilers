@@ -155,7 +155,6 @@ class Lexer:
 
             while self.running and not self.curr_input.is_input_read():
                 self.curr_char = self.curr_input.read_char()
-                print("readCHAR")
                 self.lex_char()
 
             self.curr_char = 'EOF'
