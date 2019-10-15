@@ -24,6 +24,8 @@ class Input:
     name: str
     text: str
     offset: int
+    offset_prev: int
+    pos: int
     curr_ln: int
     size: int
 
@@ -31,8 +33,8 @@ class Input:
         self.name = name
         self.text = text
         self.size = len(text)
-        self.offset = 0
         self.curr_ln = 1
+        self.offset = 0
 
     def read_char(self):
         char = self.text[self.offset]
@@ -44,6 +46,10 @@ class Input:
 
     def is_input_read(self):
         return self.offset >= self.size
+
+    def next_line(self):
+        self.offset_prev = self.offset
+        self.curr_ln += 1
 
 
 class Token:
@@ -176,7 +182,7 @@ class Lexer:
 
     def lex_comment_sl(self):
         if self.curr_char == '\n':
-            self.curr_input.curr_ln += 1
+            self.curr_input.next_line()
             self.state = 'START'
         else:
             pass  # ignore
@@ -205,7 +211,7 @@ class Lexer:
             self.state = 'LIT_STR_ESCAPE'
         elif self.curr_char == '\n':
             self.add()
-            self.curr_input.curr_ln += 1
+            self.curr_input.next_line()
         else:
             self.add()
 
@@ -246,7 +252,7 @@ class Lexer:
         elif self.curr_char == ' ':
             pass  # ignore
         elif self.curr_char == '\n':
-            self.curr_input.curr_ln += 1
+            self.curr_input.next_line()
         elif self.curr_char == '\t':
             pass  # ignore
         elif self.curr_char == '+':
@@ -305,7 +311,7 @@ class Lexer:
         print(f'{top_left_delim} [Lexer error] {top_right_delim}')
         print(f'{v_delim} [@] [inputName: {self.curr_input.name} '
               f'line: {self.curr_input.curr_ln} '
-              f'position: {self.curr_input.offset}]')
+              f'position: {self.curr_input.offset - self.curr_input.offset_prev}]')
         if not msg:
             msg = 'Something went wrong'
         print(f'{v_delim} [Error message]: {msg}'),
