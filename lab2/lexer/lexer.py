@@ -135,8 +135,6 @@ class Lexer:
         for _input in self.inputs:
             self.curr_input = _input
 
-            print(self.curr_input.size)
-
             # uncomment for debugging
             print(81 * '#')
             pprint(self.curr_input.text)
@@ -145,7 +143,6 @@ class Lexer:
             while self.running and not self.curr_input.is_input_read():
                 self.curr_char = self.curr_input.read_char()
                 self.lex_char()
-                print(self.curr_input.offset)
 
             self.curr_char = 'EOF'
 
@@ -320,6 +317,8 @@ class Lexer:
         elif self.curr_char == '.':
             self.add()
             self.state = 'LIT_FLOAT'
+        elif self.is_ident_head():
+            self.lexer_error('invalid int suffix')
         else:
             self.curr_input.reverse_read()
             self.complete_token('LIT_INT')

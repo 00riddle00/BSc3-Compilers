@@ -21,7 +21,7 @@ fx get_all_atoms() => string {
   return "
     ! | # | @ | $ | % | & | ' | ( | ) | * | , | . | / | : |
     ; | < | = | > | ? | @ | [ | ] | ^ | ` | { | } | | | ~ |
-    | _ | + | - | '' | \ | \" | \\ | (space) | \\n | \\r | \\t
+    | _ | + | - | '' | | \" | \\ | (space) | \\n | \\r | \\t
     A | B | C | D | E | F | G | H | I | J | K | L | M | N |
     O | P | Q | R | S | T | U | V | W | X | Y | Z
     a | b | c | d | e | f | g | h | i | j | k | l | m | n |
@@ -32,7 +32,7 @@ fx get_all_atoms() => string {
 
 fx print_info(int p, int q, char *separator) => void {
 
-  string insight = "some r@ndom \"w\\sdom\"\0";
+  string insight = "some r@ndom \"w\\sdom\"\"";
 
   if (p == 3 AND q != 2 OR p == 2 AND q > 0) {
     disp("Some insight->\t", insight, "\n");
