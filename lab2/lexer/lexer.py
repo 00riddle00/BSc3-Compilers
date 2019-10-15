@@ -305,7 +305,7 @@ class Lexer:
 
     def lex_struct_member(self):
         if self.is_ident_head():
-            self.complete_token('OP_ACCESS_MEMBER_DOT')
+            self.complete_token('OP_ACCESS_MEMBER')
             self.add()
             self.state = 'IDENT'
         else:
