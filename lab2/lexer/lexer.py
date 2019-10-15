@@ -169,7 +169,7 @@ class Lexer:
     def lex_char(self):
         if self.state == 'COMMENT_SL':
             self.lex_comment_sl()
-        elif 'IDENT' in self.state:
+        elif self.state == 'IDENT':
             self.lex_ident()
         elif self.state == 'LIT_INT':
             self.lex_lit_int()
@@ -263,7 +263,22 @@ class Lexer:
             self.complete_token('OP_G')
 
     def lex_start(self):
-        if self.is_letter():
+        if self.curr_char == 'T':
+            self.add()
+            self.begin_token('IDENT_OR_TRUE')
+        elif self.curr_char == 'F':
+            self.add()
+            self.begin_token('IDENT_OR_FALSE')
+        elif self.curr_char == 'N':
+            self.add()
+            self.begin_token('IDENT_OR_NULL')
+        elif self.curr_char == 'A':
+            self.add()
+            self.begin_token('IDENT_OR_AND')
+        elif self.curr_char == 'O':
+            self.add()
+            self.begin_token('IDENT_OR_OR')
+        elif self.is_letter():
             self.add()
             self.begin_token('IDENT')
         elif self.curr_char == '_':
