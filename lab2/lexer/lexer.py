@@ -158,11 +158,6 @@ class Lexer:
 
                 self.lex_char()
 
-            if self.state == 'START':
-                self.complete_token('EOF')
-            else:
-                self.lex_char()
-
             if self.state in ('COMMENT_ML', 'COMMENT_ML_MINUS_1', 'COMMENT_ML_MINUS_2'):
                 self.lexer_error('unterminated comment')
             elif self.state == 'LIT_FLOAT_E':
