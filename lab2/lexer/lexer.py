@@ -155,6 +155,7 @@ class Lexer:
 
             while self.running and not self.curr_input.is_input_read():
                 self.curr_char = self.curr_input.read_char()
+                print('KChere', self.curr_char)
                 self.lex_char()
 
             self.curr_char = 'EOF'
@@ -204,14 +205,22 @@ class Lexer:
             self.lex_op_l()
         elif self.state == 'OP_G':
             self.lex_op_g()
-        elif self.state == 'OP_NOT':
-            self.lex_op_not()
+        elif self.state == 'OP_SUM':
+            self.lex_op_sum()
+        elif self.state == 'OP_SUB':
+            self.lex_op_sub()
+        elif self.state == 'OP_MUL':
+            self.lex_op_mul()
+        elif self.state == 'OP_DIV':
+            self.lex_op_div()
+        elif self.state == 'OP_MOD':
+            self.lex_op_mod()
         elif self.state == 'OP_ASSIGN_EQ':
             self.lex_op_assign_eq()
+        elif self.state == 'OP_NOT':
+            self.lex_op_not()
         elif self.state == 'STRUCT_MEMBER':
             self.lex_struct_member()
-
-
         elif self.state == 'START':
             self.lex_start()
         else:
@@ -354,13 +363,61 @@ class Lexer:
             self.curr_input.reverse_read()
             self.complete_token('OP_G')
 
-    def lex_op_not(self):
+    def lex_op_sum(self):
+        if self.curr_char == '+':
+            self.buffer = ''
+            self.complete_token('OP_INCR')
         if self.curr_char == '=':
             self.buffer = ''
-            self.complete_token('OP_IS_NEQ')
+            self.complete_token('OP_ASSIGN_SUM')
+        elif self.is_digit():
+            self.state = 'LIT_INT'
         else:
             self.curr_input.reverse_read()
-            self.complete_token('OP_NOT')
+            self.buffer = ''
+            print("HERE")
+            self.complete_token('OP_SUM')
+
+    def lex_op_sub(self):
+        if self.curr_char == '-':
+            self.buffer = ''
+            self.complete_token('OP_DECR')
+        if self.curr_char == '=':
+            self.buffer = ''
+            self.complete_token('OP_ASSIGN_SUB')
+        elif self.is_digit():
+            self.state = 'LIT_INT'
+        else:
+            self.curr_input.reverse_read()
+            self.buffer = ''
+            self.complete_token('OP_SUB')
+
+    def lex_op_mul(self):
+        if self.curr_char == '=':
+            self.buffer = ''
+            self.complete_token('OP_ASSIGN_MUL')
+        else:
+            self.curr_input.reverse_read()
+            self.buffer = ''
+            self.complete_token('OP_MUL')
+
+    def lex_op_div(self):
+        if self.curr_char == '=':
+            self.buffer = ''
+            self.complete_token('OP_ASSIGN_DIV')
+        else:
+            self.curr_input.reverse_read()
+            self.buffer = ''
+            self.complete_token('OP_DIV')
+
+    def lex_op_mod(self):
+        if self.curr_char == '=':
+            self.buffer = ''
+            self.complete_token('OP_ASSIGN_MOD')
+        else:
+            self.curr_input.reverse_read()
+            self.buffer = ''
+            self.complete_token('OP_MOD')
 
     def lex_op_assign_eq(self):
         if self.curr_char == '=':
@@ -371,7 +428,17 @@ class Lexer:
             self.buffer = ''
             self.complete_token('OP_ASSIGN_EQ')
 
+    def lex_op_not(self):
+        if self.curr_char == '=':
+            self.buffer = ''
+            self.complete_token('OP_IS_NEQ')
+        else:
+            self.curr_input.reverse_read()
+            self.complete_token('OP_NOT')
+
     def lex_start(self):
+        print("STARThere")
+        print(self.curr_char)
         if self.is_letter():
             self.add()
             self.begin_token('IDENT')
@@ -396,25 +463,36 @@ class Lexer:
             self.curr_input.next_line()
         elif self.curr_char == '\t':
             pass  # ignore
-        elif self.curr_char == '+':
-            self.begin_token('START')
-            self.complete_token('OP_SUM')
+        elif self.curr_char == '\r':
+            pass  # ignore
         elif self.curr_char == '<':
             self.begin_token('OP_L')
         elif self.curr_char == '>':
             self.begin_token('OP_G')
+
+        elif self.curr_char == '+':
+            self.add()
+            self.begin_token('OP_SUM')
         elif self.curr_char == '-':
-            self.begin_token('START')
-            self.complete_token('OP_SUB')
+            self.add()
+            self.begin_token('OP_SUB')
         elif self.curr_char == '*':
-            self.begin_token('START')
-            self.complete_token('OP_MUL')
+            self.add()
+            self.begin_token('OP_MUL')
         elif self.curr_char == '/':
-            self.begin_token('START')
-            self.complete_token('OP_DIV')
+            self.add()
+            self.begin_token('OP_DIV')
         elif self.curr_char == '%':
-            self.begin_token('START')
-            self.complete_token('OP_MOD')
+            self.add()
+            self.begin_token('OP_MOD')
+
+        elif self.curr_char == '=':
+            self.add()
+            self.begin_token('OP_ASSIGN_EQ')
+        elif self.curr_char == '!':
+            self.add()
+            self.begin_token('OP_NOT')
+
         elif self.curr_char == '(':
             self.begin_token('START')
             self.complete_token('OP_PAREN_O')
@@ -442,15 +520,6 @@ class Lexer:
         elif self.curr_char == '&':
             self.begin_token('START')
             self.complete_token('OP_ADDR')
-
-
-
-        elif self.curr_char == '!':
-            self.add()
-            self.begin_token('OP_NOT')
-        elif self.curr_char == '=':
-            self.add()
-            self.begin_token('OP_ASSIGN_EQ')
         else:
             self.lexer_error('invalid character, usable only as char or inside a string', buffer=True)
 
