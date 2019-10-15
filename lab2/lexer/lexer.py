@@ -201,7 +201,7 @@ class Lexer:
         elif self.state == 'START':
             self.lex_start()
         else:
-            raise Exception(f'invalid state {self.state}')
+            raise self.lexer_error(f'invalid state {self.state}')
 
     def lex_comment_sl(self):
         if self.curr_char == '\n':
