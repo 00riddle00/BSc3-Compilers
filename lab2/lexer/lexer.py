@@ -136,11 +136,11 @@ class Lexer:
             self.curr_input.reverse_read(delta)
 
     def dump_tokens(self):
-        print(f'{"ID":>3}| {"LN":>3}| {"TYPE":<14} | {"VALUE":<14}')
+        print(f'{"ID":>3}| {"LN":>3}| {"TYPE":<22} | {"VALUE":<14}')
         for index, token in enumerate(self.tokens):
             print(f'{index:>3}|'
                   f' {token.line_no:>3}|'
-                  f' {token.type:<14} |'
+                  f' {token.type:<22} |'
                   f' {token.value:<14}')
 
     def lex_all(self):
@@ -208,6 +208,8 @@ class Lexer:
             self.lex_op_excl()
         elif self.state == 'OP_ASSIGN_EQ':
             self.lex_op_assign_eq()
+        elif self.state == 'STRUCT_MEMBER':
+            self.lex_struct_member()
 
 
         elif self.state == 'START':
@@ -229,6 +231,26 @@ class Lexer:
             self.add()
         elif self.curr_char == '_':
             self.add()
+        elif self.curr_char == '.':
+            self.complete_token('IDENT')
+            self.add()
+            self.state = 'STRUCT_MEMBER'
+        else:
+            self.complete_ident()
+
+    def lex_struct_member(self):
+        if self.is_ident_head():
+            self.complete_token('OP_ACCESS_MEMBER_DOT')
+            self.add()
+            self.state = 'IDENT'
+        elif self.is_digit():
+            self.add()
+        elif self.curr_char == '_':
+            self.add()
+        elif self.curr_char == '.':
+            self.complete_token('IDENT')
+            self.add()
+            self.state = 'STRUCT_MEMBER'
         else:
             self.complete_ident()
 
@@ -441,6 +463,12 @@ class Lexer:
             self.lexer_error(item=self.curr_char)
 
     def is_letter(self):
+        c = self.curr_char
+        return len(c) == 1 and (ord(c) in range(ord('A'), ord('Z') + 1) or ord(c) in range(ord('a'), ord('z') + 1))
+
+    def is_ident_head(self):
+        if self.curr_char == '_':
+            return True
         c = self.curr_char
         return len(c) == 1 and (ord(c) in range(ord('A'), ord('Z') + 1) or ord(c) in range(ord('a'), ord('z') + 1))
 

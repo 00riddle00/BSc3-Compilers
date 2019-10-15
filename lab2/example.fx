@@ -44,7 +44,7 @@ fx print_info(int p, int q, char *separator) => void {
   disp(10*(*separator));
 }
 
-fx calc(int a, int b, float c, bool e) == > int {
+fx calc(int a, int b, float c, bool e) ==> int {
   int i;
 
   for (i = 0; i < 10;) {
@@ -73,7 +73,7 @@ fx calc(int a, int b, float c, bool e) == > int {
   return a;
 }
 
-fx negative(int num) == > bool {
+fx negative(int num) ==> bool {
   if (num > 0) {
     return False;
   } else {
