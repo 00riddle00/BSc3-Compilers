@@ -389,7 +389,7 @@ class Lexer:
             self.state = 'LIT_STR_ESCAPE'
         elif self.curr_char == '\n':
             self.add()
-            # self.curr_input.next_line()
+            self.curr_input.next_line()
         else:
             self.add()
 
@@ -399,11 +399,11 @@ class Lexer:
         elif self.curr_char == "\\":
             self.buffer += "\\"
         elif self.curr_char == 'n':
-            self.buffer += "\\n"
+            self.buffer += "\n"
         elif self.curr_char == 'r':
-            self.buffer += "\\r"
+            self.buffer += "\r"
         elif self.curr_char == 't':
-            self.buffer += "\\t"
+            self.buffer += "\t"
         else:
             self.buffer += "\\"
             self.buffer += self.curr_char
