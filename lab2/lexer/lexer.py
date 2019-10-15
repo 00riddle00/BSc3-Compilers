@@ -204,8 +204,8 @@ class Lexer:
             self.lex_op_l()
         elif self.state == 'OP_G':
             self.lex_op_g()
-        elif self.state == 'OP_EXCL':
-            self.lex_op_excl()
+        elif self.state == 'OP_NOT':
+            self.lex_op_not()
         elif self.state == 'OP_ASSIGN_EQ':
             self.lex_op_assign_eq()
         elif self.state == 'STRUCT_MEMBER':
@@ -244,7 +244,7 @@ class Lexer:
             self.add()
             self.state = 'IDENT'
         else:
-            raise self.lexer_error('invalid struct member ident', self.buffer)
+            raise self.lexer_error('invalid struct member ident', buffer=True)
 
     def lex_lit_int(self):
         if self.is_digit():
@@ -289,7 +289,7 @@ class Lexer:
             self.state = 'LIT_CHAR_ESCAPE'
         elif self.curr_char in ['\n', '\r', '\t']:
             self.lexer_error('char type cannot contain newlines, tabstops or'
-                             ' carriage returns', self.buffer + self.curr_char)
+                             ' carriage returns', buffer=True)
         else:
             self.add()
             self.state = 'LIT_CHAR_ADDED'
@@ -311,7 +311,7 @@ class Lexer:
         if self.curr_char == '\'':
             self.complete_token('LIT_CHAR')
         else:
-            self.lexer_error('char type cannot consist of multiple chars', self.buffer + self.curr_char)
+            self.lexer_error('char type cannot consist of multiple chars', buffer=True)
 
     def lex_lit_str(self):
         if self.curr_char == '"':
@@ -354,13 +354,13 @@ class Lexer:
             self.curr_input.reverse_read()
             self.complete_token('OP_G')
 
-    def lex_op_excl(self):
+    def lex_op_not(self):
         if self.curr_char == '=':
             self.buffer = ''
             self.complete_token('OP_IS_NEQ')
         else:
             self.curr_input.reverse_read()
-            self.complete_token('OP_EXCL')
+            self.complete_token('OP_NOT')
 
     def lex_op_assign_eq(self):
         if self.curr_char == '=':
@@ -447,12 +447,12 @@ class Lexer:
 
         elif self.curr_char == '!':
             self.add()
-            self.begin_token('OP_EXCL')
+            self.begin_token('OP_NOT')
         elif self.curr_char == '=':
             self.add()
             self.begin_token('OP_ASSIGN_EQ')
         else:
-            self.lexer_error(item=self.curr_char)
+            self.lexer_error('invalid character, usable only as char or inside a string', buffer=True)
 
     def is_letter(self):
         c = self.curr_char

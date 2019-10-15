@@ -2,9 +2,7 @@
 a = '\''
 
 f = .3e-10
-2+ @
 
-foo.+bar
 
 #if (foo > [bar] AND "testAND") ==> void {
 #  # comment
@@ -14,3 +12,4 @@ foo.+bar
 
 a = &4
 
+!!
