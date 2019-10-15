@@ -3,7 +3,7 @@ a = '\''
 
 f = .3e-10
 
-foo.bar
+foo.+bar
 
 #if (foo > [bar] AND "testAND") ==> void {
 #  # comment
