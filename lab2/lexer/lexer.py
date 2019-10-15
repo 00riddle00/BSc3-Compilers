@@ -219,6 +219,8 @@ class Lexer:
             self.lex_op_mod()
         elif self.state == 'OP_ASSIGN_EQ':
             self.lex_op_assign_eq()
+        elif self.state == 'OP_IS_EQ':
+            self.lex_op_is_eq()
         elif self.state == 'OP_NOT':
             self.lex_op_not()
         elif self.state == 'STRUCT_MEMBER':
@@ -470,10 +472,17 @@ class Lexer:
 
     def lex_op_assign_eq(self):
         if self.curr_char == '=':
-            self.complete_token('OP_IS_EQ')
+            self.state = 'OP_IS_EQ'
         else:
             self.curr_input.reverse_read()
             self.complete_token('OP_ASSIGN_EQ')
+
+    def lex_op_is_eq(self):
+        if self.curr_char == '>':
+            self.complete_token(KEYWORDS['==>'])
+        else:
+            self.curr_input.reverse_read()
+            self.complete_token('OP_IS_EQ')
 
     def lex_op_not(self):
         if self.curr_char == '=':
