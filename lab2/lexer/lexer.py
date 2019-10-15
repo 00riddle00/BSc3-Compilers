@@ -155,6 +155,7 @@ class Lexer:
 
             while self.running and not self.curr_input.is_input_read():
                 self.curr_char = self.curr_input.read_char()
+                print("readCHAR")
                 self.lex_char()
 
             self.curr_char = 'EOF'
@@ -180,13 +181,13 @@ class Lexer:
     def lex_char(self):
         if self.state == 'COMMENT_SL':
             self.lex_comment_sl()
-        if self.state == 'COMMENT_SL_PLUS_2':
+        elif self.state == 'COMMENT_SL_PLUS_2':
             self.lex_comment_sl_plus_2()
-        if self.state == 'COMMENT_ML':
+        elif self.state == 'COMMENT_ML':
             self.lex_comment_ml()
-        if self.state == 'COMMENT_ML_MINUS_1':
+        elif self.state == 'COMMENT_ML_MINUS_1':
             self.lex_comment_ml_minus_1()
-        if self.state == 'COMMENT_ML_MINUS_2':
+        elif self.state == 'COMMENT_ML_MINUS_2':
             self.lex_comment_ml_minus_2()
         elif self.state == 'IDENT':
             self.lex_ident()
@@ -476,7 +477,6 @@ class Lexer:
         elif self.curr_char == '"':
             self.begin_token('LIT_STR')
         elif self.curr_char == '#':
-            print("comsl")
             self.state = 'COMMENT_SL'
         elif self.curr_char == ' ':
             pass  # ignore
