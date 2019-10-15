@@ -1,5 +1,13 @@
 from pprint import pprint
 
+
+def debug(self, var):
+    self.dump_tokens()
+    print(self.buffer)
+    print(var)
+    exit(1)
+
+
 KEYWORDS = {
     'fx': 'KW_FN',
     'if': 'KW_IF',
@@ -170,6 +178,7 @@ class Lexer:
         elif self.state == 'LIT_INT':
             self.lex_lit_int()
         elif self.state == 'LIT_STR':
+            debug("here")
             self.lex_lit_str()
         elif self.state == 'LIT_STR_ESCAPE':
             self.lex_lit_str_escape()
@@ -320,6 +329,4 @@ class Lexer:
             pprint(item)
         print(bottom_delim)
 
-    def debug(self, var):
-        print(var)
 
