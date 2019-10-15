@@ -194,6 +194,8 @@ class Lexer:
             self.lex_lit_int()
         elif self.state == 'LIT_CHAR':
             self.lex_lit_char()
+        elif self.state == 'LIT_CHAR_ESCAPE':
+            self.lex_lit_char_escape()
         elif self.state == 'LIT_CHAR_ADDED':
             self.lex_lit_char_added()
         elif self.state == 'LIT_STR':
@@ -236,15 +238,33 @@ class Lexer:
     def lex_lit_char(self):
         if self.curr_char == '\'':
             self.complete_token('LIT_CHAR')
+        elif self.curr_char == '\\':
+            self.state = 'LIT_CHAR_ESCAPE'
+        elif self.curr_char in ['\n', '\r', '\t']:
+            self.lexer_error('char type cannot contain newlines, tabstops or'
+                             ' carriage returns', self.buffer + self.curr_char)
         else:
             self.add()
+            self.state = 'LIT_CHAR_ADDED'
+
+    def lex_lit_char_escape(self):
+        if self.curr_char == '\'':
+            self.buffer += '\''
+        elif self.curr_char == '\\':
+            self.buffer += '\\'
+        elif self.curr_char == 'n':
+            self.buffer += '\\n'
+        elif self.curr_char == 'r':
+            self.buffer += '\\r'
+        elif self.curr_char == 't':
+            self.buffer += '\\t'
         self.state = 'LIT_CHAR_ADDED'
 
     def lex_lit_char_added(self):
         if self.curr_char == '\'':
             self.complete_token('LIT_CHAR')
         else:
-            self.lexer_error('char type cannot consist of multiple chars')
+            self.lexer_error('char type cannot consist of multiple chars', self.buffer + self.curr_char)
 
     def lex_lit_str(self):
         if self.curr_char == '"':
@@ -299,7 +319,6 @@ class Lexer:
             self.add()
             self.begin_token('LIT_INT')
         elif self.curr_char == '\'':
-            self.add()
             self.begin_token('LIT_CHAR')
         elif self.curr_char == '"':
             self.begin_token('LIT_STR')
@@ -381,13 +400,17 @@ class Lexer:
             msg = 'Something went wrong'
         print(f'{v_delim} [Error message]: {msg}'),
         if item:
-            print(f'{v_delim} [Item being lexed]:\n')
+            print(f'{v_delim} [Item being lexed]:'),
             pprint(item)
+        print(f'{v_delim} [state]: {self.state}')
+        print(f'{v_delim} [output so far]:')
+        self.dump_tokens()
         print(bottom_delim)
+        exit(1)
 
-    def debug(self, var=None):
+    def debug(self, msg=None):
         self.dump_tokens()
         print(self.buffer)
         print(self.state)
-        print(var)
+        print(msg)
         exit(1)

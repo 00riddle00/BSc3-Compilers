@@ -1,4 +1,5 @@
 
+a = '\''
 
 if (foo > [bar] AND "testAND") ==> void {
   # comment
