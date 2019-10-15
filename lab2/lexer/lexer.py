@@ -258,7 +258,7 @@ class Lexer:
             self.begin_token('IDENT')
         elif self.is_digit():
             self.add()
-            self.begin_token('LIT_INT')  # FIX
+            self.begin_token('LIT_INT')
         elif self.curr_char == '"':
             self.begin_token('LIT_STR')
         elif self.curr_char == '#':
@@ -271,11 +271,11 @@ class Lexer:
             pass  # ignore
         elif self.curr_char == '+':
             self.begin_token('START')
-            self.complete_token('OP_PLUS')
+            self.complete_token('OP_SUM')
         elif self.curr_char == '<':
-            self.begin_token('OP_L')  # delta = -1
+            self.begin_token('OP_L')
         elif self.curr_char == '>':
-            self.begin_token('OP_G')  # delta = -1
+            self.begin_token('OP_G')
         elif self.curr_char == '=':
             self.begin_token('START')
             self.complete_token('OP_E')
