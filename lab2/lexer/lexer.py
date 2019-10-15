@@ -13,12 +13,24 @@ KEYWORDS = {
     'continue': 'KW_CONTINUE',
     'return': 'KW_RETURN',
     '==>': 'KW_RET_ARROW',
+    'void': 'KW_VOID',
     'int': 'KW_INT',
     'float': 'KW_FLOAT',
     'bool': 'KW_BOOL',
     'char': 'KW_CHAR',
     'string': 'KW_STRING',
     'struct': 'KW_STRUCT',
+}
+
+CONSTANTS = {
+    'NULL': 'CONST_NULL',
+    'True': 'CONST_TRUE',
+    'False': 'CONST_FALSE',
+}
+
+OPERATORS = {
+    'AND': 'OP_AND',
+    'OR': 'OP_OR',
 }
 
 
@@ -104,11 +116,18 @@ class Lexer:
         self.curr_input.reverse_read()
 
         if self.buffer in KEYWORDS:
-            kw_type = KEYWORDS[self.buffer]
+            token_type = KEYWORDS[self.buffer]
             self.buffer = ''
-            self.complete_token(kw_type)
+        elif self.buffer in CONSTANTS:
+            token_type = CONSTANTS[self.buffer]
+            self.buffer = ''
+        elif self.buffer in OPERATORS:
+            token_type = OPERATORS[self.buffer]
+            self.buffer = ''
         else:
-            self.complete_token('IDENT')
+            token_type = 'IDENT'
+
+        self.complete_token(token_type)
 
     def complete_token(self, token_type, reverse=False, delta=0):
         self.tokens.append(
@@ -195,16 +214,6 @@ class Lexer:
 
     def lex_ident(self):
         if self.is_letter():
-            if self.curr_char == 'T':
-                self.state = "IDENT_OR_TRUE"
-            elif self.curr_char == 'F':
-                self.state = "IDENT_OR_FALSE"
-            if self.curr_char == 'N':
-                self.state = "IDENT_OR_NULL"
-            elif self.curr_char == 'A':
-                self.state = "IDENT_OR_AND"
-            elif self.curr_char == 'O':
-                self.state = "IDENT_OR_OR"
             self.add()
         elif self.is_digit():
             self.add()
@@ -263,22 +272,7 @@ class Lexer:
             self.complete_token('OP_G')
 
     def lex_start(self):
-        if self.curr_char == 'T':
-            self.add()
-            self.begin_token('IDENT_OR_TRUE')
-        elif self.curr_char == 'F':
-            self.add()
-            self.begin_token('IDENT_OR_FALSE')
-        elif self.curr_char == 'N':
-            self.add()
-            self.begin_token('IDENT_OR_NULL')
-        elif self.curr_char == 'A':
-            self.add()
-            self.begin_token('IDENT_OR_AND')
-        elif self.curr_char == 'O':
-            self.add()
-            self.begin_token('IDENT_OR_OR')
-        elif self.is_letter():
+        if self.is_letter():
             self.add()
             self.begin_token('IDENT')
         elif self.curr_char == '_':
