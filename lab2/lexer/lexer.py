@@ -155,7 +155,6 @@ class Lexer:
 
             while self.running and not self.curr_input.is_input_read():
                 self.curr_char = self.curr_input.read_char()
-                print('KChere', self.curr_char)
                 self.lex_char()
 
             self.curr_char = 'EOF'
@@ -365,80 +364,64 @@ class Lexer:
 
     def lex_op_sum(self):
         if self.curr_char == '+':
-            self.buffer = ''
             self.complete_token('OP_INCR')
-        if self.curr_char == '=':
-            self.buffer = ''
+        elif self.curr_char == '=':
             self.complete_token('OP_ASSIGN_SUM')
         elif self.is_digit():
+            self.add()
             self.state = 'LIT_INT'
         else:
             self.curr_input.reverse_read()
-            self.buffer = ''
-            print("HERE")
             self.complete_token('OP_SUM')
 
     def lex_op_sub(self):
         if self.curr_char == '-':
-            self.buffer = ''
             self.complete_token('OP_DECR')
-        if self.curr_char == '=':
-            self.buffer = ''
+        elif self.curr_char == '=':
             self.complete_token('OP_ASSIGN_SUB')
         elif self.is_digit():
+            self.add()
             self.state = 'LIT_INT'
         else:
             self.curr_input.reverse_read()
-            self.buffer = ''
             self.complete_token('OP_SUB')
 
     def lex_op_mul(self):
         if self.curr_char == '=':
-            self.buffer = ''
             self.complete_token('OP_ASSIGN_MUL')
         else:
             self.curr_input.reverse_read()
-            self.buffer = ''
             self.complete_token('OP_MUL')
 
     def lex_op_div(self):
         if self.curr_char == '=':
-            self.buffer = ''
             self.complete_token('OP_ASSIGN_DIV')
         else:
             self.curr_input.reverse_read()
-            self.buffer = ''
             self.complete_token('OP_DIV')
 
     def lex_op_mod(self):
         if self.curr_char == '=':
-            self.buffer = ''
             self.complete_token('OP_ASSIGN_MOD')
         else:
             self.curr_input.reverse_read()
-            self.buffer = ''
             self.complete_token('OP_MOD')
 
     def lex_op_assign_eq(self):
         if self.curr_char == '=':
-            self.buffer = ''
             self.complete_token('OP_IS_EQ')
         else:
             self.curr_input.reverse_read()
-            self.buffer = ''
             self.complete_token('OP_ASSIGN_EQ')
 
     def lex_op_not(self):
         if self.curr_char == '=':
-            self.buffer = ''
             self.complete_token('OP_IS_NEQ')
         else:
             self.curr_input.reverse_read()
             self.complete_token('OP_NOT')
 
     def lex_start(self):
-        print("STARThere")
-        print(self.curr_char)
         if self.is_letter():
             self.add()
             self.begin_token('IDENT')
