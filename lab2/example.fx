@@ -1,4 +1,4 @@
-# this text is not very reada#@$%&\t\n###
+# this text is not very reada#@$%&\t\n##
 
 int glob;
 

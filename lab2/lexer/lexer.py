@@ -250,23 +250,31 @@ class Lexer:
         elif self.curr_char == '#':
             self.state = 'COMMENT_ML'
         else:
-            self.state = 'COMMENT_SL_PLUS_2'
+            self.state = 'COMMENT_SL'
 
     def lex_comment_ml(self):
         if self.curr_char == '#':
             self.state = 'COMMENT_ML_MINUS_1'
+        elif self.curr_char == '\n':
+            self.curr_input.next_line()
         else:
             pass  # ignore
 
     def lex_comment_ml_minus_1(self):
         if self.curr_char == '#':
             self.state = 'COMMENT_ML_MINUS_2'
+        elif self.curr_char == '\n':
+            self.curr_input.next_line()
+            self.state = 'COMMENT_ML'
         else:
             self.state = 'COMMENT_ML'
 
     def lex_comment_ml_minus_2(self):
         if self.curr_char == '#':
             self.state = 'START'
+        elif self.curr_char == '\n':
+            self.curr_input.next_line()
+            self.state = 'COMMENT_ML'
         else:
             self.state = 'COMMENT_ML'
 
