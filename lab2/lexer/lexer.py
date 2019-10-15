@@ -135,7 +135,14 @@ class Lexer:
                 self.lex_char()
 
             self.curr_char = 'EOF'
-            # self.lex_char()
+
+            if self.state == 'START':
+                self.complete_token('EOF')
+            else:
+                self.lex_char()
+
+            if self.state == 'LIT_STR':
+                self.lexer_error('unterminated string')
 
             # if self.running:
             #     self.curr_char = '\n'
@@ -143,12 +150,15 @@ class Lexer:
             # if self.state != 'START'
             #     self.lexer_error(f'unterminated something {self.state}', None)
 
-            if self.state == 'START':
-                self.complete_token('EOF')
-            elif self.state == 'LIT_STR':
-                self.lexer_error('unterminated string')
-            else:
-                self.lexer_error(f'unterminated token: {self.state}')
+            # else:
+            #     self.lexer_error(f'unterminated token: {self.state}')
+
+            # if self.state == 'START':
+            #     self.complete_token('EOF')
+            # elif self.state == 'LIT_STR':
+            #     self.lexer_error('unterminated string')
+            # else:
+            #     self.lexer_error(f'unterminated token: {self.state}')
 
     def lex_char(self):
         if self.state == 'COMMENT_SL':
