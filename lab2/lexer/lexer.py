@@ -319,3 +319,7 @@ class Lexer:
             print(f'{v_delim} [Item being lexed]:\n')
             pprint(item)
         print(bottom_delim)
+
+    def debug(self, var):
+        print(var)
+
