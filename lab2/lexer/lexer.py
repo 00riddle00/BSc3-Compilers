@@ -218,15 +218,18 @@ class Lexer:
     def lex_lit_str_escape(self):
         if self.curr_char == '"':
             self.buffer += '"'
-        elif self.curr_char == 't':
-            self.buffer += "\t"
-        elif self.curr_char == 'n':
-            self.debug("here")
-            self.buffer += "\n"
         elif self.curr_char == "\\":
             self.buffer += "\\"
+        elif self.curr_char == 'n':
+            self.buffer += "\\n"
+        elif self.curr_char == 'r':
+            self.buffer += "\\r"
+        elif self.curr_char == 't':
+            self.buffer += "\\t"
         else:
-            self.lexer_error('invalid_escape symbol', self.curr_char)
+            self.buffer += "\\"
+            self.curr_input.reverse_read()
+            # self.lexer_error('invalid_escape symbol', self.curr_char)
         self.state = 'LIT_STR'
 
     def lex_op_l(self):
