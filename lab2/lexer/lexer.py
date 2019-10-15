@@ -2,6 +2,8 @@ from pprint import pprint
 
 KEYWORDS = {
     'fx': 'KW_FN',
+    'in': 'KW_FN_IN',
+    'out': 'KW_FN_OUT',
     'if': 'KW_IF',
     'elif': 'KW_ELIF',
     'else': 'KW_ELSE',
@@ -10,6 +12,7 @@ KEYWORDS = {
     'break': 'KW_BREAK',
     'continue': 'KW_CONTINUE',
     'return': 'KW_RETURN',
+    '==>': 'KW_RET_ARROW',
     'int': 'KW_INT',
     'float': 'KW_FLOAT',
     'bool': 'KW_BOOL',
@@ -288,6 +291,9 @@ class Lexer:
         elif self.curr_char == '/':
             self.begin_token('START')
             self.complete_token('OP_DIV')
+        elif self.curr_char == '%':
+            self.begin_token('START')
+            self.complete_token('OP_MOD')
         elif self.curr_char == '(':
             self.begin_token('START')
             self.complete_token('OP_PAREN_O')

@@ -1,5 +1,5 @@
 if (foo > [bar]) {
   # comment
   out("hello world");
-  return >=>+ 123;
+  return >=>+ %123;
 }
