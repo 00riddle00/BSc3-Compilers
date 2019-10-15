@@ -35,6 +35,7 @@ class Input:
         self.size = len(text)
         self.curr_ln = 1
         self.offset = 0
+        self.offset_prev = 0
 
     def read_char(self):
         char = self.text[self.offset]
@@ -175,6 +176,8 @@ class Lexer:
             self.lex_lit_str_escape()
         elif self.state == 'OP_L':
             self.lex_op_l()
+        elif self.state == 'OP_G':
+            self.lex_op_g()
         elif self.state == 'START':
             self.lex_start()
         else:
@@ -239,6 +242,13 @@ class Lexer:
             self.curr_input.reverse_read()
             self.complete_token('OP_L')
 
+    def lex_op_g(self):
+        if self.curr_char == '=':
+            self.complete_token('OP_GE')
+        else:
+            self.curr_input.reverse_read()
+            self.complete_token('OP_G')
+
     def lex_start(self):
         if self.is_letter():
             self.add()
@@ -264,7 +274,7 @@ class Lexer:
             self.complete_token('OP_PLUS')
         elif self.curr_char == '<':
             self.begin_token('OP_L')  # delta = -1
-        elif self.curr_char == '<':
+        elif self.curr_char == '>':
             self.begin_token('OP_G')  # delta = -1
         elif self.curr_char == '=':
             self.begin_token('START')
@@ -324,10 +334,9 @@ class Lexer:
             pprint(item)
         print(bottom_delim)
 
-    def debug(self, var):
+    def debug(self, var=None):
         self.dump_tokens()
         print(self.buffer)
         print(self.state)
         print(var)
         exit(1)
-
