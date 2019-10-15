@@ -166,6 +166,7 @@ class Lexer:
 
             if self.state == 'LIT_STR':
                 self.lexer_error('unterminated string')
+
             # elif self.state == 'LIT_CHAR':
             #     self.lexer_error('unterminated char')
             # else:
