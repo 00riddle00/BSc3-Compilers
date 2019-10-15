@@ -404,7 +404,8 @@ class Lexer:
             self.buffer += "\\t"
         else:
             self.buffer += "\\"
-            self.curr_input.reverse_read()
+            self.buffer += self.curr_char
+            self.lexer_error(f'invalid escape symbol: \\{self.curr_char}', buffer=True)
         self.state = 'LIT_STR'
 
     def lex_op_l(self):
