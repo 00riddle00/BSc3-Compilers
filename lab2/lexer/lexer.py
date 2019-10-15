@@ -156,32 +156,25 @@ class Lexer:
             while self.running and not self.curr_input.is_input_read():
                 self.curr_char = self.curr_input.read_char()
 
-                # print(self.curr_char)
-                # print(self.state)
-
-
                 self.lex_char()
-
-            self.curr_char = 'EOF'
 
             if self.state == 'START':
                 self.complete_token('EOF')
             else:
                 self.lex_char()
 
-            if self.state == 'LIT_STR':
+            if self.state in ('COMMENT_ML', 'COMMENT_ML_MINUS_1', 'COMMENT_ML_MINUS_2'):
+                self.lexer_error('unterminated comment')
+            elif self.state == 'LIT_FLOAT_E':
+                self.lexer_error('unterminated float expression')
+            elif self.state in ('LIT_CHAR', 'LIT_CHAR_ADDED'):
+                self.lexer_error('unterminated char')
+            elif self.state == 'LIT_STR':
                 self.lexer_error('unterminated string')
-
-            # elif self.state == 'LIT_CHAR':
-            #     self.lexer_error('unterminated char')
-            # else:
-            #     self.lexer_error(f'unterminated token: {self.state}')
-
-            # if self.running:
-            #     self.curr_char = '\n'
-            #     self.lex_char()
-            # if self.state != 'START'
-            #     self.lexer_error(f'unterminated token: {self.state}')
+            elif self.state in ('LIT_CHAR_ESC', 'LIT_STR_ESCAPE'):
+                self.lexer_error('unterminated escape symbol')
+            else:
+                self.complete_token('EOF')
 
     def lex_char(self):
         if self.state == 'COMMENT_START':
@@ -591,9 +584,9 @@ class Lexer:
         bottom_delim = 81 * '!'
 
         print(f'{top_left_delim} [Lexer error] {top_right_delim}')
-        print(f'{v_delim} [@] [inputName: {self.curr_input.name} '
-              f'line: {self.curr_input.curr_ln} '
-              f'position: {self.curr_input.offset - self.curr_input.offset_prev}]')
+        print(f'{v_delim} [file={self.curr_input.name}:'
+              f'line={self.curr_input.curr_ln}:'
+              f'position={self.curr_input.offset - self.curr_input.offset_prev}]')
         if not msg:
             msg = 'Something went wrong'
         print(f'{v_delim} [Error message]: {msg}'),
