@@ -6,13 +6,10 @@ file_to_lex = 'tmp.fx'
 if len(argv) == 2:
     file_to_lex = argv[1]
 
-with open(file_to_lex) as f:
-    content = ''.join(f.readlines())
-
-    try:
-        _input = Input(file_to_lex, content)
-        lexer = Lexer(_input)
-        lexer.lex_all()
-        lexer.dump_tokens()
-    except ValueError:
-        pass
+try:
+    _input = Input(file_to_lex)
+    lexer = Lexer([_input])
+    lexer.lex_all()
+    lexer.dump_tokens()
+except ValueError:
+    print('exception while starting Lexer')

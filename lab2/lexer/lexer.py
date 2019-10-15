@@ -37,13 +37,18 @@ class Input:
     curr_ln: int
     size: int
 
-    def __init__(self, name, text):
-        self.name = name
-        self.text = text
-        self.size = len(text)
+    def __init__(self, filename):
+        if not type(filename) == str:
+            print("Error: wrong argument type passed to Input constructor")
+            exit(1)
+        self.name = filename
+        with open(self.name) as f:
+            self.text = ''.join(f.readlines())
+        self.size = len(self.text)
         self.curr_ln = 1
         self.offset = 0
         self.offset_prev = 0
+        print("here")
 
     def read_char(self):
         char = self.text[self.offset]
@@ -82,12 +87,14 @@ class Lexer:
     curr_char: str
 
     def __init__(self, inputs) -> None:
-        if type(inputs) == list:
-            self.inputs = [inputs]
-        elif type(inputs) == Input:
-            self.inputs = [inputs]
-        else:
-            self.lexer_error('Wrong input passed to lexer constructor.')
+        print("here")
+        if not type(inputs) == list:
+            self.lexer_error('Wrong argument type passed to Lexer constructor.')
+        for _input in inputs:
+            if not type(_input == Input):
+                self.lexer_error('Input list has an element of incorrect type.')
+        print("here2")
+        self.inputs = inputs
 
         self.buffer = ''
         self.state = 'START'
@@ -162,6 +169,81 @@ class Lexer:
                 self.lex_char()
                 self.complete_token('EOF')
 
+    def lex_start(self):
+        if self.is_letter():
+            self.add()
+            self.begin_token('IDENT')
+        elif self.curr_char == '_':
+            self.add()
+            self.begin_token('IDENT')
+        elif self.is_digit():
+            self.add()
+            self.begin_token('LIT_INT')
+        elif self.curr_char == '.':
+            self.add()
+            self.begin_token('LIT_FLOAT')
+        elif self.curr_char == '\'':
+            self.begin_token('LIT_CHAR')
+        elif self.curr_char == '"':
+            self.begin_token('LIT_STR')
+        elif self.curr_char == '#':
+            self.state = 'COMMENT_START'
+        elif self.curr_char == ' ':
+            pass  # ignore
+        elif self.curr_char == '\n':
+            self.curr_input.next_line()
+        elif self.curr_char == '\t':
+            pass  # ignore
+        elif self.curr_char == '\r':
+            pass  # ignore
+        elif self.curr_char == '<':
+            self.begin_token('OP_L')
+        elif self.curr_char == '>':
+            self.begin_token('OP_G')
+        elif self.curr_char == '+':
+            self.begin_token('OP_SUM')
+        elif self.curr_char == '-':
+            self.begin_token('OP_SUB')
+        elif self.curr_char == '*':
+            self.begin_token('OP_MUL')
+        elif self.curr_char == '/':
+            self.begin_token('OP_DIV')
+        elif self.curr_char == '%':
+            self.begin_token('OP_MOD')
+        elif self.curr_char == '=':
+            self.begin_token('OP_ASSIGN_EQ')
+        elif self.curr_char == '!':
+            self.begin_token('OP_NOT')
+        elif self.curr_char == '(':
+            self.begin_token('START')
+            self.complete_token('OP_PAREN_O')
+        elif self.curr_char == ')':
+            self.begin_token('OP_PAREN_C')
+        elif self.curr_char == '{':
+            self.begin_token('START')
+            self.complete_token('OP_BRACE_O')
+        elif self.curr_char == '}':
+            self.begin_token('START')
+            self.complete_token('OP_BRACE_C')
+        elif self.curr_char == '[':
+            self.begin_token('START')
+            self.complete_token('OP_BRACKET_O')
+        elif self.curr_char == ']':
+            self.begin_token('OP_BRACKET_C')
+        elif self.curr_char == ';':
+            self.begin_token('START')
+            self.complete_token('OP_SEMICOLON')
+        elif self.curr_char == ',':
+            self.begin_token('START')
+            self.complete_token('OP_COMMA')
+        elif self.curr_char == '&':
+            self.begin_token('START')
+            self.complete_token('OP_ADDR')
+        elif self.curr_char == '@':
+            self.begin_token('INCLUDE')
+        else:
+            self.lexer_error('invalid character, usable only as char or inside a string', buffer=True)
+
     def lex_char(self):
         if self.state == 'COMMENT_START':
             self.lex_comment_start()
@@ -223,6 +305,8 @@ class Lexer:
             self.lex_struct_member()
         elif self.state == 'START':
             self.lex_start()
+        elif self.state == 'INCLUDE':
+            self.lex_include()
         else:
             raise self.lexer_error(f'invalid state {self.state}')
 
@@ -489,78 +573,15 @@ class Lexer:
             self.curr_input.reverse_read()
             self.complete_token('OP_NOT')
 
-    def lex_start(self):
-        if self.is_letter():
-            self.add()
-            self.begin_token('IDENT')
-        elif self.curr_char == '_':
-            self.add()
-            self.begin_token('IDENT')
-        elif self.is_digit():
-            self.add()
-            self.begin_token('LIT_INT')
-        elif self.curr_char == '.':
-            self.add()
-            self.begin_token('LIT_FLOAT')
-        elif self.curr_char == '\'':
-            self.begin_token('LIT_CHAR')
-        elif self.curr_char == '"':
-            self.begin_token('LIT_STR')
-        elif self.curr_char == '#':
-            self.state = 'COMMENT_START'
-        elif self.curr_char == ' ':
-            pass  # ignore
-        elif self.curr_char == '\n':
+    def lex_include(self):
+        if self.curr_char == '\n':
             self.curr_input.next_line()
-        elif self.curr_char == '\t':
-            pass  # ignore
-        elif self.curr_char == '\r':
-            pass  # ignore
-        elif self.curr_char == '<':
-            self.begin_token('OP_L')
-        elif self.curr_char == '>':
-            self.begin_token('OP_G')
-        elif self.curr_char == '+':
-            self.begin_token('OP_SUM')
-        elif self.curr_char == '-':
-            self.begin_token('OP_SUB')
-        elif self.curr_char == '*':
-            self.begin_token('OP_MUL')
-        elif self.curr_char == '/':
-            self.begin_token('OP_DIV')
-        elif self.curr_char == '%':
-            self.begin_token('OP_MOD')
-        elif self.curr_char == '=':
-            self.begin_token('OP_ASSIGN_EQ')
-        elif self.curr_char == '!':
-            self.begin_token('OP_NOT')
-        elif self.curr_char == '(':
-            self.begin_token('START')
-            self.complete_token('OP_PAREN_O')
-        elif self.curr_char == ')':
-            self.begin_token('OP_PAREN_C')
-        elif self.curr_char == '{':
-            self.begin_token('START')
-            self.complete_token('OP_BRACE_O')
-        elif self.curr_char == '}':
-            self.begin_token('START')
-            self.complete_token('OP_BRACE_C')
-        elif self.curr_char == '[':
-            self.begin_token('START')
-            self.complete_token('OP_BRACKET_O')
-        elif self.curr_char == ']':
-            self.begin_token('OP_BRACKET_C')
-        elif self.curr_char == ';':
-            self.begin_token('START')
-            self.complete_token('OP_SEMICOLON')
-        elif self.curr_char == ',':
-            self.begin_token('START')
-            self.complete_token('OP_COMMA')
-        elif self.curr_char == '&':
-            self.begin_token('START')
-            self.complete_token('OP_ADDR')
+            self.state = 'START'
+            new_input = Input(self.buffer)
+            self.buffer = ''
+            self.inputs.append(new_input)
         else:
-            self.lexer_error('invalid character, usable only as char or inside a string', buffer=True)
+            self.add()
 
     def is_letter(self):
         c = self.curr_char
