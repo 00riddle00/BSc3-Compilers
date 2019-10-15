@@ -425,6 +425,12 @@ class Lexer:
         elif self.curr_char == ',':
             self.begin_token('START')
             self.complete_token('OP_COMMA')
+        elif self.curr_char == '&':
+            self.begin_token('START')
+            self.complete_token('OP_ADDR')
+
+
+
         elif self.curr_char == '!':
             self.add()
             self.begin_token('OP_EXCL')
