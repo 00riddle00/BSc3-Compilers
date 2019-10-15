@@ -184,6 +184,12 @@ class Lexer:
             self.lex_ident()
         elif self.state == 'LIT_INT':
             self.lex_lit_int()
+        elif self.state == 'LIT_FLOAT':
+            self.lex_lit_float()
+        elif self.state == 'LIT_FLOAT_E':
+            self.lex_lit_float_e()
+        elif self.state == 'LIT_FLOAT_W_E':
+            self.lex_lit_float_w_e()
         elif self.state == 'LIT_CHAR':
             self.lex_lit_char()
         elif self.state == 'LIT_CHAR_ESCAPE':
@@ -223,9 +229,38 @@ class Lexer:
     def lex_lit_int(self):
         if self.is_digit():
             self.add()
+        elif self.curr_char == '.':
+            self.add()
+            self.state = 'LIT_FLOAT'
         else:
             self.curr_input.reverse_read()
             self.complete_token('LIT_INT')
+
+    def lex_lit_float(self):
+        if self.is_digit():
+            self.add()
+        elif self.curr_char == 'e':
+            self.add()
+            self.state = 'LIT_FLOAT_E'
+        else:
+            self.curr_input.reverse_read()
+            self.complete_token('LIT_FLOAT')
+
+    def lex_lit_float_e(self):
+        if self.is_digit():
+            self.add()
+            self.state = 'LIT_FLOAT_W_E'
+        elif self.curr_char in ['+', '-']:
+            self.add()
+        else:
+            self.lexer_error('Float exponent cannot be empty')
+
+    def lex_lit_float_w_e(self):
+        if self.is_digit():
+            self.add()
+        else:
+            self.curr_input.reverse_read()
+            self.complete_token('LIT_FLOAT')
 
     def lex_lit_char(self):
         if self.curr_char == '\'':
@@ -309,6 +344,9 @@ class Lexer:
         elif self.is_digit():
             self.add()
             self.begin_token('LIT_INT')
+        elif self.curr_char == '.':
+            self.add()
+            self.begin_token('LIT_FLOAT')
         elif self.curr_char == '\'':
             self.begin_token('LIT_CHAR')
         elif self.curr_char == '"':
