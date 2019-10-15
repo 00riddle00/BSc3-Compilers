@@ -20,17 +20,11 @@ KEYWORDS = {
     'char': 'KW_CHAR',
     'string': 'KW_STRING',
     'struct': 'KW_STRUCT',
-}
-
-CONSTANTS = {
-    'NULL': 'CONST_NULL',
-    'True': 'CONST_TRUE',
-    'False': 'CONST_FALSE',
-}
-
-OPERATORS = {
-    'AND': 'OP_AND',
-    'OR': 'OP_OR',
+    'NULL': 'KW_NULL',
+    'True': 'KW_TRUE',
+    'False': 'KW_FALSE',
+    'AND': 'KW_AND',
+    'OR': 'KW_OR',
 }
 
 
@@ -116,12 +110,6 @@ class Lexer:
         if self.buffer in KEYWORDS:
             token_type = KEYWORDS[self.buffer]
             self.buffer = ''
-        elif self.buffer in CONSTANTS:
-            token_type = CONSTANTS[self.buffer]
-            self.buffer = ''
-        elif self.buffer in OPERATORS:
-            token_type = OPERATORS[self.buffer]
-            self.buffer = ''
         else:
             token_type = 'IDENT'
 
@@ -155,7 +143,6 @@ class Lexer:
 
             while self.running and not self.curr_input.is_input_read():
                 self.curr_char = self.curr_input.read_char()
-
                 self.lex_char()
 
             if self.state in ('COMMENT_ML', 'COMMENT_ML_MINUS_1', 'COMMENT_ML_MINUS_2'):
