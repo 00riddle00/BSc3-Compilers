@@ -168,21 +168,15 @@ class Lexer:
 
             if self.state == 'LIT_STR':
                 self.lexer_error('unterminated string')
-            # TODO lit_char?
+            # elif self.state == 'LIT_CHAR':
+            #     self.lexer_error('unterminated char')
+            # else:
+            #     self.lexer_error(f'unterminated token: {self.state}')
+
             # if self.running:
             #     self.curr_char = '\n'
             #     self.lex_char()
             # if self.state != 'START'
-            #     self.lexer_error(f'unterminated something {self.state}', None)
-
-            # else:
-            #     self.lexer_error(f'unterminated token: {self.state}')
-
-            # if self.state == 'START':
-            #     self.complete_token('EOF')
-            # elif self.state == 'LIT_STR':
-            #     self.lexer_error('unterminated string')
-            # else:
             #     self.lexer_error(f'unterminated token: {self.state}')
 
     def lex_char(self):
