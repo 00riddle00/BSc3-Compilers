@@ -216,6 +216,10 @@ class Lexer:
             self.lex_lit_str()
         elif self.state == 'LIT_STR_ESCAPE':
             self.lex_lit_str_escape()
+        elif self.state == 'OP_BRACKET_C':
+            self.lex_op_bracket_close()
+        elif self.state == 'OP_PAREN_C':
+            self.lex_op_paren_close()
         elif self.state == 'OP_L':
             self.lex_op_l()
         elif self.state == 'OP_G':
@@ -305,6 +309,18 @@ class Lexer:
             self.state = 'STRUCT_MEMBER'
         else:
             self.complete_ident()
+
+    def lex_op_bracket_close(self):
+        self.complete_token('OP_BRACKET_C')
+        if self.curr_char == '.':
+            self.add()
+            self.state = 'STRUCT_MEMBER'
+
+    def lex_op_paren_close(self):
+        self.complete_token('OP_PAREN_C')
+        if self.curr_char == '.':
+            self.add()
+            self.state = 'STRUCT_MEMBER'
 
     def lex_struct_member(self):
         if self.is_ident_head():
@@ -531,8 +547,7 @@ class Lexer:
             self.begin_token('START')
             self.complete_token('OP_PAREN_O')
         elif self.curr_char == ')':
-            self.begin_token('START')
-            self.complete_token('OP_PAREN_C')
+            self.begin_token('OP_PAREN_C')
         elif self.curr_char == '{':
             self.begin_token('START')
             self.complete_token('OP_BRACE_O')
@@ -543,8 +558,7 @@ class Lexer:
             self.begin_token('START')
             self.complete_token('OP_BRACKET_O')
         elif self.curr_char == ']':
-            self.begin_token('START')
-            self.complete_token('OP_BRACKET_C')
+            self.begin_token('OP_BRACKET_C')
         elif self.curr_char == ';':
             self.begin_token('START')
             self.complete_token('OP_SEMICOLON')

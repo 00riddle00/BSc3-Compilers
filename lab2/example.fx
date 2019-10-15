@@ -13,6 +13,10 @@ struct Test {
   (char **)[] list_of_pointers_to_pointers_to_char;
 }
 
+struct Test *test_struct;
+
+(*test_struct).list_of_ints = [[1,2],[3,4]];
+
 fx get_all_atoms() => string {
   return "
     ! | # | @ | $ | % | & | ' | ( | ) | * | , | . | / | : |
