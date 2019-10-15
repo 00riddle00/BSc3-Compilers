@@ -25,7 +25,6 @@ class Input:
     text: str
     offset: int
     curr_ln: int
-    first_ln: int
     size: int
 
     def __init__(self, name, text):
@@ -34,7 +33,6 @@ class Input:
         self.size = len(text)
         self.offset = 0
         self.curr_ln = 1
-        self.first_ln = 1
 
     def read_char(self):
         char = self.text[self.offset]
@@ -78,11 +76,9 @@ class Lexer:
             self.lexer_error('Wrong input passed to lexer constructor.')
 
         self.buffer = ''
-        self.line_no = 1
         self.offset = 0
         self.state = 'START'
         self.tokens = []
-        self.token_start = 0
         self.token_start_ln = 1
         self.running = True
         self.curr_char = ''
@@ -91,7 +87,7 @@ class Lexer:
         self.buffer += self.curr_char
 
     def begin_token(self, new_state):
-        self.token_start_ln = self.line_no
+        self.token_start_ln = self.curr_input.curr_ln
         self.state = new_state
 
     def complete_ident(self):
@@ -180,7 +176,7 @@ class Lexer:
 
     def lex_comment_sl(self):
         if self.curr_char == '\n':
-            self.line_no += 1
+            self.curr_input.curr_ln += 1
             self.state = 'START'
         else:
             pass  # ignore
@@ -209,7 +205,7 @@ class Lexer:
             self.state = 'LIT_STR_ESCAPE'
         elif self.curr_char == '\n':
             self.add()
-            self.line_no += 1
+            self.curr_input.curr_ln += 1
         else:
             self.add()
 
@@ -250,7 +246,7 @@ class Lexer:
         elif self.curr_char == ' ':
             pass  # ignore
         elif self.curr_char == '\n':
-            self.line_no += 1
+            self.curr_input.curr_ln += 1
         elif self.curr_char == '\t':
             pass  # ignore
         elif self.curr_char == '+':
@@ -317,4 +313,3 @@ class Lexer:
             print(f'{v_delim} [Item being lexed]:\n')
             pprint(item)
         print(bottom_delim)
-
