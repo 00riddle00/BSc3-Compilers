@@ -169,7 +169,7 @@ class Lexer:
     def lex_char(self):
         if self.state == 'COMMENT_SL':
             self.lex_comment_sl()
-        elif self.state == 'IDENT':
+        elif 'IDENT' in self.state:
             self.lex_ident()
         elif self.state == 'LIT_INT':
             self.lex_lit_int()
@@ -195,6 +195,16 @@ class Lexer:
 
     def lex_ident(self):
         if self.is_letter():
+            if self.curr_char == 'T':
+                self.state = "IDENT_OR_TRUE"
+            elif self.curr_char == 'F':
+                self.state = "IDENT_OR_FALSE"
+            if self.curr_char == 'N':
+                self.state = "IDENT_OR_NULL"
+            elif self.curr_char == 'A':
+                self.state = "IDENT_OR_AND"
+            elif self.curr_char == 'O':
+                self.state = "IDENT_OR_OR"
             self.add()
         elif self.is_digit():
             self.add()

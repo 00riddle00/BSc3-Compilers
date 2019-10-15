@@ -2,7 +2,7 @@
 
 if (foo > [bar]) {
   # comment
-  out("hello world");
+  out("hello world", "test", NULL);
   return >=>+ %123;
 }
 
