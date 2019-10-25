@@ -7,16 +7,16 @@ digraph finite_state_machine {
     // todo su kw
     START -> IDENT [label = "[_a-zA-Z]"];
     IDENT -> IDENT [label = "[_a-zA-Z0-9]"];
-    IDENT -> STRUCT_MEMBER [label = "\."];
+    IDENT -> STRUCT_MEMBER [label = "\\."];
     IDENT -> IDENT_END [label = "ELSE"];
 
     START -> _LIT_INT_ [ label = "[0-9]"];
     _LIT_INT_ -> _LIT_INT_ [label = "[0-9]"];
-    _LIT_INT_ -> _LIT_FLOAT_ [label = "\."];
+    _LIT_INT_ -> _LIT_FLOAT_ [label = "\\."];
     _LIT_INT_ -> ERROR [label = "[_a-zA-Z]" ];
     _LIT_INT_ -> LIT_INT [label = "ELSE" ];
 
-    START -> _LIT_FLOAT_ [label = "\."];
+    START -> _LIT_FLOAT_ [label = "\\."];
     _LIT_FLOAT_ -> _LIT_FLOAT_ [label = "[0-9]"];
     // todo lit float e
     _LIT_FLOAT_ -> LIT_FLOAT_E [label = "e"];
@@ -24,14 +24,13 @@ digraph finite_state_machine {
 
     START -> _LIT_CHAR_ [label = "'"];
     _LIT_CHAR_ -> LIT_CHAR [label = "'"];
-    _LIT_CHAR_ -> LIT_CHAR_ESCAPE [label = "\\"];
-    _LIT_CHAR_ -> ERROR [label = "[\n\r\t]"];
+    _LIT_CHAR_ -> LIT_CHAR_ESCAPE [label = "\\\\"];
+    _LIT_CHAR_ -> ERROR [label = "[\\n\\r\\t]"];
     _LIT_CHAR_ -> LIT_CHAR_ADDED [ label = "ELSE"];
 
     START -> LIT_STR [label = "\"" ];
     LIT_STR -> LIT_STR_END [ label = "\""];
-    LIT_STR -> LIT_STR_ESCAPE [label = "\\"];
-    LIT_STR -> LIT_STR_ESCAPE [ label = "\\n"];
+    LIT_STR -> LIT_STR_ESCAPE [label = "\\\\"];
     LIT_STR -> LIT_STR [label = "ELSE"];
 
     START -> OP_L [label = "<"];
@@ -42,8 +41,8 @@ digraph finite_state_machine {
     OP_G -> OP_GE_END [label = "="];
     OP_G -> OP_G_END [label = "ELSE"];
 
-    START -> OP_SUM [label = "+"];
-    OP_SUM -> OP_INCR_END [label = "+"];
+    START -> OP_SUM [label = "\\+"];
+    OP_SUM -> OP_INCR_END [label = "\\+"];
     OP_SUM -> OP_ASSIGN_SUM_END [label = "="];
     OP_SUM -> _LIT_INT_ [label = "[0-9]"];
     OP_SUM -> OP_SUM_END [label = "ELSE"];
@@ -54,8 +53,8 @@ digraph finite_state_machine {
     OP_SUB -> _LIT_INT_ [ label = "[0-9]"];
     OP_SUB -> OP_SUB_END [ label = "ELSE"];
 
-    START -> OP_MUL [label = "*"];
-    START -> OP_DIV [label = "/"];
+    START -> OP_MUL [label = "\\*"];
+    START -> OP_DIV [label = "\\/"];
     START -> OP_MOD [label = "%" ];
     START -> OP_ASSIGN_EQ [label = "="];
 
@@ -68,20 +67,21 @@ digraph finite_state_machine {
     OP_NOT -> OP_NOT_END [label = "ELSE"];
 
 
-START -> INCLUDE [label = "@"];
+    START -> INCLUDE [label = "@"];
+    // todo include_end or next file lexing?? (start)
     INCLUDE -> INCLUDE_END [label = "\\n"];
     INCLUDE -> INCLUDE [label = "ELSE"];
 
-    START -> START [label = "[\n\r\t ]"];
+    START -> START [label = "[\\n\\r\\t]"];
 
     // todo end_state rename _END
-    START -> OP_PAREN_O [label = "\("];
-    START -> OP_PAREN_C [label = "\)"];
+    START -> OP_PAREN_O [label = "\\("];
+    START -> OP_PAREN_C [label = "\\)"];
     // todo is regex ok
     START -> OP_BRACE_O [label = "{"];
     START -> OP_BRACE_C [label = "}"];
-    START -> OP_BRACKET_O [label = "["];
-    START -> OP_BRACKET_C [label = "]"];
+    START -> OP_BRACKET_O [label = "\\["];
+    START -> OP_BRACKET_C [label = "\\]"];
     START -> OP_SEMICOLOIN [label = ";"];
     START -> OP_COMMA [label = ","];
     START -> OP_ADDR [label = "&"];
