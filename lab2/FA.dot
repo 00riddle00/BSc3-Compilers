@@ -4,6 +4,9 @@ digraph finite_state_machine {
     node [shape = doublecircle]; START;
     node [shape = circle];
 
+    // todo visi pamineti
+    // todo end_state rename _END
+
     // todo su kw
     START -> IDENT [label = "[_a-zA-Z]"];
     IDENT -> IDENT [label = "[_a-zA-Z0-9]"];
@@ -18,7 +21,6 @@ digraph finite_state_machine {
 
     START -> _LIT_FLOAT_ [label = "\\."];
     _LIT_FLOAT_ -> _LIT_FLOAT_ [label = "[0-9]"];
-    // todo lit float e
     _LIT_FLOAT_ -> LIT_FLOAT_E [label = "e"];
     _LIT_FLOAT_ -> LIT_FLOAT [label = "ELSE"];
 
@@ -33,51 +35,48 @@ digraph finite_state_machine {
     LIT_STR -> LIT_STR_ESCAPE [label = "\\\\"];
     LIT_STR -> LIT_STR [label = "ELSE"];
 
-    START -> OP_L [label = "<"];
-    OP_L -> OP_LE_END [label = "="];
-    OP_L -> OP_L_END [label = "ELSE"];
+    START -> _OP_G_ [label = ">"];
+    _OP_G_ -> OP_GE [label = "="];
+    _OP_G_ -> OP_G [label = "ELSE"];
 
-    START -> OP_G [label = ">"];
-    OP_G -> OP_GE_END [label = "="];
-    OP_G -> OP_G_END [label = "ELSE"];
+    START -> _OP_L_ [label = "<"];
+    _OP_L_ -> OP_LE [label = "="];
+    _OP_L_ -> OP_L [label = "ELSE"];
 
-    START -> OP_SUM [label = "\\+"];
-    OP_SUM -> OP_INCR_END [label = "\\+"];
-    OP_SUM -> OP_ASSIGN_SUM_END [label = "="];
-    OP_SUM -> _LIT_INT_ [label = "[0-9]"];
-    OP_SUM -> OP_SUM_END [label = "ELSE"];
+    START -> _OP_ASSIGN_EQ_ [label = "="];
+    _OP_ASSIGN_EQ_ -> OP_IS_EQ [label = "="];
+    _OP_ASSIGN_EQ_ -> OP_ASSIGN_EQ [label = "ELSE"];
 
-    START -> OP_SUB [label = "_"];
-    OP_SUB -> OP_DECR_END [label = "-"];
-    OP_SUB -> OP_ASSIGN_SUB_END [label = "="];
-    OP_SUB -> _LIT_INT_ [ label = "[0-9]"];
-    OP_SUB -> OP_SUB_END [ label = "ELSE"];
+    START -> _OP_NOT_ [label = "!"];
+    _OP_NOT_ -> OP_IS_NEQ [label = "="];
+    _OP_NOT_ -> _OP_NOT_END_ [label = "ELSE"];
 
-    START -> OP_MUL [label = "\\*"];
-    START -> OP_DIV [label = "\\/"];
-    START -> OP_MOD [label = "%" ];
-    START -> OP_ASSIGN_EQ [label = "="];
+    START -> _OP_SUM_ [label = "\\+"];
+    _OP_SUM_ -> OP_INCR [label = "\\+"];
+    _OP_SUM_ -> OP_ASSIGN_SUM [label = "="];
+    _OP_SUM_ -> _LIT_INT_ [label = "[0-9]"];
+    _OP_SUM_ -> OP_SUM [label = "ELSE"];
 
-    START -> OP_ASSIGN_EQ [label = "="];
-    OP_ASSIGN_EQ -> OP_IS_EQ [label = "="];
-    OP_ASSIGN_EQ -> OP_ASSIGN_EQ_END [label = "ELSE"];
+    START -> _OP_SUB_ [label = "_"];
+    _OP_SUB_ -> OP_DECR [label = "-"];
+    _OP_SUB_ -> OP_ASSIGN_SUB [label = "="];
+    _OP_SUB_ -> _LIT_INT_ [ label = "[0-9]"];
+    _OP_SUB_ -> OP_SUB [ label = "ELSE"];
 
-    START -> OP_NOT [label = "!"];
-    OP_NOT -> OP_IS_NEQ [label = "="];
-    OP_NOT -> OP_NOT_END [label = "ELSE"];
+    START -> _OP_MUL_ [label = "\\*"];
+    _OP_MUL_ -> OP_ASSIGN_MUL [label = "="];
+    _OP_MUL_ -> OP_MUL [label = "ELSE"];
 
+    START -> _OP_DIV_ [label = "\\/"];
+    _OP_DIV_ -> OP_ASSIGN_DIV [label = "="];
+    _OP_DIV_ -> OP_DIV [label = "ELSE"];
 
-    START -> INCLUDE [label = "@"];
-    // todo include_end or next file lexing?? (start)
-    INCLUDE -> INCLUDE_END [label = "\\n"];
-    INCLUDE -> INCLUDE [label = "ELSE"];
+    START -> _OP_MOD_ [label = "%" ];
+    _OP_MOD_ -> OP_ASSIGN_MOD [label = "="];
+    _OP_MOD_ -> OP_MOD [label = "ELSE"];
 
-    START -> START [label = "[\\n\\r\\t]"];
-
-    // todo end_state rename _END
     START -> OP_PAREN_O [label = "\\("];
     START -> OP_PAREN_C [label = "\\)"];
-    // todo is regex ok
     START -> OP_BRACE_O [label = "{"];
     START -> OP_BRACE_C [label = "}"];
     START -> OP_BRACKET_O [label = "\\["];
@@ -86,8 +85,14 @@ digraph finite_state_machine {
     START -> OP_COMMA [label = ","];
     START -> OP_ADDR [label = "&"];
 
-    // COMMENTS
+    START -> INCLUDE [label = "@"];
+    // todo include_end or next file lexing?? (start)
+    INCLUDE -> INCLUDE_END [label = "\\n"];
+    INCLUDE -> INCLUDE [label = "ELSE"];
 
+    START -> START [label = "[\\n\\r\\t]"];
+
+    // COMMENTS
     // TODO comment ignore
     START -> COMMENT_START [label = "#"];
     COMMENT_START -> START [label = "\\n"];
