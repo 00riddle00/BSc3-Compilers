@@ -157,7 +157,7 @@ class Lexer:
                 self.complete_token('EOF')
             elif self.state in ('COMMENT_ML', 'COMMENT_ML_MINUS_1', 'COMMENT_ML_MINUS_2'):
                 self.lexer_error('unterminated comment')
-            elif self.state == 'LIT_FLOAT_E':
+            elif self.state in ('LIT_FLOAT_E', 'LIT_FLOAT_E_SIGN'):
                 self.lexer_error('unterminated float expression')
             elif self.state in ('LIT_CHAR', 'LIT_CHAR_ADDED'):
                 self.lexer_error('unterminated char')

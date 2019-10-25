@@ -4,14 +4,18 @@ digraph finite_state_machine {
     node [shape = doublecircle]; START;
     node [shape = circle];
 
-    // todo visi pamineti
-    // todo end_state rename _END
+    // todo check all states
+
+    START -> EOF [label = "<EOF>"];
 
     // todo su kw (ident_end)
     START -> IDENT [label = "[_a-zA-Z]"];
     IDENT -> IDENT [label = "[_a-zA-Z0-9]"];
     IDENT -> STRUCT_MEMBER [label = "\\."];
     IDENT -> IDENT_END [label = "ELSE"];
+
+    STRUCT_MEMBER -> OP_ACCESS_MEMBER [label = "[_a-zA-Z]"];
+    STRUCT_MEMBER -> ERROR [ label = "ELSE" ];
 
     START -> _LIT_INT_ [ label = "[0-9]"];
     _LIT_INT_ -> _LIT_INT_ [label = "[0-9]"];
@@ -24,20 +28,6 @@ digraph finite_state_machine {
     _LIT_FLOAT_ -> LIT_FLOAT_E [label = "e"];
     _LIT_FLOAT_ -> LIT_FLOAT [label = "ELSE"];
 
-    START -> _LIT_CHAR_ [label = "'"];
-    _LIT_CHAR_ -> LIT_CHAR [label = "'"];
-    _LIT_CHAR_ -> LIT_CHAR_ESCAPE [label = "\\\\"];
-    _LIT_CHAR_ -> ERROR [label = "[\\n\\r\\t]"];
-    _LIT_CHAR_ -> LIT_CHAR_ADDED [ label = "ELSE"];
-
-    START -> _LIT_STR_ [label = "\"" ];
-    _LIT_STR_ -> LIT_STR [ label = "\""];
-    _LIT_STR_ -> LIT_STR_ESCAPE [label = "\\\\"];
-    _LIT_STR_ -> _LIT_STR_ [label = "ELSE"];
-
-    STRUCT_MEMBER -> OP_ACCESS_MEMBER [label = "[_a-zA-Z]"];
-    STRUCT_MEMBER -> ERROR [ label = "ELSE" ];
-
     LIT_FLOAT_E -> LIT_FLOAT_W_E [label = "[0-9]"];
     LIT_FLOAT_E -> LIT_FLOAT_E_SIGN [label = "[\\+-]"];
     LIT_FLOAT_E -> ERROR [label = "ELSE"];
@@ -48,19 +38,28 @@ digraph finite_state_machine {
     LIT_FLOAT_W_E -> LIT_FLOAT_W_E [label = "[0-9]"];
     LIT_FLOAT_W_E -> LIT_FLOAT [label = "ELSE"];
 
+    START -> _LIT_CHAR_ [label = "'"];
+    _LIT_CHAR_ -> LIT_CHAR [label = "'"];
+    _LIT_CHAR_ -> LIT_CHAR_ESCAPE [label = "\\\\"];
+    _LIT_CHAR_ -> ERROR [label = "[\\n\\r\\t<EOF>]"];
+    _LIT_CHAR_ -> LIT_CHAR_ADDED [ label = "ELSE"];
 
+    LIT_CHAR_ESCAPE -> LIT_CHAR_ADDED [label = "['\\\\nrt]"];
+    LIT_CHAR_ESCAPE -> ERROR [label = "ELSE"];
 
+    LIT_CHAR_ADDED -> LIT_CHAR [label = "'"];
+    LIT_CHAR_ADDED -> ERROR [label = "ELSE"];
 
+    START -> _LIT_STR_ [label = "\"" ];
+    _LIT_STR_ -> LIT_STR [ label = "\""];
+    _LIT_STR_ -> LIT_STR_ESCAPE [label = "\\\\"];
+    _LIT_STR_ -> ERROR [label = "<EOF>"];
+    _LIT_STR_ -> _LIT_STR_ [label = "ELSE"];
 
+    LIT_STR_ESCAPE -> _LIT_STR_ [label = "[\"\\\\nrt]"];
+    LIT_STR_ESCAPE -> ERROR [label = "ELSE"];
 
-
-
-
-
-
-
-
-START -> _OP_G_ [label = ">"];
+    START -> _OP_G_ [label = ">"];
     _OP_G_ -> OP_GE [label = "="];
     _OP_G_ -> OP_G [label = "ELSE"];
 
@@ -131,14 +130,16 @@ START -> _OP_G_ [label = ">"];
     COMMENT_SL_PLUS_2 -> COMMENT_SL [label = "ELSE"];
 
     COMMENT_ML -> COMMENT_ML_MINUS_1 [label = "#"];
+    COMMENT_ML -> ERROR [label = "<EOF>"];
     COMMENT_ML -> START [label = "ELSE"];
 
     COMMENT_ML_MINUS_1 -> COMMENT_ML_MINUS_2 [label = "#"];
+    COMMENT_ML_MINUS_1 -> ERROR [label = "<EOF>"];
     COMMENT_ML_MINUS_1 -> COMMENT_ML [label = "ELSE"];
 
     COMMENT_ML_MINUS_2 -> START [label = "#"];
+    COMMENT_ML_MINUS_2 -> ERROR [label = "<EOF>"];
     COMMENT_ML_MINUS_2 -> COMMENT_ML [label = "ELSE"];
 
     START -> ERROR [ label = "ELSE" ];
-
 }
