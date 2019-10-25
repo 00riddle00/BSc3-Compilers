@@ -1,0 +1,90 @@
+digraph finite_state_machine {
+    rankdir = LR;
+    size = "8,5"
+    node [shape = doublecircle]; START;
+    node [shape = circle];
+
+    START -> IDENT [label = "[_a-zA-Z]"];
+    IDENT -> IDENT [label = "[_a-zA-Z0-9]"];
+    IDENT -> STRUCT_MEMBER [label = "\."];
+    IDENT -> IDENT_END [label = "ELSE"];
+
+    START -> LIT_INT [ label = "[0-9]"];
+    LIT_INT -> LIT_INT [label = "[0-9]"];
+    LIT_INT -> LIT_FLOAT [label = "\."];
+    LIT_INT -> ERROR [label = "[_a-zA-Z]" ];
+    LIT_INT -> LIT_INT_END [label = "ELSE" ];
+
+    START -> LIT_FLOAT [label = "\."];
+    LIT_FLOAT -> LIT_FLOAT [label = "[0-9]"];
+    LIT_FLOAT -> LIT_FLOAT_E [label = "e"];
+    LIT_FLOAT -> LIT_FLOAT_END [label = "ELSE"];
+
+    START -> LIT_CHAR [label = "'"];
+    LIT_CHAR -> LIT_CHAR_END [label = "'"];
+    LIT_CHAR -> LIT_CHAR_ESCAPE [label = "\\"];
+    LIT_CHAR -> ERROR [label = "[\n\r\t]"];
+    LIT_CHAR -> LIT_CHAR_ADDED [ label = "ELSE"];
+
+    START -> LIT_STR [label = "\"" ];
+    LIT_STR -> LIT_STR_END [ label = "\""];
+    LIT_STR -> LIT_STR_ESCAPE [label = "\\"];
+    LIT_STR -> LIT_STR_ESCAPE [ label = "\\n"];
+    LIT_STR -> LIT_STR [label = "ELSE"];
+
+//    TODO comment ignore
+    START -> COMMENT_START [label = "#"];
+    COMMENT_START -> COMMENT_START_END [label = "\\n"];
+    COMMENT_START -> COMMENT_SL_PLUS_2 [label = "#" ];
+    COMMENT_START -> COMMENT_SL [label = "ELSE"];
+
+    START -> OP_L [label = "<"];
+    OP_L -> OP_LE_END [label = "="];
+    OP_L -> OP_L_END [label = "ELSE"];
+
+    START -> OP_G [label = ">"];
+    OP_G -> OP_GE_END [label = "="];
+    OP_G -> OP_G_END [label = "ELSE"];
+
+    START -> OP_SUM [label = "+"];
+    OP_SUM -> OP_INCR_END [label = "+"];
+    OP_SUM -> OP_ASSIGN_SUM_END [label = "="];
+    OP_SUM -> LIT_INT [label = "[0-9]"];
+    OP_SUM -> OP_SUM_END [label = "ELSE"];
+
+    START -> OP_SUB [label = "_"];
+    OP_SUB -> OP_DECR_END [label = "-"];
+    OP_SUB -> OP_ASSIGN_SUB_END [label = "="];
+    OP_SUB -> LIT_INT [ label = "[0-9]"];
+    OP_SUB -> OP_SUB_END [ label = "ELSE"];
+
+    START -> OP_MUL [label = "*"];
+    START -> OP_DIV [label = "/"];
+    START -> OP_MOD [label = "%" ];
+    START -> OP_ASSIGN_EQ [label = "="];
+    START -> OP_NOT [label = "!"];
+
+    START -> INCLUDE [label = "@"];
+    INCLUDE -> INCLUDE_END [label = "\\n"];
+    INCLUDE -> INCLUDE [label = "ELSE"];
+
+    START -> START [label = "[\n\r\t ]"];
+
+    // todo end_state rename _END
+    START -> OP_PAREN_O [label = "\("];
+    START -> OP_PAREN_C [label = "\)"];
+    // todo is regex ok
+    START -> OP_BRACE_O [label = "{"];
+    START -> OP_BRACE_C [label = "}"];
+    START -> OP_BRACKET_O [label = "["];
+    START -> OP_BRACKET_C [label = "]"];
+    START -> OP_SEMICOLOIN [label = ";"];
+    START -> OP_COMMA [label = ","];
+    START -> OP_ADDR [label = "&"];
+
+
+
+
+    START -> ERROR [ label = "ELSE" ];
+
+}
