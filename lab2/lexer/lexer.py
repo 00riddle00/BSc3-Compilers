@@ -182,7 +182,7 @@ class Lexer:
         elif self.curr_char == '.':
             self.add()
             self.begin_token('LIT_FLOAT')
-        elif self.curr_char == '\'':
+        elif self.curr_char == "'":
             self.begin_token('LIT_CHAR')
         elif self.curr_char == '"':
             self.begin_token('LIT_STR')
@@ -434,7 +434,7 @@ class Lexer:
             self.complete_token('LIT_FLOAT')
 
     def lex_lit_char(self):
-        if self.curr_char == '\'':
+        if self.curr_char == "'":
             self.complete_token('LIT_CHAR')
         elif self.curr_char == '\\':
             self.state = 'LIT_CHAR_ESCAPE'
@@ -446,8 +446,8 @@ class Lexer:
             self.state = 'LIT_CHAR_ADDED'
 
     def lex_lit_char_escape(self):
-        if self.curr_char == '\'':
-            self.buffer += '\''
+        if self.curr_char == "'":
+            self.buffer += "'"
         elif self.curr_char == '\\':
             self.buffer += '\\'
         elif self.curr_char == 'n':
@@ -458,12 +458,11 @@ class Lexer:
             self.buffer += '\\t'
         else:
             self.buffer += "\\"
-            # self.buffer += self.curr_char
             self.lexer_error(f'invalid escape sequence used in a char: \\{self.curr_char}', buffer=True)
         self.state = 'LIT_CHAR_ADDED'
 
     def lex_lit_char_added(self):
-        if self.curr_char == '\'':
+        if self.curr_char == "'":
             self.complete_token('LIT_CHAR')
         else:
             self.lexer_error('char type cannot consist of multiple chars', buffer=True)
@@ -492,7 +491,6 @@ class Lexer:
             self.buffer += "\t"
         else:
             self.buffer += "\\"
-            # self.buffer += self.curr_char
             self.lexer_error(f'invalid escape sequence used in a string: \\{self.curr_char}', buffer=True)
         self.state = 'LIT_STR'
 
