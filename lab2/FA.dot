@@ -8,11 +8,42 @@ digraph finite_state_machine {
 
     START -> EOF [label = "<EOF>"];
 
-    // todo su kw (ident_end)
-    START -> IDENT [label = "[_a-zA-Z]"];
-    IDENT -> IDENT [label = "[_a-zA-Z0-9]"];
-    IDENT -> STRUCT_MEMBER [label = "\\."];
-    IDENT -> IDENT_END [label = "ELSE"];
+    // todo su kw (_IDENT__end)
+
+    START -> KW_BOOL_BREAK [label = "b"];
+
+    KW_BOOL_BREAK -> _KW_BOOL_O_ [label = "o"];
+    KW_BOOL_BREAK -> _KW_BREAK_R_ [label = "r"];
+    // todo spec ELSE
+    KW_BOOL_BREAK -> ERROR [label = "ELSE"];
+
+    _KW_BOOL_O_ -> _KW_BOOL_OO_ [label = "o"];
+    // todo spec ELSE
+    _KW_BOOL_O_ -> ERROR [label = "ELSE"];
+
+    _KW_BOOL_OO_ -> _KW_BOOL_OO_ [label = "l"];
+    // todo spec ELSE
+    _KW_BOOL_O_ -> ERROR [label = "ELSE"];
+
+
+START -> KW_CHAR_CONTINUE [label = "c"];
+    START -> KW_ELIF_ELSE [label = "e"];
+    START -> KW_FN_FOR_FLOAT [label = "f"];
+    START -> KW_IN_IF_INT [label = "i"];
+    START -> _KW_FN_OUT_ [label = "o"];
+    START -> _KW_RETURN_ [label = "r"];
+    START -> KW_STRING_STRUCT [label = "s"];
+    START -> _KW_VOID_ [label = "v"];
+    START -> _KW_AND_ [label = "A"];
+    START -> _KW_FALSE_ [label = "F"];
+    START -> _KW_NULL_ [label = "N"];
+    START -> _KW_OR_ [label = "O"];
+    START -> _KW_TRUE_ [label = "T"];
+
+    START -> _IDENT_ [label = "[_a-zA-Z]"]; // todo spec ELSE
+    _IDENT_ -> _IDENT_ [label = "[_a-zA-Z0-9]"];
+    _IDENT_ -> STRUCT_MEMBER [label = "\\."];
+    _IDENT_ -> IDENT [label = "ELSE"];
 
     STRUCT_MEMBER -> OP_ACCESS_MEMBER [label = "[_a-zA-Z]"];
     STRUCT_MEMBER -> ERROR [ label = "ELSE" ];
