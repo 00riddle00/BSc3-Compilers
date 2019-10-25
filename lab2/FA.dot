@@ -7,7 +7,7 @@ digraph finite_state_machine {
     // todo visi pamineti
     // todo end_state rename _END
 
-    // todo su kw
+    // todo su kw (ident_end)
     START -> IDENT [label = "[_a-zA-Z]"];
     IDENT -> IDENT [label = "[_a-zA-Z0-9]"];
     IDENT -> STRUCT_MEMBER [label = "\\."];
@@ -86,7 +86,7 @@ digraph finite_state_machine {
     START -> OP_ADDR [label = "&"];
 
     START -> INCLUDE [label = "@"];
-    // todo include_end or next file lexing?? (start)
+    // todo (include_end) or next file lexing?? (start)
     INCLUDE -> INCLUDE_END [label = "\\n"];
     INCLUDE -> INCLUDE [label = "ELSE"];
 
