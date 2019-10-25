@@ -32,12 +32,6 @@ digraph finite_state_machine {
     LIT_STR -> LIT_STR_ESCAPE [ label = "\\n"];
     LIT_STR -> LIT_STR [label = "ELSE"];
 
-//    TODO comment ignore
-    START -> COMMENT_START [label = "#"];
-    COMMENT_START -> COMMENT_START_END [label = "\\n"];
-    COMMENT_START -> COMMENT_SL_PLUS_2 [label = "#" ];
-    COMMENT_START -> COMMENT_SL [label = "ELSE"];
-
     START -> OP_L [label = "<"];
     OP_L -> OP_LE_END [label = "="];
     OP_L -> OP_L_END [label = "ELSE"];
@@ -82,8 +76,29 @@ digraph finite_state_machine {
     START -> OP_COMMA [label = ","];
     START -> OP_ADDR [label = "&"];
 
+    // COMMENTS
 
+    // TODO comment ignore
+    START -> COMMENT_START [label = "#"];
+    COMMENT_START -> START [label = "\\n"];
+    COMMENT_START -> COMMENT_SL_PLUS_2 [label = "#" ];
+    COMMENT_START -> COMMENT_SL [label = "ELSE"];
 
+    COMMENT_SL -> START [label = "\\n"];
+    COMMENT_SL -> COMMENT_SL [label = "ELSE"];
+
+    COMMENT_SL_PLUS_2 -> START [label = "\\n"];
+    COMMENT_SL_PLUS_2 -> COMMENT_ML [label = "#"];
+    COMMENT_SL_PLUS_2 -> COMMENT_SL [label = "ELSE"];
+
+    COMMENT_ML -> COMMENT_ML_MINUS_1 [label = "#"];
+    COMMENT_ML -> START [label = "ELSE"];
+
+    COMMENT_ML_MINUS_1 -> COMMENT_ML_MINUS_2 [label = "#"];
+    COMMENT_ML_MINUS_1 -> COMMENT_ML [label = "ELSE"];
+
+    COMMENT_ML_MINUS_2 -> START [label = "#"];
+    COMMENT_ML_MINUS_2 -> COMMENT_ML [label = "ELSE"];
 
     START -> ERROR [ label = "ELSE" ];
 
