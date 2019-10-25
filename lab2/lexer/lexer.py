@@ -265,6 +265,8 @@ class Lexer:
             self.lex_lit_float()
         elif self.state == 'LIT_FLOAT_E':
             self.lex_lit_float_e()
+        elif self.state == 'LIT_FLOAT_E_SIGN':
+            self.lex_lit_float_e_sign()
         elif self.state == 'LIT_FLOAT_W_E':
             self.lex_lit_float_w_e()
         elif self.state == 'LIT_CHAR':
@@ -423,8 +425,16 @@ class Lexer:
             self.state = 'LIT_FLOAT_W_E'
         elif self.curr_char in ['+', '-']:
             self.add()
+            self.state = 'LIT_FLOAT_E_SIGN'
         else:
-            self.lexer_error('Float exponent cannot be empty')
+            self.lexer_error('Invalid float exponent')
+
+    def lex_lit_float_e_sign(self):
+        if self.is_digit():
+            self.add()
+            self.state = 'LIT_FLOAT_W_E'
+        else:
+            self.lexer_error('Invalid float exponent')
 
     def lex_lit_float_w_e(self):
         if self.is_digit():

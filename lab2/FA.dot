@@ -35,7 +35,32 @@ digraph finite_state_machine {
     _LIT_STR_ -> LIT_STR_ESCAPE [label = "\\\\"];
     _LIT_STR_ -> _LIT_STR_ [label = "ELSE"];
 
-    START -> _OP_G_ [label = ">"];
+    STRUCT_MEMBER -> OP_ACCESS_MEMBER [label = "[_a-zA-Z]"];
+    STRUCT_MEMBER -> ERROR [ label = "ELSE" ];
+
+    LIT_FLOAT_E -> LIT_FLOAT_W_E [label = "[0-9]"];
+    LIT_FLOAT_E -> LIT_FLOAT_E_SIGN [label = "[\\+-]"];
+    LIT_FLOAT_E -> ERROR [label = "ELSE"];
+
+    LIT_FLOAT_E_SIGN -> LIT_FLOAT_W_E [label = "[0-9]"];
+    LIT_FLOAT_E_SIGN -> ERROR [label = "ELSE"];
+
+    LIT_FLOAT_W_E -> LIT_FLOAT_W_E [label = "[0-9]"];
+    LIT_FLOAT_W_E -> LIT_FLOAT [label = "ELSE"];
+
+
+
+
+
+
+
+
+
+
+
+
+
+START -> _OP_G_ [label = ">"];
     _OP_G_ -> OP_GE [label = "="];
     _OP_G_ -> OP_G [label = "ELSE"];
 
