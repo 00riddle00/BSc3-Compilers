@@ -4,5 +4,5 @@ struct Test {
   (char **)[] list_of_pointers_to_pointers_to_char;
 }
 
-@tmp2.fx
+#@tmp2.fx
 

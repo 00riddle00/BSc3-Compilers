@@ -456,6 +456,10 @@ class Lexer:
             self.buffer += '\\r'
         elif self.curr_char == 't':
             self.buffer += '\\t'
+        else:
+            self.buffer += "\\"
+            # self.buffer += self.curr_char
+            self.lexer_error(f'invalid escape sequence used in a char: \\{self.curr_char}', buffer=True)
         self.state = 'LIT_CHAR_ADDED'
 
     def lex_lit_char_added(self):
@@ -488,8 +492,8 @@ class Lexer:
             self.buffer += "\t"
         else:
             self.buffer += "\\"
-            self.buffer += self.curr_char
-            self.lexer_error(f'invalid escape symbol: \\{self.curr_char}', buffer=True)
+            # self.buffer += self.curr_char
+            self.lexer_error(f'invalid escape sequence used in a string: \\{self.curr_char}', buffer=True)
         self.state = 'LIT_STR'
 
     def lex_op_l(self):
@@ -610,7 +614,7 @@ class Lexer:
             msg = 'Something went wrong'
         print(f'{v_delim} [Error message]: {msg}'),
         if buffer:
-            print(f'{v_delim} [Item being lexed]:'),
+            print(f'{v_delim} [Item being lexed (pretty print)]:'),
             pprint(self.buffer + self.curr_char)
         print(f'{v_delim} [state]: {self.state}')
         print(f'{v_delim} [output so far]:')
