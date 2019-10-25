@@ -30,10 +30,10 @@ digraph finite_state_machine {
     _LIT_CHAR_ -> ERROR [label = "[\\n\\r\\t]"];
     _LIT_CHAR_ -> LIT_CHAR_ADDED [ label = "ELSE"];
 
-    START -> LIT_STR [label = "\"" ];
-    LIT_STR -> LIT_STR_END [ label = "\""];
-    LIT_STR -> LIT_STR_ESCAPE [label = "\\\\"];
-    LIT_STR -> LIT_STR [label = "ELSE"];
+    START -> _LIT_STR_ [label = "\"" ];
+    _LIT_STR_ -> LIT_STR [ label = "\""];
+    _LIT_STR_ -> LIT_STR_ESCAPE [label = "\\\\"];
+    _LIT_STR_ -> _LIT_STR_ [label = "ELSE"];
 
     START -> _OP_G_ [label = ">"];
     _OP_G_ -> OP_GE [label = "="];
@@ -49,7 +49,7 @@ digraph finite_state_machine {
 
     START -> _OP_NOT_ [label = "!"];
     _OP_NOT_ -> OP_IS_NEQ [label = "="];
-    _OP_NOT_ -> _OP_NOT_END_ [label = "ELSE"];
+    _OP_NOT_ -> OP_NOT [label = "ELSE"];
 
     START -> _OP_SUM_ [label = "\\+"];
     _OP_SUM_ -> OP_INCR [label = "\\+"];
@@ -93,7 +93,6 @@ digraph finite_state_machine {
     START -> START [label = "[\\n\\r\\t]"];
 
     // COMMENTS
-    // TODO comment ignore
     START -> COMMENT_START [label = "#"];
     COMMENT_START -> START [label = "\\n"];
     COMMENT_START -> COMMENT_SL_PLUS_2 [label = "#" ];
