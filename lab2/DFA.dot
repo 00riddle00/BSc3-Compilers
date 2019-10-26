@@ -6,6 +6,8 @@ digraph finite_state_machine {
 
     // todo symmetric var names
     // todo keywords
+    // todo kw_fn_arrow
+    // todo fix include in DFA
 
     START -> EOF [label = "<EOF>"];
 
@@ -159,7 +161,6 @@ digraph finite_state_machine {
     START -> OP_ADDR [label = "&"];
 
     START -> INCLUDE [label = "@"];
-    // todo (include_end) or next file lexing?? (start)
     INCLUDE -> INCLUDE_END [label = "\\n"];
     INCLUDE -> INCLUDE [label = "ELSE"];
 
