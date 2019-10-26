@@ -287,29 +287,22 @@ class Lexer:
         elif self.curr_char == '!':
             self.begin_token('OP_NOT')
         elif self.curr_char == '(':
-            self.begin_token('START')
             self.complete_token('OP_PAREN_O')
         elif self.curr_char == ')':
             self.begin_token('OP_PAREN_C')
         elif self.curr_char == '{':
-            self.begin_token('START')
             self.complete_token('OP_BRACE_O')
         elif self.curr_char == '}':
-            self.begin_token('START')
             self.complete_token('OP_BRACE_C')
         elif self.curr_char == '[':
-            self.begin_token('START')
             self.complete_token('OP_BRACKET_O')
         elif self.curr_char == ']':
             self.begin_token('OP_BRACKET_C')
         elif self.curr_char == ';':
-            self.begin_token('START')
             self.complete_token('OP_SEMICOLON')
         elif self.curr_char == ',':
-            self.begin_token('START')
             self.complete_token('OP_COMMA')
         elif self.curr_char == '&':
-            self.begin_token('START')
             self.complete_token('OP_PTR_ADDR')
         elif self.curr_char == '@':
             self.begin_token('INCLUDE')
