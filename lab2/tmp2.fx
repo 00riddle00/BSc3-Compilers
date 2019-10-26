@@ -1,1 +1,1 @@
-struct Test *test_struct; ~
+struct Test *test_struct;

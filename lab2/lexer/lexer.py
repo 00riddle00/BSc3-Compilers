@@ -120,7 +120,6 @@ class Input:
         self.curr_ln = 1
         self.offset = 0
         self.offset_prev = 0
-        print("here")
 
     def read_char(self):
         char = self.text[self.offset]
@@ -159,13 +158,11 @@ class Lexer:
     curr_char: str
 
     def __init__(self, inputs) -> None:
-        print("here")
         if not type(inputs) == list:
             self.lexer_error('Wrong argument type passed to Lexer constructor.')
         for _input in inputs:
             if not type(_input == Input):
                 self.lexer_error('Input list has an element of incorrect type.')
-        print("here2")
         self.inputs = inputs
 
         self.buffer = ''
@@ -216,6 +213,7 @@ class Lexer:
 
             # uncomment for debugging
             print(81 * '#')
+            print(f'[file]: {self.curr_input.name}')
             pprint(self.curr_input.text)
             print(81 * '#')
 
