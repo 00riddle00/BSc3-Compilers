@@ -5,28 +5,46 @@ digraph finite_state_machine {
     node [shape = circle];
 
     // todo check all states
+    // todo su kw
 
     START -> EOF [label = "<EOF>"];
 
-    // todo su kw (_IDENT__end)
+    START -> _KW_BOOL_BREAK_ [label = "b"];
 
-    START -> KW_BOOL_BREAK [label = "b"];
-
-    KW_BOOL_BREAK -> _KW_BOOL_O_ [label = "o"];
-    KW_BOOL_BREAK -> _KW_BREAK_R_ [label = "r"];
-    // todo spec ELSE
-    KW_BOOL_BREAK -> ERROR [label = "ELSE"];
-
-    _KW_BOOL_O_ -> _KW_BOOL_OO_ [label = "o"];
-    // todo spec ELSE
-    _KW_BOOL_O_ -> ERROR [label = "ELSE"];
-
-    _KW_BOOL_OO_ -> _KW_BOOL_OO_ [label = "l"];
-    // todo spec ELSE
-    _KW_BOOL_O_ -> ERROR [label = "ELSE"];
+    _KW_BOOL_BREAK_ -> _KW_BOOL_BO_ [label = "o"];
+    _KW_BOOL_BREAK_ -> _KW_BREAK_BR_ [label = "r"];
+    _KW_BOOL_BREAK_ -> _IDENT_ [label = "(?=[^or])[_a-zA-Z0-9]"];
+    _KW_BOOL_BREAK_ -> IDENT [label = "ELSE"];
 
 
-START -> KW_CHAR_CONTINUE [label = "c"];
+    _KW_BOOL_BO_ -> _KW_BOOL_BOO_ [label = "o"];
+    _KW_BOOL_BO_ -> _IDENT_ [label = "(?=[^o])[_a-zA-Z0-9]"];
+    _KW_BOOL_BO_ -> IDENT [label = "ELSE"];
+
+    _KW_BOOL_BOO_ -> _KW_BOOL_BOOL_ [label = "l"];
+    _KW_BOOL_BOO_ -> _IDENT_ [label = "(?=[^l])[_a-zA-Z0-9]"];
+    _KW_BOOL_BOO_ -> IDENT [label = "ELSE"];
+
+    _KW_BOOL_BOOL_ -> _IDENT_ [label = "[_a-zA-Z0-9]"];
+    _KW_BOOL_BOOL_ -> KW_BOOL [label = "ELSE"];
+
+
+    _KW_BREAK_BR_ -> _KW_BREAK_BRE_ [label = "e"];
+    _KW_BREAK_BR_ -> _IDENT_ [label = "(?=[^e])[_a-zA-Z0-9]"];
+    _KW_BREAK_BR_ -> IDENT [label = "ELSE"];
+
+    _KW_BREAK_BRE_ -> _KW_BREAK_BREA_ [label = "a"];
+    _KW_BREAK_BRE_ -> _IDENT_ [label = "(?=[^a])[_a-zA-Z0-9]"];
+    _KW_BREAK_BRE_ -> IDENT [label = "ELSE"];
+
+    _KW_BREAK_BREA_ -> _KW_BREAK_BREAK_ [label = "k"];
+    _KW_BREAK_BREA_ -> _IDENT_ [label = "(?=[^k])[_a-zA-Z0-9]"];
+    _KW_BREAK_BREA_ -> IDENT [label = "ELSE"];
+
+    _KW_BREAK_BREAK_ -> _IDENT_ [label = "[_a-zA-Z0-9]"];
+    _KW_BREAK_BREAK_ -> KW_BREAK [label = "ELSE"];
+
+    START -> KW_CHAR_CONTINUE [label = "c"];
     START -> KW_ELIF_ELSE [label = "e"];
     START -> KW_FN_FOR_FLOAT [label = "f"];
     START -> KW_IN_IF_INT [label = "i"];
@@ -40,7 +58,7 @@ START -> KW_CHAR_CONTINUE [label = "c"];
     START -> _KW_OR_ [label = "O"];
     START -> _KW_TRUE_ [label = "T"];
 
-    START -> _IDENT_ [label = "[_a-zA-Z]"]; // todo spec ELSE
+    START -> _IDENT_ [label = "(?=[^bcefiosvAFNOT])[_a-zA-Z]"];
     _IDENT_ -> _IDENT_ [label = "[_a-zA-Z0-9]"];
     _IDENT_ -> STRUCT_MEMBER [label = "\\."];
     _IDENT_ -> IDENT [label = "ELSE"];
