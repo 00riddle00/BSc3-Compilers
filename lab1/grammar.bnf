@@ -1,76 +1,76 @@
 <PROGRAM> ::= <ROOT_ELEMS>
 
 <ROOT_ELEMS> ::= <ROOT_ELEM> | <ROOT_ELEMS> <ROOT_ELEM>
-<ROOT_ELEM> ::= <FN_DECL> | <STRUCT_DECL> ";" | <VAR_DECL_STMT> ";" | <VAR_DECL_AND_INIT_STMT> ";"
+<ROOT_ELEM> ::= <FN_DECL> | <STRUCT_DECL> <OP_SEMICOLON> | <VAR_DECL_STMT> <OP_SEMICOLON> | <VAR_DECL_AND_INIT_STMT> <OP_SEMICOLON>
 
 /* statement block */
-<STMT_BLOCK> ::= "{" "}" | "{" <STMTS> "}"
+<STMT_BLOCK> ::= <OP_BRACE_O> <OP_BRACE_C> | <OP_BRACE_O> <STMTS> <OP_BRACE_C>
 
 /* statements */
 <STMTS> ::= <STMT> | <STMTS> <STMT> 
 
 /* statement */
-<STMT> ::= <STATEMENT_W_DELIM> ";" | <STATEMENT_WO_DELIM> 
+<STMT> ::= <STATEMENT_W_DELIM> <OP_SEMICOLON> | <STATEMENT_WO_DELIM> 
 
 /* statement types by delimiter */
 <STATEMENT_W_DELIM> ::= <IN_IO_STMT> | <OUT_IO_STMT> | <VAR_DECL_STMT> | <VAR_DECL_AND_INIT_STMT> | <ASSIGNMENT_STMT> | <EXPR_STMT> | <BREAK_STMT> | <CONTINUE_STMT> | <RETURN_STMT>
-<STATEMENT_WO_DELIM> ::= <IF_STMT> | <WHILE_STMT> | <FOR_STMT>
+<STATEMENT_WO_DELIM> ::= <IF_STMT> | <WHILE_STMT> | <FOR_STMT> | <INCLUDE_STMT>
 
 /* statement parts */
-<IN_IO_STMT> ::= "in" "(" <EXPR_SEQ> ")"
-<OUT_IO_STMT> ::= "disp" "(" <EXPR_SEQ> ")"
+<IN_IO_STMT> ::= <KW_FN_IN> <OP_PAREN_O> <EXPR_SEQ> <OP_PAREN_C>
+<OUT_IO_STMT> ::= <KW_FN_OUT> <OP_PAREN_O> <EXPR_SEQ> <OP_PAREN_C>
 <VAR_DECL_STMT> ::= <VAR_DECL>
 <VAR_DECL_AND_INIT_STMT> ::= <VAR_DECL_AND_INIT>
 <ASSIGNMENT_STMT> ::= <ASSIGNMENT>
 <EXPR_STMT> ::= <EXPR>
 <IF_STMT> ::= <IF_IF> | <IF_IF> <IF_ELSE> | <IF_IF> <IF_ELIFS> | <IF_IF> <IF_ELIFS> <IF_ELSE>
-<WHILE_STMT> ::= "while" "(" <EXPR> ")" <STMT_BLOCK>
-<FOR_STMT> ::= "for" "(" <FOR_INIT> ";" <FOR_CONDITION> ";" <FOR_INCREMENT> ")" <STMT_BLOCK>
-<BREAK_STMT> ::= "break" 
-<CONTINUE_STMT> ::= "continue" 
-<RETURN_STMT> ::= "return" | "return" <EXPR>
+<WHILE_STMT> ::= <KW_WHILE> <OP_PAREN_O> <EXPR> <OP_PAREN_C> <STMT_BLOCK>
+<FOR_STMT> ::= <KW_FOR> <OP_PAREN_O> <FOR_INIT> <OP_SEMICOLON> <FOR_CONDITION> <OP_SEMICOLON> <FOR_INCREMENT> <OP_PAREN_C> <STMT_BLOCK>
+<BREAK_STMT> ::= <KW_BREAK>
+<CONTINUE_STMT> ::= <KW_CONTINUE>
+<RETURN_STMT> ::= <KW_RETURN> | <KW_RETURN> <EXPR>
+<INCLUDE_STMT> ::= "@" <ANY> <NEWLINE>
 
 /* if-statement parts */
-<IF_IF> ::= "if" "(" <EXPR> ")" <STMT_BLOCK>
-<IF_ELIFS> ::= <IF_ELIF> | <IF_ELIFS> <IF_ELIF> 
-<IF_ELIF> ::= "elif" "(" <EXPR> ")" <STMT_BLOCK>
-<IF_ELSE> ::= "else" <STMT_BLOCK> 
+<IF_IF> ::= <KW_IF> <OP_PAREN_O> <EXPR> <OP_PAREN_C> <STMT_BLOCK>
+<IF_ELIFS> ::= <IF_ELIF> | <IF_ELIFS> <IF_ELIF>
+<IF_ELIF> ::= <KW_ELIF> <OP_PAREN_O> <EXPR> <OP_PAREN_C> <STMT_BLOCK>
+<IF_ELSE> ::= <KW_ELSE> <STMT_BLOCK>
 
 /* for-statement parts */
-<FOR_INIT> ::= <VAR_DECL> | <VAR_DECL_AND_INIT> | <ASSIGNMENT> | <EXPR> | ""
-<FOR_CONDITION> ::= <ASSIGNMENT> | <EXPR> | ""
-<FOR_INCREMENT> ::= <ASSIGNMENT> | <EXPR> | ""
+<FOR_INIT> ::= <VAR_DECL> | <VAR_DECL_AND_INIT> | <ASSIGNMENT> | <EXPR> | <EPSILON>
+<FOR_CONDITION> ::= <ASSIGNMENT> | <EXPR> | <EPSILON>
+<FOR_INCREMENT> ::= <ASSIGNMENT> | <EXPR> | <EPSILON>
 
 /* function declaration */
-<FN_DECL> ::= "fx" <IDENT> <PARAMS> "==>" <RETURN_TYPE> <STMT_BLOCK>
+<FN_DECL> ::= <KW_FN> <IDENT> <PARAMS> <KW_FN_RET_ARROW> <RETURN_TYPE> <STMT_BLOCK>
 
 /* struct declaration */
 <STRUCT_DECL> ::= <STRUCT_TYPE> <VAR_DECL_STMT_BLOCK>
-<VAR_DECL_STMT_BLOCK> ::= "{" <VAR_DECL_STMTS> "}"
-<VAR_DECL_STMTS> ::= <VAR_DECL_STMT> ";" | <VAR_DECL_STMTS> <VAR_DECL_STMT> ";"
+<VAR_DECL_STMT_BLOCK> ::= <OP_BRACE_O> <VAR_DECL_STMTS> <OP_BRACE_C>
+<VAR_DECL_STMTS> ::= <VAR_DECL_STMT> <OP_SEMICOLON> | <VAR_DECL_STMTS> <VAR_DECL_STMT> <OP_SEMICOLON>
 
 /* variable declaration */
 <VAR_DECL> ::= <TYPE> <IDENT>
 
 /* variable declaration with initialization */
-<VAR_DECL_AND_INIT> ::= <TYPE> <IDENT> "=" <EXPR>
+<VAR_DECL_AND_INIT> ::= <TYPE> <IDENT> <OP_ASSIGN_EQ> <EXPR>
 
 /* assignment */
 <ASSIGNMENT> ::= <LVALUE> <OP_ASSIGN> <EXPR>
 
 /* lvalues */
 <LVALUE> ::= <VAR_LVALUE> | <STRUCT_MEMBER_LVALUE> | <POINTER_DEREF_LVALUE> | <LIST_ACCESS_LVALUE>
-
 <VAR_LVALUE> ::= <IDENT>
 <STRUCT_MEMBER_LVALUE> ::= <STRUCT_MEMBER> | <STRUCT_MEMBER_LVALUE> <OP_ACCESS_MEMBER> <IDENT>
 <STRUCT_MEMBER> ::= <EXPR> <OP_ACCESS_MEMBER> <IDENT>
-<POINTER_DEREF_LVALUE> ::= "*" <UNARY>
-<LIST_ACCESS_LVALUE> ::= <UNARY> "[" <EXPR> "]"
+<POINTER_DEREF_LVALUE> ::= <OP_PTR_DEREF> <UNARY>
+<LIST_ACCESS_LVALUE> ::= <UNARY> <OP_BRACKET_O> <EXPR> <OP_BRACKET_C>
 
 /* expression */
-<LIST_EXPR> ::= "[" <EXPR_SEQ> "]"
-<LIST_ACCESS_EXPR> ::= <PRIMARY> "[" <EXPR> "]"
-<EXPR_SEQ> ::= <EXPR> | <EXPR_SEQ> "," <EXPR>
+<LIST_EXPR> ::= <OP_BRACKET_O> <EXPR_SEQ> <OP_BRACKET_C>
+<LIST_ACCESS_EXPR> ::= <PRIMARY> <OP_BRACKET_O> <EXPR> <OP_BRACKET_C>
+<EXPR_SEQ> ::= <EXPR> | <EXPR_SEQ> <OP_COMMA> <EXPR>
 <EXPR> ::= <OR>
 <OR> ::= <AND> | <OR> <OP_OR> <AND>
 <AND> ::= <CMP_EQ_NEQ> | <AND> <OP_AND> <CMP_EQ_NEQ>
@@ -79,108 +79,186 @@
 <SUM_SUB> ::= <MUL_DIV_MOD> | <SUM_SUB> <OP_SUM_SUB> <MUL_DIV_MOD>
 <MUL_DIV_MOD> ::= <UNARY> | <MUL_DIV_MOD> <OP_MUL_DIV_MOD> <UNARY>
 <UNARY> ::= <PRIMARY> | <OP_UNARY> <UNARY>
-<PRIMARY> ::= <BASE_TYPE_LIT> | <NULL_LIT> | <VAR> | <FN_CALL> | <LIST_ACCESS_EXPR> | <LIST_EXPR> | "(" <EXPR> ")"
+<PRIMARY> ::= <BASE_TYPE_LIT> | <NULL_LIT> | <VAR> | <FN_CALL> | <LIST_ACCESS_EXPR> | <LIST_EXPR> | <OP_PAREN_O> <EXPR> <OP_PAREN_C>
 
 /* function call */
 <FN_CALL> ::= <IDENT> <ARGS>
 
 /* arguments */
-<ARGS> ::= "(" ")" | "(" <ARGS_SEQ> ")"
-<ARGS_SEQ> ::= <ARG> | <ARGS_SEQ> "," <ARG>
+<ARGS> ::= <OP_PAREN_O> <OP_PAREN_C> | <OP_PAREN_O> <ARGS_SEQ> <OP_PAREN_C>
+<ARGS_SEQ> ::= <ARG> | <ARGS_SEQ> <OP_COMMA> <ARG>
 <ARG> ::= <EXPR>
 
 /* parameters */
-<PARAMS> ::= "(" ")" | "(" <PARAMS_SEQ> ")"
-<PARAMS_SEQ> ::= <PARAM> | <PARAMS_SEQ> "," <PARAM>
+<PARAMS> ::= <OP_PAREN_O> <OP_PAREN_C> | <OP_PAREN_O> <PARAMS_SEQ> <OP_PAREN_C>
+<PARAMS_SEQ> ::= <PARAM> | <PARAMS_SEQ> <OP_COMMA> <PARAM>
 <PARAM> ::= <TYPE> <IDENT>
 
 /* variables */
 <VAR> ::= <IDENT>
-
-/* identifiers */
-<IDENT> ::= <IDENT_HEAD_SYM> | <IDENT> <IDENT_TAIL_SYM>
 
 /* return type */
 <RETURN_TYPE> ::= <TYPE> | <VOID_LIT>
 
 /* types */
 <TYPE> ::= <BASE_TYPE> | <POINTER_TYPE> | <LIST_TYPE> | <STRUCT_TYPE>
-<POINTER_TYPE> ::= <TYPE> "*"
-<LIST_TYPE> ::= <TYPE> "[" <INT_LIT> "]" |  <TYPE> "[" "]"
-<STRUCT_TYPE> ::= "struct" <IDENT>
-<BASE_TYPE> ::= "int" | "float" | "bool" | "char" | "string"
+<POINTER_TYPE> ::= <TYPE> <PTR>
+<LIST_TYPE> ::= <TYPE> <OP_BRACKET_O> <LIT_INT> <OP_BRACKET_C> |  <TYPE> <OP_BRACKET_O> <OP_BRACKET_C>
+<STRUCT_TYPE> ::= <KW_STRUCT> <IDENT>
+<BASE_TYPE> ::= <KW_INT> | <KW_FLOAT> | <KW_BOOL> | <KW_CHAR> | <KW_STR>
 
 /* literals */
-<NULL_LIT> ::= "NULL"
-<VOID_LIT> ::= "void"
-<BASE_TYPE_LIT> ::= <INT_LIT> | <FLOAT_LIT> | <BOOL_LIT> | <CHAR_LIT> | <STRING_LIT>
-<STRING_LIT> ::= "\"" "\"" | "\"" <ANY> "\""
-<CHAR_LIT> ::= "'" <ANY_SYM> "'"
-<BOOL_LIT> ::= "True" | "False"
-<FLOAT_LIT> ::= <FLOAT_WO_E> | <FLOAT_WO_E> "e" <SIGNABLE_DIGITS> | <SIGNABLE_DIGITS> "e" <SIGNABLE_DIGITS>
-<FLOAT_WO_E> ::= "." <DIGITS> | <SIGNABLE_DIGITS> "." |  <SIGNABLE_DIGITS> "." <DIGITS>
-<INT_LIT> ::= <SIGNABLE_DIGITS>
+<NULL_LIT> ::= <KW_NULL>
+<VOID_LIT> ::= <KW_VOID>
+<BASE_TYPE_LIT> ::= <LIT_INT> | <LIT_FLOAT> | <LIT_BOOL> | <LIT_CHAR> | <LIT_STR>
+<FLOAT_WO_E> ::= <FLOAT_DELIM> <DIGITS> | <SIGNABLE_DIGITS> <FLOAT_DELIM> |  <SIGNABLE_DIGITS> <FLOAT_DELIM> <DIGITS>
+<LIT_BOOL> ::= <KW_TRUE> | <KW_FALSE>
 
 /* access member operators */
-<OP_ACCESS_MEMBER> ::= "." | "->"
+<OP_ACCESS_MEMBER> ::= <OP_DOT_ACCESS_MEMBER> | <OP_PTR_ACCESS_MEMBER>
 
 /* unary operators */
-<OP_UNARY> ::= "!" | "++" | "--" | "*" | "&" | <SIGN>
+<OP_UNARY> ::= <OP_NOT> | <OP_INCR> | <OP_DECR> | <OP_PTR_DEREF> | <OP_PTR_ADDR> | <SYM_SIGN>
 
 /* arithmetic operators */
-<OP_MUL_DIV_MOD> ::= "*" | "/" | "%"
+<OP_MUL_DIV_MOD> ::= <OP_MUL> | <OP_DIV> | <OP_MOD>
 
 /* arithmetic operators */
-<OP_SUM_SUB> ::= "+" | "-"
+<OP_SUM_SUB> ::= <OP_SUM> | <OP_SUB>
 
 /* cmp operators */
-<OP_CMP_GT_LT> ::= ">" | "<" | ">=" | "<="
+<OP_CMP_GT_LT> ::= <OP_G> | <OP_L> | <OP_GE> | <OP_LE>
 
 /* cmp operators */
-<OP_CMP_EQ_NEQ> ::= "==" | "!="
+<OP_CMP_EQ_NEQ> ::= <OP_IS_EQ> | <OP_IS_NEQ>
 
 /* logical operators */
-<OP_AND> ::= "AND"
+<OP_AND> ::= <KW_AND>
 
 /* logical operators */
-<OP_OR> ::= "OR"
+<OP_OR> ::= <KW_OR>
 
 /* assign operators */
-<OP_ASSIGN> ::= "=" | "+=" | "-=" | "*=" | "/=" | "%="
+<OP_ASSIGN> ::= <OP_ASSIGN_EQ> | <OP_ASSIGN_SUM> | <OP_ASSIGN_SUB> | <OP_ASSIGN_MUL> | <OP_ASSIGN_DIV> | <OP_ASSIGN_MOD>
 
 /* comments */
 <COMMENT> ::= <COMMENT_LINE> | <COMMENT_BLOCK>
-<COMMENT_LINE> ::= "#" <ANY_WO_ESCAPES> <NEWLINE> 
-<COMMENT_BLOCK> ::= "###" <ANY_WO_ESCAPES> "###"
+<COMMENT_LINE> ::= <COMMENT_SL> <ANY_WO_ESCAPES> <NEWLINE>
+<COMMENT_BLOCK> ::= <COMMENT_ML> <ANY_WO_ESCAPES> <COMMENT_ML>
 
-/* molecules */
-<ANY> ::= <ANY_SYM> | <ANY> <ANY_SYM>
-<ANY_WO_ESCAPES> ::= <ANY_SYM_WO_ESCAPES> | <ANY_WO_ESCAPES> <ANY_SYM_WO_ESCAPES>
 
-<SIGNABLE_DIGITS> ::= <SIGN> <DIGITS> | <DIGITS>
+/* BUILDING BLOCKS */
+
+/* rows of symbols */
+<ANY> ::= <SYM_ANY> | <ANY> <SYM_ANY>
+<ANY_WO_ESCAPES> ::= <SYM_ANY_WO_ESCAPES> | <ANY_WO_ESCAPES> <SYM_ANY_WO_ESCAPES>
+
+<SIGNABLE_DIGITS> ::= <SYM_SIGN> <DIGITS> | <DIGITS>
 <DIGITS> ::= <DIGIT> | <DIGITS> <DIGIT>
 
+/* symbols */
+<SYM_IDENT_TAIL> ::= <DIGIT> | <SYM_IDENT_HEAD>
+<SYM_IDENT_HEAD> ::= <SYM_LETTER> | <UNDERSCORE>
+
+<SYM_ANY> ::= <SYM_ANY_WO_ESCAPES> | <SYM_ESCAPED>
+<SYM_ANY_WO_ESCAPES> ::= <DIGIT> | <SYM_LETTER> | <SPECIAL>
+
+<SYM_ESCAPED> ::= <BACKSLASH> <SYM_TO_BE_ESCAPED>
+<SYM_TO_BE_ESCAPED> ::= <NEWLINE> | <CR> | <TABSTOP> | <BACKSLASH> | <QUOTE>
+
+<SYM_SIGN> ::= <PLUS> | <MINUS>
+<SYM_LETTER> ::= <LCASE_LETTER> | <UCASE_LETTER>
+
 /* atoms */
-<IDENT_TAIL_SYM> ::= <DIGIT> | <IDENT_HEAD_SYM>
-<IDENT_HEAD_SYM> ::= <LETTER> | <UNDERSCORE>
-
-<ANY_SYM> ::= <ANY_SYM_WO_ESCAPES> | <ESCAPED_SYM>
-<ANY_SYM_WO_ESCAPES> ::= <DIGIT> | <LETTER> | <SPECIAL>
-
-<ESCAPED_SYM> ::= "\\" <SYM_TO_BE_ESCAPED>
-<SYM_TO_BE_ESCAPED> ::= "n" | "r" | "t" | "\\" | "\""
-
+<PTR> ::= "*"
+<FLOAT_DELIM> ::= "."
+<NEWLINE> ::= "n"
+<CR> ::= "r"
+<TABSTOP> ::= "t"
 <NEWLINE> ::= "\n"
-<CARRIAGE_RETURN> ::= "\r"
+<CR> ::= "\r"
 <TABSTOP> ::= "\t"
 <BACKSLASH> ::= "\\"
 <QUOTE> ::= "\""
-
-<SIGN> ::= "+" | "-"
+<COMMENT_SL> ::= "#"
+<COMMENT_ML> ::= "###"
+<PLUS> ::= "+"
+<MINUS> ::= "-"
 <UNDERSCORE> ::= "_"
-
+<EPSILON> ::= ""
 <SPECIAL> ::= "!" | "#" | "$" | "%" | "&" | "'" | "(" | ")" | "*" | "," | "." | "/" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "[" | "]" | "^" | "`" | "{" | "}" | "|" | "~" | " " | "_" | "+" | "-"
-<LETTER> ::= <LCASE_LETTER> | <UCASE_LETTER>
 <UCASE_LETTER> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
 <LCASE_LETTER> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 <DIGIT> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+
+/* lexemes */
+<KW_INCLUDE> ::= "@"
+<KW_FN> ::= "fx"
+<KW_FN_RET_ARROW> ::= "==>"
+<KW_FN_IN> ::= "in"
+<KW_FN_OUT> ::= "disp"
+<KW_IF> ::= "if"
+<KW_ELIF> ::= "elif"
+<KW_ELSE> ::= "else"
+<KW_FOR> ::= "for"
+<KW_WHILE> ::= "while"
+<KW_BREAK> ::= "break"
+<KW_CONTINUE> ::= "continue"
+<KW_RETURN> ::= "return"
+<KW_VOID> ::= "void"
+<KW_INT> ::= "int"
+<KW_FLOAT> ::= "float"
+<KW_BOOL> ::= "bool"
+<KW_CHAR> ::= "char"
+<KW_STR> ::= "string"
+<KW_STRUCT> ::= "struct"
+<KW_NULL> ::= "NULL"
+<KW_TRUE> ::= "True"
+<KW_FALSE> ::= "False"
+<KW_AND> ::= "AND"
+<KW_OR> ::= "OR"
+
+<IDENT> ::= <SYM_IDENT_HEAD> | <IDENT> <SYM_IDENT_TAIL>
+
+<LIT_INT> ::= <SIGNABLE_DIGITS>
+<LIT_FLOAT> ::= <FLOAT_WO_E> | <FLOAT_WO_E> "e" <SIGNABLE_DIGITS> | <SIGNABLE_DIGITS> "e" <SIGNABLE_DIGITS>
+<LIT_CHAR> ::= "'" <SYM_ANY> "'"
+<LIT_STR> ::= "\"" "\"" | "\"" <ANY> "\""
+
+<OP_G> ::= ">"
+<OP_GE> ::= ">="
+<OP_L> ::= "<"
+<OP_LE> ::= "<="
+<OP_IS_EQ> ::= "=="
+<OP_IS_NEQ> ::= "!="
+
+<OP_SUM> ::= "+"
+<OP_SUB> ::= "-"
+<OP_MUL> ::= "*"
+<OP_DIV> ::= "/"
+<OP_MOD> ::= "%"
+<OP_NOT> ::= "!"
+<OP_INCR> ::= "++"
+<OP_DECR> ::= "--"
+
+<OP_ASSIGN_EQ> ::= "="
+<OP_ASSIGN_SUM> ::= "+="
+<OP_ASSIGN_SUB> ::= "-="
+<OP_ASSIGN_MUL> ::= "*="
+<OP_ASSIGN_DIV> ::= "/="
+<OP_ASSIGN_MOD> ::= "%="
+
+<OP_PTR_DEREF> ::= "*"
+<OP_PTR_ADDR> ::= "&"
+
+<OP_DOT_ACCESS_MEMBER> ::= "."
+<OP_PTR_ACCESS_MEMBER> ::= "->"
+
+<OP_PAREN_O> ::= "("
+<OP_PAREN_C> ::= ")"
+<OP_BRACE_O> ::= "{"
+<OP_BRACE_C> ::= "}"
+<OP_BRACKET_O> ::= "["
+<OP_BRACKET_C> ::= "]"
+<OP_SEMICOLON> ::= ";"
+<OP_COMMA> ::= ","
