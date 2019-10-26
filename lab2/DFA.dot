@@ -1,24 +1,19 @@
 digraph finite_state_machine {
     rankdir = LR;
     size = "8,5"
-    node [shape = doublecircle]; START, IDENT, KW_BOOL, IDENT, KW_BREAK, OP_ACCESS_MEMBER, ERROR, LIT_INT, LIT_FLOAT, LIT_CHAR, LIT_STR, OP_GE, OP_G, OP_LE, OP_L, OP_IS_EQ, OP_ASSIGN_EQ, OP_IS_NEQ, OP_NOT, OP_INCR, OP_ASSIGN_SUM, OP_SUM, OP_DECR, OP_ASSIGN_SUB, OP_SUB, OP_ASSIGN_MUL, OP_MUL, OP_ASSIGN_DIV, OP_DIV, OP_ASSIGN_MOD, OP_MOD, OP_PAREN_O, OP_PAREN_C, OP_BRACE_O, OP_BRACE_C, OP_BRACKET_O, OP_BRACKET_C, OP_SEMICOLOIN, OP_COMMA, OP_ADDR;
+    node [shape = doublecircle]; IDENT, KW_BOOL, KW_BREAK, KW_FN_ARROW, OP_ACCESS_MEMBER, ERROR, LIT_INT, LIT_FLOAT, LIT_CHAR, LIT_STR, OP_GE, OP_G, OP_LE, OP_L, OP_IS_EQ, OP_ASSIGN_EQ, OP_IS_NEQ, OP_NOT, OP_INCR, OP_ASSIGN_SUM, OP_SUM, OP_DECR, OP_ASSIGN_SUB, OP_SUB, OP_ASSIGN_MUL, OP_MUL, OP_ASSIGN_DIV, OP_DIV, OP_ASSIGN_MOD, OP_MOD, OP_PAREN_O, OP_PAREN_C, OP_BRACE_O, OP_BRACE_C, OP_BRACKET_O, OP_BRACKET_C, OP_SEMICOLOIN, OP_COMMA, OP_ADDR;
     node [shape = circle];
 
-    // todo symmetric var names
-    // todo keywords
-    // todo kw_fn_arrow
-    // todo fix include in DFA
+    // KW START
+    _START_ -> _KW_BOOL_BREAK_ [label = "b"];
 
-    START -> EOF [label = "<EOF>"];
-
-    START -> _KW_BOOL_BREAK_ [label = "b"];
-
+    // KW SPECIFYING
     _KW_BOOL_BREAK_ -> _KW_BOOL_BO_ [label = "o"];
     _KW_BOOL_BREAK_ -> _KW_BREAK_BR_ [label = "r"];
     _KW_BOOL_BREAK_ -> _IDENT_ [label = "(?=[^or])[_a-zA-Z0-9]"];
     _KW_BOOL_BREAK_ -> IDENT [label = "ELSE"];
 
-
+    // KW BOOL
     _KW_BOOL_BO_ -> _KW_BOOL_BOO_ [label = "o"];
     _KW_BOOL_BO_ -> _IDENT_ [label = "(?=[^o])[_a-zA-Z0-9]"];
     _KW_BOOL_BO_ -> IDENT [label = "ELSE"];
@@ -31,6 +26,7 @@ digraph finite_state_machine {
     _KW_BOOL_BOOL_ -> KW_BOOL [label = "ELSE"];
 
 
+    // KW BREAK
     _KW_BREAK_BR_ -> _KW_BREAK_BRE_ [label = "e"];
     _KW_BREAK_BR_ -> _IDENT_ [label = "(?=[^e])[_a-zA-Z0-9]"];
     _KW_BREAK_BR_ -> IDENT [label = "ELSE"];
@@ -46,35 +42,37 @@ digraph finite_state_machine {
     _KW_BREAK_BREAK_ -> _IDENT_ [label = "[_a-zA-Z0-9]"];
     _KW_BREAK_BREAK_ -> KW_BREAK [label = "ELSE"];
 
-    START -> KW_CHAR_CONTINUE [label = "c"];
-    START -> KW_ELIF_ELSE [label = "e"];
-    START -> KW_FN_FOR_FLOAT [label = "f"];
-    START -> KW_IN_IF_INT [label = "i"];
-    START -> _KW_FN_OUT_ [label = "o"];
-    START -> _KW_RETURN_ [label = "r"];
-    START -> KW_STRING_STRUCT [label = "s"];
-    START -> _KW_VOID_ [label = "v"];
-    START -> _KW_AND_ [label = "A"];
-    START -> _KW_FALSE_ [label = "F"];
-    START -> _KW_NULL_ [label = "N"];
-    START -> _KW_OR_ [label = "O"];
-    START -> _KW_TRUE_ [label = "T"];
+    // REMAINING KEYWORDS (to be implemented)
 
-    START -> _IDENT_ [label = "(?=[^bcefiosvAFNOT])[_a-zA-Z]"];
+    //_START_ -> _KW_CHAR_CONTINUE_ [label = "c"];
+    //_START_ -> _KW_ELIF_ELSE_ [label = "e"];
+    //_START_ -> _KW_FN_FOR_FLOAT_ [label = "f"];
+    //_START_ -> _KW_IN_IF_INT_ [label = "i"];
+    //_START_ -> _KW_FN_OUT_ [label = "o"];
+    //_START_ -> _KW_RETURN_ [label = "r"];
+    //_START_ -> _KW_STRING_STRUCT_ [label = "s"];
+    //_START_ -> _KW_VOID_ [label = "v"];
+    //_START_ -> _KW_AND_ [label = "A"];
+    //_START_ -> _KW_FALSE_ [label = "F"];
+    //_START_ -> _KW_NULL_ [label = "N"];
+    //_START_ -> _KW_OR_ [label = "O"];
+    //_START_ -> _KW_TRUE_ [label = "T"];
+
+    _START_ -> _IDENT_ [label = "(?=[^bcefiosvAFNOT])[_a-zA-Z]"];
     _IDENT_ -> _IDENT_ [label = "[_a-zA-Z0-9]"];
-    _IDENT_ -> STRUCT_MEMBER [label = "\\."];
+    _IDENT_ -> _STRUCT_MEMBER_ [label = "\\."];
     _IDENT_ -> IDENT [label = "ELSE"];
 
-    STRUCT_MEMBER -> OP_ACCESS_MEMBER [label = "[_a-zA-Z]"];
-    STRUCT_MEMBER -> ERROR [ label = "ELSE" ];
+    _STRUCT_MEMBER_ -> OP_ACCESS_MEMBER [label = "[_a-zA-Z]"];
+    _STRUCT_MEMBER_ -> ERROR [ label = "ELSE" ];
 
-    START -> _LIT_INT_ [ label = "[0-9]"];
+    _START_ -> _LIT_INT_ [ label = "[0-9]"];
     _LIT_INT_ -> _LIT_INT_ [label = "[0-9]"];
     _LIT_INT_ -> _LIT_FLOAT_ [label = "\\."];
     _LIT_INT_ -> ERROR [label = "[_a-zA-Z]" ];
     _LIT_INT_ -> LIT_INT [label = "ELSE" ];
 
-    START -> _LIT_FLOAT_ [label = "\\."];
+    _START_ -> _LIT_FLOAT_ [label = "\\."];
     _LIT_FLOAT_ -> _LIT_FLOAT_ [label = "[0-9]"];
     _LIT_FLOAT_ -> LIT_FLOAT_E [label = "e"];
     _LIT_FLOAT_ -> LIT_FLOAT [label = "ELSE"];
@@ -89,107 +87,106 @@ digraph finite_state_machine {
     LIT_FLOAT_W_E -> LIT_FLOAT_W_E [label = "[0-9]"];
     LIT_FLOAT_W_E -> LIT_FLOAT [label = "ELSE"];
 
-    START -> _LIT_CHAR_ [label = "'"];
+    _START_ -> _LIT_CHAR_ [label = "'"];
     _LIT_CHAR_ -> LIT_CHAR [label = "'"];
     _LIT_CHAR_ -> LIT_CHAR_ESCAPE [label = "\\\\"];
-    _LIT_CHAR_ -> ERROR [label = "[\\n\\r\\t<EOF>]"];
+    _LIT_CHAR_ -> ERROR [label = "[\\n\\r\\t]"];
     _LIT_CHAR_ -> LIT_CHAR_ADDED [ label = "ELSE"];
 
-    LIT_CHAR_ESCAPE -> LIT_CHAR_ADDED [label = "['\\\\nrt]"];
-    LIT_CHAR_ESCAPE -> ERROR [label = "ELSE"];
+    _LIT_CHAR_ESCAPE_ -> _LIT_CHAR_ADDED_ [label = "['\\\\nrt]"];
+    _LIT_CHAR_ESCAPE_ -> ERROR [label = "ELSE"];
 
-    LIT_CHAR_ADDED -> LIT_CHAR [label = "'"];
-    LIT_CHAR_ADDED -> ERROR [label = "ELSE"];
+    _LIT_CHAR_ADDED_ -> LIT_CHAR [label = "'"];
+    _LIT_CHAR_ADDED_ -> ERROR [label = "ELSE"];
 
-    START -> _LIT_STR_ [label = "\"" ];
+    _START_ -> _LIT_STR_ [label = "\"" ];
     _LIT_STR_ -> LIT_STR [ label = "\""];
-    _LIT_STR_ -> LIT_STR_ESCAPE [label = "\\\\"];
-    _LIT_STR_ -> ERROR [label = "<EOF>"];
+    _LIT_STR_ -> _LIT_STR_ESCAPE_ [label = "\\\\"];
     _LIT_STR_ -> _LIT_STR_ [label = "ELSE"];
 
-    LIT_STR_ESCAPE -> _LIT_STR_ [label = "[\"\\\\nrt]"];
-    LIT_STR_ESCAPE -> ERROR [label = "ELSE"];
+    _LIT_STR_ESCAPE_ -> _LIT_STR_ [label = "[\"\\\\nrt]"];
+    _LIT_STR_ESCAPE_ -> ERROR [label = "ELSE"];
 
-    START -> _OP_G_ [label = ">"];
+    _START_ -> _OP_G_ [label = ">"];
     _OP_G_ -> OP_GE [label = "="];
     _OP_G_ -> OP_G [label = "ELSE"];
 
-    START -> _OP_L_ [label = "<"];
+    _START_ -> _OP_L_ [label = "<"];
     _OP_L_ -> OP_LE [label = "="];
     _OP_L_ -> OP_L [label = "ELSE"];
 
-    START -> _OP_ASSIGN_EQ_ [label = "="];
-    _OP_ASSIGN_EQ_ -> OP_IS_EQ [label = "="];
+    _START_ -> _OP_ASSIGN_EQ_ [label = "="];
+    _OP_ASSIGN_EQ_ -> _OP_IS_EQ_ [label = "="];
     _OP_ASSIGN_EQ_ -> OP_ASSIGN_EQ [label = "ELSE"];
 
-    START -> _OP_NOT_ [label = "!"];
+    _OP_IS_EQ_ -> KW_FN_ARROW [label = ">"];
+    _OP_IS_EQ_ -> OP_IS_EQ [label = "ELSE"];
+
+    _START_ -> _OP_NOT_ [label = "!"];
     _OP_NOT_ -> OP_IS_NEQ [label = "="];
     _OP_NOT_ -> OP_NOT [label = "ELSE"];
 
-    START -> _OP_SUM_ [label = "\\+"];
+    _START_ -> _OP_SUM_ [label = "\\+"];
     _OP_SUM_ -> OP_INCR [label = "\\+"];
     _OP_SUM_ -> OP_ASSIGN_SUM [label = "="];
     _OP_SUM_ -> _LIT_INT_ [label = "[0-9]"];
     _OP_SUM_ -> OP_SUM [label = "ELSE"];
 
-    START -> _OP_SUB_ [label = "_"];
+    _START_ -> _OP_SUB_ [label = "_"];
     _OP_SUB_ -> OP_DECR [label = "-"];
     _OP_SUB_ -> OP_ASSIGN_SUB [label = "="];
     _OP_SUB_ -> _LIT_INT_ [ label = "[0-9]"];
     _OP_SUB_ -> OP_SUB [ label = "ELSE"];
 
-    START -> _OP_MUL_ [label = "\\*"];
+    _START_ -> _OP_MUL_ [label = "\\*"];
     _OP_MUL_ -> OP_ASSIGN_MUL [label = "="];
     _OP_MUL_ -> OP_MUL [label = "ELSE"];
 
-    START -> _OP_DIV_ [label = "\\/"];
+    _START_ -> _OP_DIV_ [label = "\\/"];
     _OP_DIV_ -> OP_ASSIGN_DIV [label = "="];
     _OP_DIV_ -> OP_DIV [label = "ELSE"];
 
-    START -> _OP_MOD_ [label = "%" ];
+    _START_ -> _OP_MOD_ [label = "%" ];
     _OP_MOD_ -> OP_ASSIGN_MOD [label = "="];
     _OP_MOD_ -> OP_MOD [label = "ELSE"];
 
-    START -> OP_PAREN_O [label = "\\("];
-    START -> OP_PAREN_C [label = "\\)"];
-    START -> OP_BRACE_O [label = "{"];
-    START -> OP_BRACE_C [label = "}"];
-    START -> OP_BRACKET_O [label = "\\["];
-    START -> OP_BRACKET_C [label = "\\]"];
-    START -> OP_SEMICOLOIN [label = ";"];
-    START -> OP_COMMA [label = ","];
-    START -> OP_ADDR [label = "&"];
+    _START_ -> OP_PAREN_O [label = "\\("];
+    _START_ -> OP_PAREN_C [label = "\\)"];
+    _START_ -> OP_BRACE_O [label = "{"];
+    _START_ -> OP_BRACE_C [label = "}"];
+    _START_ -> OP_BRACKET_O [label = "\\["];
+    _START_ -> OP_BRACKET_C [label = "\\]"];
+    _START_ -> OP_SEMICOLOIN [label = ";"];
+    _START_ -> OP_COMMA [label = ","];
+    _START_ -> OP_ADDR [label = "&"];
 
-    START -> INCLUDE [label = "@"];
-    INCLUDE -> INCLUDE_END [label = "\\n"];
-    INCLUDE -> INCLUDE [label = "ELSE"];
+    _START_ -> _INCLUDE_ [label = "@"];
+    _INCLUDE_ -> _START_ [label = "\\n"];
+    _INCLUDE_ -> _INCLUDE_ [label = "ELSE"];
 
-    START -> START [label = "[\\n\\r\\t]"];
+    _START_ -> _START_ [label = "[\\n\\r\\t]"];
 
     // COMMENTS
-    START -> COMMENT_START [label = "#"];
-    COMMENT_START -> START [label = "\\n"];
-    COMMENT_START -> COMMENT_SL_PLUS_2 [label = "#" ];
-    COMMENT_START -> COMMENT_SL [label = "ELSE"];
+    _START_ -> _COMMENT_START_ [label = "#"];
+    _COMMENT_START_ -> _START_ [label = "\\n"];
+    _COMMENT_START_ -> _COMMENT_SL_PLUS_2_ [label = "#" ];
+    _COMMENT_START_ -> _COMMENT_SL_ [label = "ELSE"];
 
-    COMMENT_SL -> START [label = "\\n"];
-    COMMENT_SL -> COMMENT_SL [label = "ELSE"];
+    _COMMENT_SL_ -> _START_ [label = "\\n"];
+    _COMMENT_SL_ -> _COMMENT_SL_ [label = "ELSE"];
 
-    COMMENT_SL_PLUS_2 -> START [label = "\\n"];
-    COMMENT_SL_PLUS_2 -> COMMENT_ML [label = "#"];
-    COMMENT_SL_PLUS_2 -> COMMENT_SL [label = "ELSE"];
+    _COMMENT_SL_PLUS_2_ -> _START_ [label = "\\n"];
+    _COMMENT_SL_PLUS_2_ -> _COMMENT_ML_ [label = "#"];
+    _COMMENT_SL_PLUS_2_ -> _COMMENT_SL_ [label = "ELSE"];
 
-    COMMENT_ML -> COMMENT_ML_MINUS_1 [label = "#"];
-    COMMENT_ML -> ERROR [label = "<EOF>"];
-    COMMENT_ML -> START [label = "ELSE"];
+    _COMMENT_ML_ -> _COMMENT_ML_MINUS_1_ [label = "#"];
+    _COMMENT_ML_ -> _START_ [label = "ELSE"];
 
-    COMMENT_ML_MINUS_1 -> COMMENT_ML_MINUS_2 [label = "#"];
-    COMMENT_ML_MINUS_1 -> ERROR [label = "<EOF>"];
-    COMMENT_ML_MINUS_1 -> COMMENT_ML [label = "ELSE"];
+    _COMMENT_ML_MINUS_1_ -> _COMMENT_ML_MINUS_2_ [label = "#"];
+    _COMMENT_ML_MINUS_1_ -> _COMMENT_ML_ [label = "ELSE"];
 
-    COMMENT_ML_MINUS_2 -> START [label = "#"];
-    COMMENT_ML_MINUS_2 -> ERROR [label = "<EOF>"];
-    COMMENT_ML_MINUS_2 -> COMMENT_ML [label = "ELSE"];
+    _COMMENT_ML_MINUS_2_ -> _START_ [label = "#"];
+    _COMMENT_ML_MINUS_2_ -> _COMMENT_ML_ [label = "ELSE"];
 
-    START -> ERROR [ label = "ELSE" ];
+    _START_ -> ERROR [ label = "ELSE" ];
 }

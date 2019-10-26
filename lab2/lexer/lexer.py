@@ -1,5 +1,69 @@
 from pprint import pprint
 
+# List of all lexemes
+
+# <KW_FN>
+# <KW_FN_IN>
+# <KW_FN_OUT>
+# <KW_IF>
+# <KW_ELIF>
+# <KW_ELSE>
+# <KW_FOR>
+# <KW_WHILE>
+# <KW_BREAK>
+# <KW_CONTINUE>
+# <KW_RETURN>
+# <KW_RET_ARROW>
+# <KW_VOID>
+# <KW_INT>
+# <KW_FLOAT>
+# <KW_BOOL>
+# <KW_CHAR>
+# <KW_STRING>
+# <KW_STRUCT>
+# <KW_NULL>
+# <KW_TRUE>
+# <KW_FALSE>
+# <KW_AND>
+# <KW_OR>
+
+# <IDENT>
+# <OP_ACCESS_MEMBER>
+# <ERROR>
+# <LIT_INT>
+# <LIT_FLOAT>
+# <LIT_CHAR>
+# <LIT_STR>
+# <OP_GE>
+# <OP_G>
+# <OP_LE>
+# <OP_L>
+# <OP_IS_EQ>
+# <OP_ASSIGN_EQ>
+# <OP_IS_NEQ>
+# <OP_NOT>
+# <OP_INCR>
+# <OP_ASSIGN_SUM>
+# <OP_SUM>
+# <OP_DECR>
+# <OP_ASSIGN_SUB>
+# <OP_SUB>
+# <OP_ASSIGN_MUL>
+# <OP_MUL>
+# <OP_ASSIGN_DIV>
+# <OP_DIV>
+# <OP_ASSIGN_MOD>
+# <OP_MOD>
+# <OP_PAREN_O>
+# <OP_PAREN_C>
+# <OP_BRACE_O>
+# <OP_BRACE_C>
+# <OP_BRACKET_O>
+# <OP_BRACKET_C>
+# <OP_SEMICOLOIN>
+# <OP_COMMA>
+# <OP_ADD>
+
 KEYWORDS = {
     'fx': 'KW_FN',
     'in': 'KW_FN_IN',
