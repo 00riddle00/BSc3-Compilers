@@ -1,7 +1,7 @@
 digraph finite_state_machine {
     rankdir = LR;
     size = "8,5"
-    node [shape = doublecircle]; IDENT, KW_BOOL, KW_BREAK, KW_FN_ARROW, OP_ACCESS_MEMBER, ERROR, LIT_INT, LIT_FLOAT, LIT_CHAR, LIT_STR, OP_GE, OP_G, OP_LE, OP_L, OP_IS_EQ, OP_ASSIGN_EQ, OP_IS_NEQ, OP_NOT, OP_INCR, OP_ASSIGN_SUM, OP_SUM, OP_DECR, OP_ASSIGN_SUB, OP_SUB, OP_ASSIGN_MUL, OP_MUL, OP_ASSIGN_DIV, OP_DIV, OP_ASSIGN_MOD, OP_MOD, OP_PAREN_O, OP_PAREN_C, OP_BRACE_O, OP_BRACE_C, OP_BRACKET_O, OP_BRACKET_C, OP_SEMICOLOIN, OP_COMMA, OP_ADDR;
+    node [shape = doublecircle]; IDENT, KW_BOOL, KW_BREAK, KW_FN_RET_ARROW, OP_DOT_ACCESS_MEMBER, ERROR, LIT_INT, LIT_FLOAT, LIT_CHAR, LIT_STR, OP_GE, OP_G, OP_LE, OP_L, OP_IS_EQ, OP_ASSIGN_EQ, OP_IS_NEQ, OP_NOT, OP_INCR, OP_ASSIGN_SUM, OP_SUM, OP_DECR, OP_ASSIGN_SUB, OP_SUB, OP_ASSIGN_MUL, OP_MUL, OP_ASSIGN_DIV, OP_DIV, OP_ASSIGN_MOD, OP_MOD, OP_PAREN_O, OP_PAREN_C, OP_BRACE_O, OP_BRACE_C, OP_BRACKET_O, OP_BRACKET_C, OP_SEMICOLON, OP_COMMA, OP_PTR_ADDR;
     node [shape = circle];
 
     // KW START
@@ -50,7 +50,7 @@ digraph finite_state_machine {
     //_START_ -> _KW_IN_IF_INT_ [label = "i"];
     //_START_ -> _KW_FN_OUT_ [label = "o"];
     //_START_ -> _KW_RETURN_ [label = "r"];
-    //_START_ -> _KW_STRING_STRUCT_ [label = "s"];
+    //_START_ -> _KW_STRUCT_ [label = "s"];
     //_START_ -> _KW_VOID_ [label = "v"];
     //_START_ -> _KW_AND_ [label = "A"];
     //_START_ -> _KW_FALSE_ [label = "F"];
@@ -63,7 +63,7 @@ digraph finite_state_machine {
     _IDENT_ -> _STRUCT_MEMBER_ [label = "\\."];
     _IDENT_ -> IDENT [label = "ELSE"];
 
-    _STRUCT_MEMBER_ -> OP_ACCESS_MEMBER [label = "[_a-zA-Z]"];
+    _STRUCT_MEMBER_ -> OP_DOT_ACCESS_MEMBER [label = "[_a-zA-Z]"];
     _STRUCT_MEMBER_ -> ERROR [ label = "ELSE" ];
 
     _START_ -> _LIT_INT_ [ label = "[0-9]"];
@@ -119,7 +119,7 @@ digraph finite_state_machine {
     _OP_ASSIGN_EQ_ -> _OP_IS_EQ_ [label = "="];
     _OP_ASSIGN_EQ_ -> OP_ASSIGN_EQ [label = "ELSE"];
 
-    _OP_IS_EQ_ -> KW_FN_ARROW [label = ">"];
+    _OP_IS_EQ_ -> KW_FN_RET_ARROW [label = ">"];
     _OP_IS_EQ_ -> OP_IS_EQ [label = "ELSE"];
 
     _START_ -> _OP_NOT_ [label = "!"];
@@ -156,9 +156,9 @@ digraph finite_state_machine {
     _START_ -> OP_BRACE_C [label = "}"];
     _START_ -> OP_BRACKET_O [label = "\\["];
     _START_ -> OP_BRACKET_C [label = "\\]"];
-    _START_ -> OP_SEMICOLOIN [label = ";"];
+    _START_ -> OP_SEMICOLON [label = ";"];
     _START_ -> OP_COMMA [label = ","];
-    _START_ -> OP_ADDR [label = "&"];
+    _START_ -> OP_PTR_ADDR [label = "&"];
 
     _START_ -> _INCLUDE_ [label = "@"];
     _INCLUDE_ -> _START_ [label = "\\n"];
