@@ -22,6 +22,7 @@ class Parser:
         exit(1)
 
     def accept(self, token_type):
+        # todo wrap into 'current' fn
         self.curr_token = self.tokens[self.offset]
         if self.curr_token.type == token_type:
             self.offset += 1
@@ -44,14 +45,13 @@ class Parser:
     def parse_decl_fn(self):
         self.expect('KW_FN')
         name = self.expect('IDENT')
-        self.expect('OP_PAREN_O')
         params = self.parse_params()
-        self.expect('OP_PAREN_C')
         self.expect('KW_FN_RET_ARROW')
         ret_type = self.parse_type()
         body = self.parse_stmt_block()
         return DeclFn(name, params, ret_type, body)
 
+    # <EXPR> ::= <ADD>
     def parse_expr(self):
         return self.parse_expr_add()
 
@@ -113,16 +113,20 @@ class Parser:
     def parse_params(self):
         params = []
 
+        self.expect('OP_PAREN_O')
+
         if self.test_token('OP_PAREN_C'):
             return params
+        else:
+            params.append(self.parse_param())
 
-        params.append(self.parse_param())
-
-        while self.accept('OP_COMMA'):
+        while not self.accept('OP_PAREN_C'):
+            self.expect('OP_COMMA')
             params.append(self.parse_param())
 
         return params
 
+    # <START> ::= {<DEF_FN>} EOF
     def parse_program(self):
         decls = []
 
