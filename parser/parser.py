@@ -252,10 +252,28 @@ class Parser:
     def parse_stmt_if(self):
         self.expect('KW_IF')
         self.expect('OP_PAREN_O')
-        cond = self.parse_expr()
+        if_cond = self.parse_expr()
         self.expect('OP_PAREN_C')
-        body = self.parse_stmt_block()
-        return StmtIf(cond, body)
+        if_body = self.parse_stmt_block()
+
+        elif_conds = []
+        elif_bodies = []
+        else_body = None
+
+        if self.token_type() == 'KW_ELIF':
+
+            while self.accept('KW_ELIF'):
+                self.expect('OP_PAREN_O')
+                elif_conds.append(self.parse_expr())
+                self.expect('OP_PAREN_C')
+                elif_bodies.append(self.parse_stmt_block())
+
+        if self.token_type() == 'KW_ELSE':
+            print("YES")
+            self.expect('KW_ELSE')
+            else_body = self.parse_stmt_block()
+
+        return StmtIf(if_cond, if_body, elif_conds, elif_bodies, else_body)
 
     def parse_stmt_while(self):
         self.expect('KW_WHILE')
@@ -466,15 +484,23 @@ class StmtBlock(Stmt):
 
 class StmtIf(Stmt):
 
-    def __init__(self, cond, body):
-        self.cond = cond
-        self.body = body
+    def __init__(self, if_cond, if_body, elif_conds = None, elif_bodies = None, else_body = None):
+        self.if_cond = if_cond
+        self.if_body = if_body
+        self.elif_conds = elif_conds
+        self.elif_bodies = elif_bodies
+        self.else_body = else_body
         super().__init__()
 
     def print_node(self, p):
-        p.print('cond', self.cond)
-        p.print('body', self.body)
-
+        p.print('if_cond', self.if_cond)
+        p.print('if_body', self.if_body)
+        if self.elif_conds:
+            for ind in range(len(self.elif_conds)):
+                p.print(f'elif_cond[{ind}]', self.elif_conds[ind])
+                p.print(f'elif_body[{ind}]', self.elif_bodies[ind])
+        if self.else_body:
+            p.print('else_body', self.else_body)
 
 class StmtWhile(Stmt):
 
