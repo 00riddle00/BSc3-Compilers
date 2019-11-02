@@ -46,19 +46,19 @@ class Parser:
             self.expect('OP_ASSIGN_EQ')
             op = 'EQUALS'
         elif self.token_type() == 'OP_ASSIGN_SUM':
-            op = self.expect('OP_ASSIGN_SUM')
+            self.expect('OP_ASSIGN_SUM')
             op = 'PLUS_EQUALS'
         elif self.token_type() == 'OP_ASSIGN_SUB':
-            op = self.expect('OP_ASSIGN_SUB')
+            self.expect('OP_ASSIGN_SUB')
             op = 'MINUS_EQUALS'
         elif self.token_type() == 'OP_ASSIGN_MUL':
-            op = self.expect('OP_ASSIGN_MUL')
+            self.expect('OP_ASSIGN_MUL')
             op = 'MULT_EQUALS'
         elif self.token_type() == 'OP_ASSIGN_DIV':
-            op = self.expect('OP_ASSIGN_DIV')
+            self.expect('OP_ASSIGN_DIV')
             op = 'DIV_EQUALS'
         elif self.token_type() == 'OP_ASSIGN_MOD':
-            op = self.expect('OP_ASSIGN_MOD')
+            self.expect('OP_ASSIGN_MOD')
             op = 'MOD_EQUALS'
         else:
             self.error('invalid assign op')
