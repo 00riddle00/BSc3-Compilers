@@ -183,6 +183,8 @@ class Lexer:
         self.curr_input.reverse_read()
 
         if self.buffer in KEYWORDS:
+            print('hereYES')
+            print('here', self.buffer)
             token_type = KEYWORDS[self.buffer]
             self.buffer = ''
         else:
@@ -287,7 +289,7 @@ class Lexer:
         elif self.curr_char == '(':
             self.complete_token('OP_PAREN_O')
         elif self.curr_char == ')':
-            self.begin_token('OP_PAREN_C')
+            self.complete_token('OP_PAREN_C')
         elif self.curr_char == '{':
             self.complete_token('OP_BRACE_O')
         elif self.curr_char == '}':
@@ -297,6 +299,7 @@ class Lexer:
         elif self.curr_char == ']':
             self.begin_token('OP_BRACKET_C')
         elif self.curr_char == ';':
+            print("here semi")
             self.complete_token('OP_SEMICOLON')
         elif self.curr_char == ',':
             self.complete_token('OP_COMMA')

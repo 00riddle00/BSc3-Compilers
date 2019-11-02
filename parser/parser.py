@@ -17,8 +17,8 @@ class Parser:
         self.offset = 0
         self.result = ''
 
-    def error(self):
-        print('parse error')
+    def error(self, msg=''):
+        print(f'parse error: {msg}')
         exit(1)
 
     def accept(self, token_type):
@@ -38,6 +38,21 @@ class Parser:
             # todo add prety prints
             print(f'  expected={token_type}, found={self.curr_token.type}')
             exit(1)
+
+    def parse_expr_call(self):
+        name = self.expect('IDENT')
+        args = []
+        self.expect('OP_PAREN_O')
+
+        if not self.peek('OP_PAREN_C'):
+            args.append(self.parse_expr())
+
+        while not self.peek('OP_PAREN_C'):
+            self.expect('OP_COMMA')
+            args.append(self.parse_expr())
+
+        self.expect('OP_PAREN_C')
+        return ExprCall(name, args)
 
     def parse_decl(self):
         return self.parse_decl_fn()
@@ -96,14 +111,18 @@ class Parser:
 
     # <PRIMARY> ::= <LIT_INT> | <VAR> | <PAREN>
     def parse_expr_primary(self):
+        if self.peek2('IDENT', 'OP_PAREN_O'):
+            return self.parse_expr_call()
+
         if self.token_type() == 'IDENT':
             return self.parse_expr_var()
         elif self.token_type() == 'LIT_INT':
+            self.debug('here1')
             return self.parse_expr_lit_int()
         elif self.token_type() == 'OP_PAREN_O':
             return self.parse_expr_paren()
         else:
-            self.error()
+            self.error(f'expr error {self.curr_token}')
 
     def parse_expr_var(self):
         name = self.expect('IDENT')
@@ -119,7 +138,8 @@ class Parser:
 
         self.expect('OP_PAREN_O')
 
-        if self.test_token('OP_PAREN_C'):
+        if self.peek('OP_PAREN_C'):
+            self.accept('OP_PAREN_C')
             return params
         else:
             params.append(self.parse_param())
@@ -217,10 +237,15 @@ class Parser:
         else:
             self.error()
 
-    def test_token(self, token_type):
+    def peek(self, token_type):
         self.curr_token = self.tokens[self.offset]
         if self.curr_token.type == token_type:
             return self.curr_token
+
+    def peek2(self, token_type0, token_type1):
+        token0 = self.tokens[self.offset + 0]
+        token1 = self.tokens[self.offset + 1]
+        return token0.type == token_type0 and token1.type == token_type1
 
     def token_type(self):
         return self.tokens[self.offset].type
@@ -231,6 +256,10 @@ class Parser:
             print(f'{token.type},', end='')
         print('\n')
 
+    def debug(self, msg):
+        print(f'[debug:{msg}:{self.curr_token.type}:{self.curr_token.value}]')
+
+
 
 class Node(object):
 
@@ -239,6 +268,7 @@ class Node(object):
 
     def print_node(self, p):
         print(f'print not implemented for {self.__class__}')
+
 
 class Expr(Node):
 
@@ -261,6 +291,18 @@ class ExprBinary(Expr):
         p.print_single('op', self.op)
         p.print('left', self.left)
         p.print('right', self.right)
+
+
+class ExprCall(Expr):
+
+    def __init__(self, name, args):
+        self.name = name
+        self.args = args
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('name', self.name)
+        p.print('args', self.args)
 
 
 class ExprLit(Expr):
@@ -446,5 +488,4 @@ class ASTPrinter:
     def print_token(self, title, token):
         text = f'{token.value} (ln={token.line_no})'
         self.print_single(title, text)
-
 
