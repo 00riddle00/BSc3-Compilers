@@ -1,5 +1,6 @@
 fx test() ==> void {
 
+    a = b;
     return main(test);
 }
 

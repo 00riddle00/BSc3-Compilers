@@ -39,6 +39,14 @@ class Parser:
             print(f'  expected={token_type}, found={self.curr_token.type}')
             exit(1)
 
+    def parse_stmt_assign(self):
+        var = self.expect('IDENT')
+        self.expect('OP_ASSIGN_EQ')
+        value = self.parse_expr()
+        self.expect('OP_SEMICOLON')
+        return StmtAssign(var, value)
+
+
     def parse_expr_call(self):
         name = self.expect('IDENT')
         args = []
@@ -162,6 +170,9 @@ class Parser:
         return Program(decls)
 
     def parse_stmt(self):
+        if self.peek2('IDENT', 'OP_ASSIGN_EQ'):
+            return self.parse_stmt_assign()
+
         if self.token_type() == 'KW_IF':
             return self.parse_stmt_if()
         if self.token_type() == 'KW_WHILE':
@@ -427,6 +438,17 @@ class StmtReturn(Stmt):
 
     def print_node(self, p):
         p.print('return_kw', self.return_kw)
+        p.print('value', self.value)
+
+class StmtAssign(Stmt):
+
+    def __init__(self, var, value):
+        self.var = var
+        self.value = value
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('var', self.var)
         p.print('value', self.value)
 
 
