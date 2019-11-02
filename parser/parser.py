@@ -269,7 +269,6 @@ class Parser:
                 elif_bodies.append(self.parse_stmt_block())
 
         if self.token_type() == 'KW_ELSE':
-            print("YES")
             self.expect('KW_ELSE')
             else_body = self.parse_stmt_block()
 
