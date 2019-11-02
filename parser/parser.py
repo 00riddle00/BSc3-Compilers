@@ -57,6 +57,8 @@ class Parser:
 
     # <ADD> ::= <MULT> | <ADD> "+" <MULT>
     # <ADD> ::= <MULT> {("+" | "-") <MULT>}
+
+    # older: <ADD> ::= <MULT> {OP_PLUS <MULT>}
     def parse_expr_add(self):
         self.result = self.parse_expr_mult()
 
@@ -76,6 +78,8 @@ class Parser:
 
     # <MULT> ::= <PRIMARY> | <MULT> "*" <PRIMARY>
     # <MULT> ::= <PRIMARY> {"*" <PRIMARY>}
+
+    # older: <MULT> ::= <TERM> {OP_MULT <TERM>}
     def parse_expr_mult(self):
         self.result = self.parse_expr_primary()
 
@@ -141,6 +145,10 @@ class Parser:
     def parse_stmt(self):
         if self.token_type() == 'KW_IF':
             return self.parse_stmt_if()
+        if self.token_type() == 'KW_WHILE':
+            return self.parse_stmt_while()
+        if self.token_type() == 'KW_BREAK':
+            return self.parse_stmt_break()
         if self.token_type() == 'KW_RETURN':
             return self.parse_stmt_ret()
         else:
@@ -162,9 +170,24 @@ class Parser:
 
     def parse_stmt_if(self):
         self.expect('KW_IF')
+        self.expect('OP_PAREN_O')
         cond = self.parse_expr()
+        self.expect('OP_PAREN_C')
         body = self.parse_stmt_block()
         return StmtIf(cond, body)
+
+    def parse_stmt_while(self):
+        self.expect('KW_WHILE')
+        self.expect('OP_PAREN_O')
+        cond = self.parse_expr()
+        self.expect('OP_PAREN_C')
+        body = self.parse_stmt_block()
+        return StmtWhile(cond, body)
+
+    def parse_stmt_break(self):
+        break_kw = self.expect('KW_BREAK')
+        self.expect('OP_SEMICOLON')
+        return StmtBreak(break_kw)
 
     def parse_stmt_ret(self):
         return_kw = self.expect('KW_RETURN')
@@ -333,6 +356,26 @@ class StmtIf(Stmt):
         p.print('cond', self.cond)
         p.print('body', self.body)
 
+
+class StmtWhile(Stmt):
+
+    def __init__(self, cond, body):
+        self.cond = cond
+        self.body = body
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('cond', self.cond)
+        p.print('body', self.body)
+
+class StmtBreak(Stmt):
+
+    def __init__(self, break_kw):
+        self.break_kw = break_kw
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('break_kw', self.break_kw)
 
 class StmtReturn(Stmt):
 
