@@ -74,24 +74,24 @@ digraph finite_state_machine {
 
     _START_ -> _LIT_FLOAT_ [label = "\\."];
     _LIT_FLOAT_ -> _LIT_FLOAT_ [label = "[0-9]"];
-    _LIT_FLOAT_ -> LIT_FLOAT_E [label = "e"];
+    _LIT_FLOAT_ ->_LIT_FLOAT_E_[label = "e"];
     _LIT_FLOAT_ -> LIT_FLOAT [label = "ELSE"];
 
-    LIT_FLOAT_E -> LIT_FLOAT_W_E [label = "[0-9]"];
-    LIT_FLOAT_E -> LIT_FLOAT_E_SIGN [label = "[\\+-]"];
-    LIT_FLOAT_E -> ERROR [label = "ELSE"];
+   _LIT_FLOAT_E_-> _LIT_FLOAT_W_E_ [label = "[0-9]"];
+   _LIT_FLOAT_E_-> _LIT_FLOAT_E_SIGN_ [label = "[\\+-]"];
+   _LIT_FLOAT_E_-> ERROR [label = "ELSE"];
 
-    LIT_FLOAT_E_SIGN -> LIT_FLOAT_W_E [label = "[0-9]"];
-    LIT_FLOAT_E_SIGN -> ERROR [label = "ELSE"];
+    _LIT_FLOAT_E_SIGN_ -> _LIT_FLOAT_W_E_ [label = "[0-9]"];
+    _LIT_FLOAT_E_SIGN_ -> ERROR [label = "ELSE"];
 
-    LIT_FLOAT_W_E -> LIT_FLOAT_W_E [label = "[0-9]"];
-    LIT_FLOAT_W_E -> LIT_FLOAT [label = "ELSE"];
+    _LIT_FLOAT_W_E_ -> _LIT_FLOAT_W_E_ [label = "[0-9]"];
+    _LIT_FLOAT_W_E_ -> LIT_FLOAT [label = "ELSE"];
 
     _START_ -> _LIT_CHAR_ [label = "'"];
     _LIT_CHAR_ -> LIT_CHAR [label = "'"];
-    _LIT_CHAR_ -> LIT_CHAR_ESCAPE [label = "\\\\"];
+    _LIT_CHAR_ -> _LIT_CHAR_ESCAPE_ [label = "\\\\"];
     _LIT_CHAR_ -> ERROR [label = "[\\n\\r\\t]"];
-    _LIT_CHAR_ -> LIT_CHAR_ADDED [ label = "ELSE"];
+    _LIT_CHAR_ ->_LIT_CHAR_ADDED_[ label = "ELSE"];
 
     _LIT_CHAR_ESCAPE_ -> _LIT_CHAR_ADDED_ [label = "['\\\\nrt]"];
     _LIT_CHAR_ESCAPE_ -> ERROR [label = "ELSE"];
@@ -180,7 +180,7 @@ digraph finite_state_machine {
     _COMMENT_SL_PLUS_2_ -> _COMMENT_SL_ [label = "ELSE"];
 
     _COMMENT_ML_ -> _COMMENT_ML_MINUS_1_ [label = "#"];
-    _COMMENT_ML_ -> _START_ [label = "ELSE"];
+    _COMMENT_ML_ -> _COMMENT_ML_ [label = "ELSE"];
 
     _COMMENT_ML_MINUS_1_ -> _COMMENT_ML_MINUS_2_ [label = "#"];
     _COMMENT_ML_MINUS_1_ -> _COMMENT_ML_ [label = "ELSE"];

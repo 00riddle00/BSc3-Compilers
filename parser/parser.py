@@ -45,11 +45,11 @@ class Parser:
     def parse_decl_fn(self):
         self.expect('KW_FN')
         name = self.expect('OP_PAREN_O')
-        params = parse_params
+        params = self.parse_params()
         self.expect('OP_PAREN_C')
         self.expect('OP_COLON')
-        ret_type = parse_type
-        body = parse_stmt_block
+        ret_type = self.parse_type()
+        body = self.parse_stmt_block()
         DeclFn.new(name, params, ret_type, body)
 
 
@@ -85,11 +85,17 @@ class Parser:
 
         return self.result
 
+    def parse_expr_paren(self):
+        self.expect('OP_PAREN_O')
+        self.result = parse_expr
+        self.expect('OP_PAREN_C')
+        return self.result
+
     # <PRIMARY> ::= <LIT_INT> | <VAR> | <PAREN>
     def parse_expr_primary(self):
         if self.token_type() == 'IDENT':
             return self.parse_expr_var()
-        if self.token_type() == 'LIT_INT':
+        elif self.token_type() == 'LIT_INT':
             return self.parse_expr_lit_int()
         else:
             self.error()
@@ -97,6 +103,50 @@ class Parser:
     def parse_expr_var(self):
         name = self.expect('IDENT')
         return ExprVar(name)
+
+    def parse_param(self):
+        name = self.expect('IDENT')
+        self.expect('OP_COLON')
+        type_ = self.parse_type()
+        return Param(name, type_)
+
+    def parse_params(self):
+        params = []
+
+        if self.test_token('OP_PAREN_C'):
+            return params
+
+
+
+
+
+    def parse_stmt_block(self):
+        stmts = []
+
+        while True:
+            if self.accept('OP_BRACE_C'):
+                break
+            else:
+                # stmts.append(self.parse_stmt())
+                pass
+
+        return StmtBlock(stmts)
+
+    def parse_type(self):
+        if self.token_type() == 'KW_BOOL':
+            self.expect('KW_BOOL')
+            return TypePrim('BOOL')
+        elif self.token_type() == 'KW_FLOAT':
+            self.expect('KW_FLOAT')
+            return TypePrim('FLOAT')
+        elif self.token_type() == 'KW_INT':
+            self.expect('KW_INT')
+            return TypePrim('INT')
+        elif self.token_type() == 'KW_VOID':
+            self.expect('KW_VOID')
+            return TypePrim('VOID')
+        else:
+            self.error()
 
     def token_type(self):
         return self.tokens[self.offset].type
@@ -156,6 +206,74 @@ class ExprVar(Expr):
 
     def print_node(self, p):
         p.print('name', self.name)
+
+
+class Param(Node):
+
+    def __init__(self, name, type):
+        self.name = name
+        self.type = type
+
+    def print_node(self, p):
+        p.print('name', self.name)
+        p.print('type', self.type)
+
+
+class Decl(Node):
+
+    def __init__(self):
+        pass
+        super().__init__()
+
+
+class DeclFn(Decl):
+
+    def __init__(self, name, params, ret_type, body):
+        self.name = name
+        self.params = params
+        self.ret_type = ret_type
+        self.body = body
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('name', self.name)
+        p.print('params', self.params)
+        p.print('ret_type', self.ret_type)
+        p.print('body', self.body)
+
+
+class Stmt(Node):
+
+    def __init__(self):
+        pass
+        super().__init__()
+
+
+class StmtBlock(Stmt):
+
+    def __init__(self, stmts):
+        self.stmts = stmts
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('stmts', self.stmts)
+
+
+class Type(Node):
+
+    def __init__(self):
+        pass
+        super().__init__()
+
+
+class TypePrim(Type):
+
+    def __init__(self, kind):
+        self.kind = kind
+        super().__init__()
+
+    def print_node(self, p):
+        p.print_single('kind', self.kind)
 
 
 class ASTPrinter:
