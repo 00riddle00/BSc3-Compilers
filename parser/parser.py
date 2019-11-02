@@ -1,10 +1,10 @@
 from pprint import pprint
+from lexer import Token
 
 # <TERM> ::= <IDENT>
 # <MULT> ::= <MULT> "*" <TERM> | <TERM>
 # <ADD> ::= <ADD> "+" <MULT> | <MULT>
 
-from lexer import Token
 
 class Parser:
     tokens: list
@@ -38,6 +38,20 @@ class Parser:
             # todo add prety prints
             print(f'  expected={token_type}, found={self.curr_token.type}')
             exit(1)
+
+    def parse_decl(self):
+        return self.parse_decl_fn()
+
+    def parse_decl_fn(self):
+        self.expect('KW_FN')
+        name = self.expect('OP_PAREN_O')
+        params = parse_params
+        self.expect('OP_PAREN_C')
+        self.expect('OP_COLON')
+        ret_type = parse_type
+        body = parse_stmt_block
+        DeclFn.new(name, params, ret_type, body)
+
 
     def parse_expr(self):
         return self.parse_expr_add()
