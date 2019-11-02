@@ -1,19 +1,10 @@
+from pprint import pprint
 
 # <TERM> ::= <IDENT>
 # <MULT> ::= <MULT> "*" <TERM> | <TERM>
 # <ADD> ::= <ADD> "+" <MULT> | <MULT>
 
-
-class Token:
-    type_: str
-    value: str
-    line_no: int
-
-    def __init__(self, type_, value, line_no):
-        self.type = type_
-        self.value = value
-        self.line_no = line_no
-
+from lexer import Token
 
 class Parser:
     tokens: list
@@ -49,7 +40,7 @@ class Parser:
             exit(1)
 
     def parse_expr(self):
-        self.parse_expr_add()
+        return self.parse_expr_add()
 
     # <ADD> ::= <MULT> | <ADD> "+" <MULT>
     # <ADD> ::= <MULT> {("+" | "-") <MULT>}
@@ -58,9 +49,9 @@ class Parser:
 
         while True:
             if self.accept('OP_SUM'):
-                self.result = f'{self.result} ADD {self.parse_expr_mult()}'
+                self.result = ExprBinary('ADD', self.result, self.parse_expr_mult())
             elif self.accept('OP_SUB'):
-                self.result = f'{self.result} SUB {self.parse_expr_mult()}'
+                self.result = ExprBinary('SUB', self.result, self.parse_expr_mult())
             else:
                 break
 
@@ -68,8 +59,7 @@ class Parser:
 
     def parse_expr_lit_int(self):
         lit = self.expect('LIT_INT')
-        self.result = 'LIT_INT'
-        return self.result
+        return ExprLit(lit)
 
     # <MULT> ::= <PRIMARY> | <MULT> "*" <PRIMARY>
     # <MULT> ::= <PRIMARY> {"*" <PRIMARY>}
@@ -77,25 +67,22 @@ class Parser:
         self.result = self.parse_expr_primary()
 
         while self.accept('OP_MULT'):
-            self.result = 'MULT'
+            self.result = ExprBinary('MULT', self.result, self.parse_expr_primary())
 
         return self.result
 
     # <PRIMARY> ::= <LIT_INT> | <VAR> | <PAREN>
     def parse_expr_primary(self):
         if self.token_type() == 'IDENT':
-            self.result = self.parse_expr_var()
+            return self.parse_expr_var()
         if self.token_type() == 'LIT_INT':
-            self.result = self.parse_expr_lit_int()
+            return self.parse_expr_lit_int()
         else:
             self.error()
 
-        return self.result
-
     def parse_expr_var(self):
         name = self.expect('IDENT')
-        self.result = 'IDENT'
-        return self.result
+        return ExprVar(name)
 
     def token_type(self):
         return self.tokens[self.offset].type
@@ -106,4 +93,93 @@ class Parser:
         print('\n')
 
 
+class Node(object):
 
+    def __init__(self):
+        pass
+
+    def print_node(self, p):
+        print(f'print not implemented for {self.__class__}')
+
+class Expr(Node):
+
+    def __init__(self):
+        pass
+        super().__init__()
+
+
+class ExprBinary(Expr):
+
+    # todo atr list everywhere
+
+    def __init__(self, op, left, right):
+        self.op = op
+        self.left = left
+        self.right = right
+        super().__init__()
+
+    def print_node(self, p):
+        p.print_single('op', self.op)
+        p.print('left', self.left)
+        p.print('right', self.right)
+
+
+class ExprLit(Expr):
+
+    def __init__(self, lit):
+        self.lit = lit
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('lit', self.lit)
+
+
+class ExprVar(Expr):
+
+    def __init__(self, name):
+        self.name = name
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('name', self.name)
+
+
+class ASTPrinter:
+
+    def __init__(self):
+        self.indent_level = 0
+
+    def print(self, title, object):
+        if isinstance(object, Node):
+            self.print_node(title, object)
+        elif isinstance(object, list):
+            self.print_array(title, object)
+        elif isinstance(object, Token):
+            self.print_token(title, object)
+        elif not object:
+            self.print_single(title, 'NULL')
+        else:
+            # print(f'bad argument {object.__class__.__name__}')
+            print(f'bad argument {object.__class__}')
+            exit(1)
+
+    def print_array(self, title, array):
+        if not array:
+            self.print_single(title, '[]')
+
+        for ind, el in enumerate(array):
+            print(f'{title}[{ind}], {el}')
+
+    def print_node(self, title, node):
+        self.print_single(title, f'{node.__class__}')
+        self.indent_level += 1
+        node.print_node(self)
+        self.indent_level -= 1
+
+    def print_single(self, title, text):
+        prefix = '  ' * self.indent_level
+        print(f'{prefix}{title}: {text}')
+
+    def print_token(self, title, token):
+        text = f'{token.value, token.line_no}'
+        self.print_single(title, text)

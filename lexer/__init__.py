@@ -1,1 +1,1 @@
-from .lexer import Input, Lexer
+from .lexer import Input, Lexer, Token

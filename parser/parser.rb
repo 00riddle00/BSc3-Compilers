@@ -1,20 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class Parser
   def initialize(tokens)
     @tokens = tokens
@@ -43,21 +27,6 @@ class Parser
     end
   end
 
-  def parse_decl
-    parse_decl_fn
-  end
-
-  def parse_decl_fn
-    expect(:KW_FN)
-    name = expect(:IDENT)
-    expect(:OP_PAREN_0)
-    params = parse_params
-    expect(:OP_PAREN_1)
-    expect(:OP_COLON)
-    ret_type = parse_type
-    body = parse_stmt_block
-    DeclFn.new(name, params, ret_type, body)
-  end
 
   def parse_expr
     parse_expr_add
@@ -98,13 +67,6 @@ class Parser
     result
   end
 
-  def parse_expr_paren
-    expect(:OP_PAREN_0)
-    result = parse_expr
-    expect(:OP_PAREN_1)
-    result
-  end
-
   # <PRIMARY> ::= <LIT_INT> | <VAR> | <PAREN>
   def parse_expr_primary
     case token_type
@@ -120,97 +82,105 @@ class Parser
     ExprVar.new(name)
   end
 
-  def parse_param
-    name = expect(:IDENT)
-    expect(:OP_COLON)
-    type = parse_type
-    Param.new(name, type)
-  end
 
-  def parse_params
-    params = []
-
-    if test_token(:OP_PAREN_1)
-      return params
-    end
-
-    params << parse_param
-    while accept(:OP_COMMA)
-      params << parse_param
-    end
-
-    params
-  end
-
-  def parse_program
-    decls = []
-
-    loop do
-      case token_type
-      when :EOF; break
-      else; decls << parse_decl
-      end
-    end
-
-    Program.new(decls)
-  end
-
-  def parse_stmt
-    case token_type
-    when :KW_IF; parse_stmt_if
-    when :KW_RETURN; parse_stmt_ret
-    else; error
-    end
-  end
-
-  def parse_stmt_block
-    stmts = []
-
-    loop do
-      if accept(:KW_END)
-        break
-      else
-        stmts << parse_stmt
-      end
-    end
-
-    StmtBlock.new(stmts)
-  end
-
-  def parse_stmt_if
-    expect(:KW_IF)
-    cond = parse_expr
-    body = parse_stmt_block
-    StmtIf.new(cond, body)
-  end
-
-  def parse_stmt_ret
-    return_kw = expect(:KW_RETURN)
-    value = token_type != :OP_SEMI ? parse_expr : nil
-    expect(:OP_SEMI)
-    StmtReturn.new(return_kw, value)
-  end
-
-  def parse_type
-    case token_type
-    when :KW_BOOL; expect(:KW_BOOL); TypePrim.new(:BOOL)
-    when :KW_FLOAT; expect(:KW_FLOAT); TypePrim.new(:FLOAT)
-    when :KW_INT; expect(:KW_INT); TypePrim.new(:INT)
-    when :KW_VOID; expect(:KW_VOID); TypePrim.new(:VOID)
-    else; error
-    end
-  end
-
-  def test_token(token_type)
-    curr_token = @tokens[@offset]
-    if curr_token.type == token_type
-      curr_token
-    end
-  end
-
-  def token_type
-    @tokens[@offset].type
+# abstract
+class Node
+  def print_node(p)
+    raise 'print not implemented for %s' % [self.class]
   end
 end
+
+class ExprBinary < Expr
+  attr_reader :op, :left, :right
+
+  def initialize(op, left, right)
+    @op = op
+    @left = left
+    @right = right
+  end
+
+  def print_node(p)
+    p.print_single('op', @op)
+    p.print('left', @left)
+    p.print('right', @right)
+  end
+end
+
+class ExprLit < Expr
+  attr_reader :lit
+
+  def initialize(lit)
+    @lit = lit
+  end
+
+  def print_node(p)
+    p.print('lit', @lit)
+  end
+end
+
+class ExprVar < Expr
+  attr_reader :name
+
+  def initialize(name)
+    @name = name
+  end
+
+  def print_node(p)
+    p.print('name', @name)
+  end
+end
+
+
+
+class ASTPrinter
+  def initialize
+    @indent_level = 0
+  end
+
+  def print(title, object)
+    if object.is_a?(Node)
+      print_node(title, object)
+    elsif object.is_a?(Array)
+      print_array(title, object)
+    elsif object.is_a?(Token)
+      print_token(title, object)
+    elsif object.nil?
+      print_single(title, 'NIL')
+    else
+      raise 'bad print argument %s' % [object.class]
+    end
+  end
+
+  def print_array(title, array)
+    if array.empty?
+      return print_single(title, '[]')
+    end
+
+    array.each_with_index do |elem, index|
+      print('%s[%i]' % [title, index], elem)
+    end
+  end
+
+  def print_node(title, node)
+    print_single(title, '%s:' % [node.class])
+    @indent_level += 1
+    node.print_node(self)
+    @indent_level -= 1
+  end
+
+  def print_single(title, text)
+    prefix = '  ' * @indent_level
+    STDOUT.puts '%s%s: %s' % [prefix, title, text]
+  end
+
+  def print_token(title, token)
+    text = '%s (l=%i)' % [token.value, token.line_no]
+    print_single(title, text)
+  end
+end
+
+
+
+
 
 

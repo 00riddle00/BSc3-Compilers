@@ -1,7 +1,7 @@
 from sys import argv
 
 from lexer import Input, Lexer
-from parser import Parser
+from parser import Parser, ASTPrinter
 
 samples_dir = 'FXlang_samples'
 
@@ -19,8 +19,11 @@ except ValueError:
 
 try:
     parser = Parser(lexer.tokens)
-    result = parser.parse_expr_add()
-    print('res=', result)
+    root = parser.parse_expr()
+    printer = ASTPrinter()
+    printer.print('root', root)
 except ValueError:
     print('exception while starting Parser')
+
+
 
