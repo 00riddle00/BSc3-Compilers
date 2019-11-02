@@ -99,12 +99,19 @@ class Parser:
         self.result = self.parse_expr_add()
 
         while True:
-            if self.accept('OP_L'):
-                self.result = ExprBinaryRel('LESS', self.result, self.parse_expr_add())
-            elif self.accept('OP_G'):
+
+            if self.accept('OP_G'):
                 self.result = ExprBinaryRel('GREATER', self.result, self.parse_expr_add())
+            elif self.accept('OP_GE'):
+                self.result = ExprBinaryRel('GREATER_OR_EQUAL', self.result, self.parse_expr_add())
+            elif self.accept('OP_L'):
+                self.result = ExprBinaryRel('LESS', self.result, self.parse_expr_add())
+            elif self.accept('OP_LE'):
+                self.result = ExprBinaryRel('LESS_OR_EQUAL', self.result, self.parse_expr_add())
             elif self.accept('OP_IS_EQ'):
                 self.result = ExprBinaryCmp('EQUAL', self.result, self.parse_expr_add())
+            elif self.accept('OP_IS_NEQ'):
+                self.result = ExprBinaryCmp('NOT_EQUAL', self.result, self.parse_expr_add())
             else:
                 break
 
@@ -199,6 +206,8 @@ class Parser:
             return self.parse_stmt_break()
         if self.token_type() == 'KW_RETURN':
             return self.parse_stmt_ret()
+        if self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID']:
+            return self.parse_stmt_var_decl()
         else:
             self.error()
 
@@ -248,6 +257,12 @@ class Parser:
         self.expect('OP_SEMICOLON')
 
         return StmtReturn(return_kw, value)
+
+    def parse_stmt_var_decl(self):
+        type_ = self.parse_type()
+        name = self.expect('IDENT')
+        self.expect('OP_SEMICOLON')
+        return StmtVarDecl(name, type_)
 
     def parse_type(self):
         if self.token_type() == 'KW_BOOL':
@@ -479,6 +494,17 @@ class StmtAssign(Stmt):
     def print_node(self, p):
         p.print('var', self.var)
         p.print('value', self.value)
+
+class StmtVarDecl(Stmt):
+
+    def __init__(self, name, type_):
+        self.name = name
+        self.type = type_
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('name', self.name)
+        p.print('type', self.type)
 
 
 class Type(Node):
