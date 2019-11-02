@@ -1,7 +1,6 @@
 fx test() ==> void {
 
-    a = b;
-    return main(test);
+    return a > 2;
 }
 
 fx main(int a, float b) ==> int {

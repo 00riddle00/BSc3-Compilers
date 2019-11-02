@@ -76,7 +76,7 @@ class Parser:
 
     # <EXPR> ::= <ADD>
     def parse_expr(self):
-        return self.parse_expr_add()
+        return self.parse_expr_compare()
 
     # <ADD> ::= <MULT> | <ADD> "+" <MULT>
     # <ADD> ::= <MULT> {("+" | "-") <MULT>}
@@ -87,13 +87,31 @@ class Parser:
 
         while True:
             if self.accept('OP_SUM'):
-                self.result = ExprBinary('ADD', self.result, self.parse_expr_mult())
+                self.result = ExprBinaryArith('ADD', self.result, self.parse_expr_mult())
             elif self.accept('OP_SUB'):
-                self.result = ExprBinary('SUB', self.result, self.parse_expr_mult())
+                self.result = ExprBinaryArith('SUB', self.result, self.parse_expr_mult())
             else:
                 break
 
         return self.result
+
+    def parse_expr_compare(self):
+        self.result = self.parse_expr_add()
+
+        while True:
+            if self.accept('OP_L'):
+                self.result = ExprBinaryRel('LESS', self.result, self.parse_expr_add())
+            elif self.accept('OP_G'):
+                self.result = ExprBinaryRel('GREATER', self.result, self.parse_expr_add())
+            elif self.accept('OP_IS_EQ'):
+                self.result = ExprBinaryCmp('EQUAL', self.result, self.parse_expr_add())
+            else:
+                break
+
+        return self.result
+
+
+
 
     def parse_expr_lit_int(self):
         lit = self.expect('LIT_INT')
@@ -107,7 +125,7 @@ class Parser:
         self.result = self.parse_expr_primary()
 
         while self.accept('OP_MUL'):
-            self.result = ExprBinary('MUL', self.result, self.parse_expr_primary())
+            self.result = ExprBinaryArith('MUL', self.result, self.parse_expr_primary())
 
         return self.result
 
@@ -302,6 +320,17 @@ class ExprBinary(Expr):
         p.print('left', self.left)
         p.print('right', self.right)
 
+class ExprBinaryArith(ExprBinary):
+    pass
+
+class ExprBinaryCmp(ExprBinary):
+    pass
+
+class ExprBinaryLog(ExprBinary):
+    pass
+
+class ExprBinaryRel(ExprBinary):
+    pass
 
 class ExprCall(Expr):
 
