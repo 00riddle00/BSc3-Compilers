@@ -79,8 +79,8 @@ class Parser:
     def parse_expr_mult(self):
         self.result = self.parse_expr_primary()
 
-        while self.accept('OP_MULT'):
-            self.result = ExprBinary('MULT', self.result, self.parse_expr_primary())
+        while self.accept('OP_MUL'):
+            self.result = ExprBinary('MUL', self.result, self.parse_expr_primary())
 
         return self.result
 
@@ -96,6 +96,8 @@ class Parser:
             return self.parse_expr_var()
         elif self.token_type() == 'LIT_INT':
             return self.parse_expr_lit_int()
+        elif self.token_type() == 'OP_PAREN_O':
+            return self.parse_expr_paren()
         else:
             self.error()
 
@@ -132,6 +134,14 @@ class Parser:
 
         return Program(decls)
 
+    def parse_stmt(self):
+        if self.token_type() == 'KW_IF':
+            return self.parse_stmt_if()
+        if self.token_type() == 'KW_RETURN':
+            return self.parse_stmt_ret()
+        else:
+            self.error()
+
     def parse_stmt_block(self):
         self.expect('OP_BRACE_O')
 
@@ -141,10 +151,28 @@ class Parser:
             if self.accept('OP_BRACE_C'):
                 break
             else:
-                # stmts.append(self.parse_stmt())
+                stmts.append(self.parse_stmt())
                 pass
 
         return StmtBlock(stmts)
+
+    def parse_stmt_if(self):
+        self.expect('KW_IF')
+        cond = self.parse_expr()
+        body = self.parse_stmt_block()
+        return StmtIf(cond, body)
+
+    def parse_stmt_ret(self):
+        return_kw = self.expect('KW_RETURN')
+
+        if self.token_type() != 'OP_SEMICOLON':
+            value = self.parse_expr()
+        else:
+            value = None
+
+        self.expect('OP_SEMICOLON')
+
+        return StmtReturn(return_kw, value)
 
     def parse_type(self):
         if self.token_type() == 'KW_BOOL':
@@ -290,6 +318,30 @@ class StmtBlock(Stmt):
         p.print('stmts', self.stmts)
 
 
+class StmtIf(Stmt):
+
+    def __init__(self, cond, body):
+        self.cond = cond
+        self.body = body
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('cond', self.cond)
+        p.print('body', self.body)
+
+
+class StmtReturn(Stmt):
+
+    def __init__(self, return_kw, value):
+        self.return_kw = return_kw
+        self.value = value
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('return_kw', self.return_kw)
+        p.print('value', self.value)
+
+
 class Type(Node):
 
     def __init__(self):
@@ -347,3 +399,5 @@ class ASTPrinter:
     def print_token(self, title, token):
         text = f'{token.value} (ln={token.line_no})'
         self.print_single(title, text)
+
+

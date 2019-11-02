@@ -196,17 +196,3 @@ class Parser
   end
 end
 
-
-
-class Program < Node
-  # std::vector<Decl*>
-  attr_reader :decls
-
-  def initialize(decls)
-    @decls = decls
-  end
-
-  def print_node(p)
-    p.print('decls', @decls)
-  end
-end
