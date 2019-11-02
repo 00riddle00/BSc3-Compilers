@@ -121,6 +121,17 @@ class Parser:
 
         return params
 
+    def parse_program(self):
+        decls = []
+
+        while True:
+            if self.token_type() == 'EOF':
+                break
+            else:
+                decls.append(self.parse_decl())
+
+        return Program(decls)
+
     def parse_stmt_block(self):
         self.expect('OP_BRACE_O')
 
@@ -227,6 +238,16 @@ class Param(Node):
     def print_node(self, p):
         p.print('name', self.name)
         p.print('type', self.type)
+
+
+class Program(Node):
+    # std::vector<Decl*>
+    def __init__(self, decls):
+        self.decls = decls
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('decls', self.decls)
 
 
 class Decl(Node):
