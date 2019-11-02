@@ -41,10 +41,31 @@ class Parser:
 
     def parse_stmt_assign(self):
         var = self.expect('IDENT')
-        self.expect('OP_ASSIGN_EQ')
+
+        if self.token_type() == 'OP_ASSIGN_EQ':
+            self.expect('OP_ASSIGN_EQ')
+            op = 'EQUALS'
+        elif self.token_type() == 'OP_ASSIGN_SUM':
+            op = self.expect('OP_ASSIGN_SUM')
+            op = 'PLUS_EQUALS'
+        elif self.token_type() == 'OP_ASSIGN_SUB':
+            op = self.expect('OP_ASSIGN_SUB')
+            op = 'MINUS_EQUALS'
+        elif self.token_type() == 'OP_ASSIGN_MUL':
+            op = self.expect('OP_ASSIGN_MUL')
+            op = 'MULT_EQUALS'
+        elif self.token_type() == 'OP_ASSIGN_DIV':
+            op = self.expect('OP_ASSIGN_DIV')
+            op = 'DIV_EQUALS'
+        elif self.token_type() == 'OP_ASSIGN_MOD':
+            op = self.expect('OP_ASSIGN_MOD')
+            op = 'MOD_EQUALS'
+        else:
+            self.error('invalid assign op')
+
         value = self.parse_expr()
         self.expect('OP_SEMICOLON')
-        return StmtAssign(var, value)
+        return StmtAssign(var, op, value)
 
 
     def parse_expr_call(self):
@@ -144,11 +165,11 @@ class Parser:
 
     # <PRIMARY> ::= <LIT_INT> | <VAR> | <PAREN>
     def parse_expr_primary(self):
-        if self.peek2('IDENT', 'OP_PAREN_O'):
-            return self.parse_expr_call()
-
-        if self.token_type() == 'IDENT':
-            return self.parse_expr_var()
+        if self.peek('IDENT'):
+            if self.peek2('OP_PAREN_O'):
+                return self.parse_expr_call()
+            else:
+                return self.parse_expr_var()
         elif self.token_type() == 'LIT_INT':
             return self.parse_expr_lit_int()
         elif self.token_type() == 'OP_PAREN_O':
@@ -195,8 +216,11 @@ class Parser:
         return Program(decls)
 
     def parse_stmt(self):
-        if self.peek2('IDENT', 'OP_ASSIGN_EQ'):
-            return self.parse_stmt_assign()
+        if self.peek('IDENT'):
+            for assign_op in ['OP_ASSIGN_EQ', 'OP_ASSIGN_SUM', 'OP_ASSIGN_SUB',
+                          'OP_ASSIGN_MUL', 'OP_ASSIGN_DIV', 'OP_ASSIGN_MOD']:
+                if self.peek2(assign_op):
+                    return self.parse_stmt_assign()
 
         if self.token_type() == 'KW_IF':
             return self.parse_stmt_if()
@@ -285,10 +309,9 @@ class Parser:
         if self.curr_token.type == token_type:
             return self.curr_token
 
-    def peek2(self, token_type0, token_type1):
-        token0 = self.tokens[self.offset + 0]
-        token1 = self.tokens[self.offset + 1]
-        return token0.type == token_type0 and token1.type == token_type1
+    def peek2(self, next_token_type):
+        next_token = self.tokens[self.offset + 1]
+        return next_token.type == next_token_type
 
     def token_type(self):
         return self.tokens[self.offset].type
@@ -486,13 +509,15 @@ class StmtReturn(Stmt):
 
 class StmtAssign(Stmt):
 
-    def __init__(self, var, value):
+    def __init__(self, var, op, value):
         self.var = var
+        self.op = op
         self.value = value
         super().__init__()
 
     def print_node(self, p):
         p.print('var', self.var)
+        p.print_single('op', self.op)
         p.print('value', self.value)
 
 class StmtVarDecl(Stmt):
