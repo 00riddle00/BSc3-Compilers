@@ -117,7 +117,6 @@ class Parser:
         if self.token_type() == 'IDENT':
             return self.parse_expr_var()
         elif self.token_type() == 'LIT_INT':
-            self.debug('here1')
             return self.parse_expr_lit_int()
         elif self.token_type() == 'OP_PAREN_O':
             return self.parse_expr_paren()
