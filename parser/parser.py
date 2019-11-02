@@ -159,8 +159,8 @@ class ASTPrinter:
         elif not object:
             self.print_single(title, 'NULL')
         else:
-            # print(f'bad argument {object.__class__.__name__}')
-            print(f'bad argument {object.__class__}')
+            print(f'bad argument {object.__class__.__name__}')
+            # print(f'bad argument {object.__class__}')
             exit(1)
 
     def print_array(self, title, array):
@@ -171,7 +171,7 @@ class ASTPrinter:
             print(f'{title}[{ind}], {el}')
 
     def print_node(self, title, node):
-        self.print_single(title, f'{node.__class__}')
+        self.print_single(title, f'{node.__class__.__name__}:')
         self.indent_level += 1
         node.print_node(self)
         self.indent_level -= 1
@@ -181,5 +181,5 @@ class ASTPrinter:
         print(f'{prefix}{title}: {text}')
 
     def print_token(self, title, token):
-        text = f'{token.value, token.line_no}'
+        text = f'{token.value} (ln={token.line_no})'
         self.print_single(title, text)
