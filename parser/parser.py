@@ -14,7 +14,6 @@ class Parser:
 
     def __init__(self, tokens) -> None:
         self.tokens = tokens
-        self.print_tokens()
         self.offset = 0
         self.result = ''
 
@@ -44,10 +43,11 @@ class Parser:
 
     def parse_decl_fn(self):
         self.expect('KW_FN')
-        name = self.expect('OP_PAREN_O')
+        name = self.expect('IDENT')
+        self.expect('OP_PAREN_O')
         params = self.parse_params()
         self.expect('OP_PAREN_C')
-        self.expect('OP_COLON')
+        self.expect('KW_FN_RET_ARROW')
         ret_type = self.parse_type()
         body = self.parse_stmt_block()
         return DeclFn(name, params, ret_type, body)
@@ -104,9 +104,8 @@ class Parser:
         return ExprVar(name)
 
     def parse_param(self):
-        name = self.expect('IDENT')
-        self.expect('OP_COLON')
         type_ = self.parse_type()
+        name = self.expect('IDENT')
         return Param(name, type_)
 
     def parse_params(self):
@@ -123,6 +122,8 @@ class Parser:
         return params
 
     def parse_stmt_block(self):
+        self.expect('OP_BRACE_O')
+
         stmts = []
 
         while True:
@@ -158,6 +159,7 @@ class Parser:
     def token_type(self):
         return self.tokens[self.offset].type
 
+    # fixme for debug
     def print_tokens(self):
         for token in self.tokens:
             print(f'{token.type},', end='')
@@ -222,7 +224,7 @@ class Param(Node):
         self.type = type
         super().__init__()
 
-def print_node(self, p):
+    def print_node(self, p):
         p.print('name', self.name)
         p.print('type', self.type)
 
@@ -308,7 +310,8 @@ class ASTPrinter:
             self.print_single(title, '[]')
 
         for ind, el in enumerate(array):
-            print(f'{title}[{ind}], {el}')
+            # print(f'{title}[{ind}], {el}')
+            self.print(f'{title}[{ind}]', el)
 
     def print_node(self, title, node):
         self.print_single(title, f'{node.__class__.__name__}:')
