@@ -50,8 +50,7 @@ class Parser:
         self.expect('OP_COLON')
         ret_type = self.parse_type()
         body = self.parse_stmt_block()
-        DeclFn.new(name, params, ret_type, body)
-
+        return DeclFn(name, params, ret_type, body)
 
     def parse_expr(self):
         return self.parse_expr_add()
@@ -87,7 +86,7 @@ class Parser:
 
     def parse_expr_paren(self):
         self.expect('OP_PAREN_O')
-        self.result = parse_expr
+        self.result = self.parse_expr()
         self.expect('OP_PAREN_C')
         return self.result
 
@@ -116,9 +115,12 @@ class Parser:
         if self.test_token('OP_PAREN_C'):
             return params
 
+        params.append(self.parse_param())
 
+        while self.accept('OP_COMMA'):
+            params.append(self.parse_param())
 
-
+        return params
 
     def parse_stmt_block(self):
         stmts = []
@@ -147,6 +149,11 @@ class Parser:
             return TypePrim('VOID')
         else:
             self.error()
+
+    def test_token(self, token_type):
+        self.curr_token = self.tokens[self.offset]
+        if self.curr_token.type == token_type:
+            return self.curr_token
 
     def token_type(self):
         return self.tokens[self.offset].type
@@ -213,8 +220,9 @@ class Param(Node):
     def __init__(self, name, type):
         self.name = name
         self.type = type
+        super().__init__()
 
-    def print_node(self, p):
+def print_node(self, p):
         p.print('name', self.name)
         p.print('type', self.type)
 

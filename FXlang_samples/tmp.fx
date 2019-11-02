@@ -1,5 +1,3 @@
-21 - 83
-
-fx test(int p, int q) => void {
+fx main(int a, float b) ==> void {
 
 }

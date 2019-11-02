@@ -19,7 +19,8 @@ except ValueError:
 
 try:
     parser = Parser(lexer.tokens)
-    root = parser.parse_expr()
+    # root = parser.parse_expr()
+    root = parser.parse_decl_fn()
     printer = ASTPrinter()
     printer.print('root', root)
 except ValueError:
