@@ -172,6 +172,18 @@ class Parser:
         lit = self.expect('LIT_STR')
         return ExprLit(lit, 'STR')
 
+    def parse_expr_lit_null(self):
+        lit = self.expect('KW_NULL')
+        return ExprLit(lit, 'NULL')
+
+    def parse_expr_lit_true(self):
+        lit = self.expect('KW_TRUE')
+        return ExprLit(lit, 'TRUE')
+
+    def parse_expr_lit_false(self):
+        lit = self.expect('KW_FALSE')
+        return ExprLit(lit, 'FALSE')
+
     # <MULT> ::= <PRIMARY> | <MULT> "*" <PRIMARY>
     # <MULT> ::= <PRIMARY> {"*" <PRIMARY>}
 
@@ -235,6 +247,12 @@ class Parser:
             return self.parse_expr_lit_char()
         elif self.token_type() == 'LIT_STR':
             return self.parse_expr_lit_str()
+        elif self.token_type() == 'KW_NULL':
+            return self.parse_expr_lit_null()
+        elif self.token_type() == 'KW_TRUE':
+            return self.parse_expr_lit_true()
+        elif self.token_type() == 'KW_FALSE':
+            return self.parse_expr_lit_false()
         elif self.token_type() == 'OP_PAREN_O':
             return self.parse_expr_paren()
         else:
