@@ -69,12 +69,12 @@ class Parser:
         self.expect('OP_SEMICOLON')
         return StmtAssign(var, op, value)
 
-    def parse_stmt_expr_call(self):
-        self.result = self.parse_expr_call()
+    def parse_fn_expr_call(self):
+        self.result = self.parse_fn_call()
         self.expect('OP_SEMICOLON')
-        return StmtExprCall(self.result)
+        return StmtFnCall(self.result)
 
-    def parse_expr_call(self):
+    def parse_fn_call(self):
         name = self.expect('IDENT')
         args = []
         self.expect('OP_PAREN_O')
@@ -87,7 +87,7 @@ class Parser:
             args.append(self.parse_expr())
 
         self.expect('OP_PAREN_C')
-        return ExprCall(name, args)
+        return FnCall(name, args)
 
     def parse_decl(self):
         return self.parse_decl_fn()
@@ -173,7 +173,7 @@ class Parser:
     def parse_expr_primary(self):
         if self.peek('IDENT'):
             if self.peek2('OP_PAREN_O'):
-                return self.parse_expr_call()
+                return self.parse_fn_call()
             else:
                 return self.parse_expr_var()
         elif self.token_type() == 'LIT_INT':
@@ -224,10 +224,10 @@ class Parser:
     def parse_stmt(self):
         if self.peek('IDENT'):
             if self.peek2('OP_PAREN_O'):
-                return self.parse_stmt_expr_call()
+                return self.parse_fn_expr_call()
             # todo refactor peek2 fn
             # elif self.peek2('OP_INCR'):
-            #     return self.parse_expr_call()
+            #     return self.parse_fn_call()
 
             for assign_op in ['OP_ASSIGN_EQ', 'OP_ASSIGN_SUM', 'OP_ASSIGN_SUB',
                           'OP_ASSIGN_MUL', 'OP_ASSIGN_DIV', 'OP_ASSIGN_MOD']:
@@ -402,7 +402,7 @@ class ExprBinaryRel(ExprBinary):
 
 
 
-class ExprCall(Expr):
+class FnCall(Expr):
 
     def __init__(self, name, args):
         self.name = name
@@ -527,7 +527,7 @@ class StmtWhile(Stmt):
         p.print('cond', self.cond)
         p.print('body', self.body)
 
-class StmtExprCall(Stmt):
+class StmtFnCall(Stmt):
     def __init__(self, expr_call):
         self.expr_call = expr_call
         super().__init__()
