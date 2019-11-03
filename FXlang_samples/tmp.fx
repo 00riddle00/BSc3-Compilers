@@ -1,9 +1,7 @@
 
 fx main(int a, float b) ==> int {
 
-    !a;
-
-    if (a+b) {
+    if (a+b/c) {
         break;
     }
 

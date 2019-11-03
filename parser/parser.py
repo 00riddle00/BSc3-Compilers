@@ -118,36 +118,36 @@ class Parser:
     # <ADD> ::= <MULT> {("+" | "-") <MULT>}
 
     # older: <ADD> ::= <MULT> {OP_PLUS <MULT>}
-    def parse_expr_add(self):
-        self.result = self.parse_expr_mult()
+    def parse_expr_sum_sub(self):
+        self.result = self.parse_expr_mul_div_mod()
 
         while True:
             if self.accept('OP_SUM'):
-                self.result = ExprBinaryArith('ADD', self.result, self.parse_expr_mult())
+                self.result = ExprBinaryArith('ADD', self.result, self.parse_expr_mul_div_mod())
             elif self.accept('OP_SUB'):
-                self.result = ExprBinaryArith('SUB', self.result, self.parse_expr_mult())
+                self.result = ExprBinaryArith('SUB', self.result, self.parse_expr_mul_div_mod())
             else:
                 break
 
         return self.result
 
     def parse_expr_compare(self):
-        self.result = self.parse_expr_add()
+        self.result = self.parse_expr_sum_sub()
 
         while True:
 
             if self.accept('OP_G'):
-                self.result = ExprBinaryRel('GREATER', self.result, self.parse_expr_add())
+                self.result = ExprBinaryRel('GREATER', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_GE'):
-                self.result = ExprBinaryRel('GREATER_OR_EQUAL', self.result, self.parse_expr_add())
+                self.result = ExprBinaryRel('GREATER_OR_EQUAL', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_L'):
-                self.result = ExprBinaryRel('LESS', self.result, self.parse_expr_add())
+                self.result = ExprBinaryRel('LESS', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_LE'):
-                self.result = ExprBinaryRel('LESS_OR_EQUAL', self.result, self.parse_expr_add())
+                self.result = ExprBinaryRel('LESS_OR_EQUAL', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_IS_EQ'):
-                self.result = ExprBinaryCmp('EQUAL', self.result, self.parse_expr_add())
+                self.result = ExprBinaryCmp('EQUAL', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_IS_NEQ'):
-                self.result = ExprBinaryCmp('NOT_EQUAL', self.result, self.parse_expr_add())
+                self.result = ExprBinaryCmp('NOT_EQUAL', self.result, self.parse_expr_sum_sub())
             else:
                 break
 
@@ -164,11 +164,19 @@ class Parser:
     # <MULT> ::= <PRIMARY> {"*" <PRIMARY>}
 
     # older: <MULT> ::= <TERM> {OP_MULT <TERM>}
-    def parse_expr_mult(self):
+    def parse_expr_mul_div_mod(self):
         self.result = self.parse_expr_unary()
 
-        while self.accept('OP_MUL'):
-            self.result = ExprBinaryArith('MUL', self.result, self.parse_expr_unary())
+        # fixme useless while loop
+        while True:
+            if self.accept('OP_MUL'):
+                self.result = ExprBinaryArith('MUL', self.result, self.parse_expr_unary())
+            elif self.accept('OP_DIV'):
+                self.result = ExprBinaryArith('DIV', self.result, self.parse_expr_unary())
+            elif self.accept('OP_MOD'):
+                self.result = ExprBinaryArith('MOD', self.result, self.parse_expr_unary())
+            else:
+                break
 
         return self.result
 
