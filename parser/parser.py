@@ -42,6 +42,7 @@ class Parser:
             exit(1)
 
     def parse_stmt_assign(self):
+        # todo do not allow var to be keyword (ex TRUE, NULL)
         var = self.expect('IDENT')
 
         if self.token_type() == 'OP_ASSIGN_EQ':
@@ -178,11 +179,11 @@ class Parser:
 
     def parse_expr_lit_true(self):
         lit = self.expect('KW_TRUE')
-        return ExprLit(lit, 'TRUE')
+        return ExprLit(lit, 'True')
 
     def parse_expr_lit_false(self):
         lit = self.expect('KW_FALSE')
-        return ExprLit(lit, 'FALSE')
+        return ExprLit(lit, 'False')
 
     # <MULT> ::= <PRIMARY> | <MULT> "*" <PRIMARY>
     # <MULT> ::= <PRIMARY> {"*" <PRIMARY>}
@@ -239,6 +240,7 @@ class Parser:
                 return self.parse_fn_call()
             else:
                 return self.parse_expr_var()
+
         elif self.token_type() == 'LIT_INT':
             return self.parse_expr_lit_int()
         elif self.token_type() == 'LIT_FLOAT':
@@ -247,7 +249,7 @@ class Parser:
             return self.parse_expr_lit_char()
         elif self.token_type() == 'LIT_STR':
             return self.parse_expr_lit_str()
-        elif self.token_type() == 'KW_NULL':
+        if self.token_type() == 'KW_NULL':
             return self.parse_expr_lit_null()
         elif self.token_type() == 'KW_TRUE':
             return self.parse_expr_lit_true()
