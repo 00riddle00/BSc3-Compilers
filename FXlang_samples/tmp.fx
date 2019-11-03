@@ -1,7 +1,7 @@
 
 fx main(int a, float b) ==> int {
 
-    a = !!!!!!!b;
+    !a;
 
     if (a+b) {
         break;

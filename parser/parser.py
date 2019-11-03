@@ -262,6 +262,8 @@ class Parser:
                 if self.peek2(assign_op):
                     return self.parse_stmt_assign()
 
+        # fixme here it is specified what prefix operators are legit to be contained in a legit statement!
+        # fixme vagueness
         elif self.token_type() in ['OP_INCR', 'OP_DECR']:
             return self.parse_stmt_unary_prefix()
 
