@@ -113,7 +113,64 @@ class Parser:
 
     # <EXPR> ::= <ADD>
     def parse_expr(self):
-        return self.parse_expr_compare()
+        return self.parse_expr_or()
+
+    def parse_expr_or(self):
+        self.result = self.parse_expr_and()
+
+        while True:
+            if self.accept('KW_OR'):
+                self.result = ExprBinaryOR('OR', self.result, self.parse_expr_and())
+            else:
+                break
+
+        return self.result
+
+    def parse_expr_and(self):
+        self.result = self.parse_expr_cmp()
+
+        # todo remove useless while
+        while True:
+            if self.accept('KW_AND'):
+                self.result = ExprBinaryAND('AND', self.result, self.parse_expr_cmp())
+            else:
+                break
+
+        return self.result
+
+
+    def parse_expr_cmp(self):
+        self.result = self.parse_expr_rel()
+
+        while True:
+            if self.accept('OP_IS_EQ'):
+                self.result = ExprBinaryCmp('EQUAL', self.result, self.parse_expr_rel())
+            elif self.accept('OP_IS_NEQ'):
+                self.result = ExprBinaryCmp('NOT_EQUAL', self.result, self.parse_expr_rel())
+            else:
+                break
+
+        return self.result
+
+
+    def parse_expr_rel(self):
+        self.result = self.parse_expr_sum_sub()
+
+        while True:
+
+            if self.accept('OP_G'):
+                self.result = ExprBinaryRel('GREATER', self.result, self.parse_expr_sum_sub())
+            elif self.accept('OP_GE'):
+                self.result = ExprBinaryRel('GREATER_OR_EQUAL', self.result, self.parse_expr_sum_sub())
+            elif self.accept('OP_L'):
+                self.result = ExprBinaryRel('LESS', self.result, self.parse_expr_sum_sub())
+            elif self.accept('OP_LE'):
+                self.result = ExprBinaryRel('LESS_OR_EQUAL', self.result, self.parse_expr_sum_sub())
+            else:
+                break
+
+        return self.result
+
 
     # <ADD> ::= <MULT> | <ADD> "+" <MULT>
     # <ADD> ::= <MULT> {("+" | "-") <MULT>}
@@ -132,58 +189,6 @@ class Parser:
 
         return self.result
 
-    def parse_expr_compare(self):
-        self.result = self.parse_expr_sum_sub()
-
-        while True:
-
-            if self.accept('OP_G'):
-                self.result = ExprBinaryRel('GREATER', self.result, self.parse_expr_sum_sub())
-            elif self.accept('OP_GE'):
-                self.result = ExprBinaryRel('GREATER_OR_EQUAL', self.result, self.parse_expr_sum_sub())
-            elif self.accept('OP_L'):
-                self.result = ExprBinaryRel('LESS', self.result, self.parse_expr_sum_sub())
-            elif self.accept('OP_LE'):
-                self.result = ExprBinaryRel('LESS_OR_EQUAL', self.result, self.parse_expr_sum_sub())
-            elif self.accept('OP_IS_EQ'):
-                self.result = ExprBinaryCmp('EQUAL', self.result, self.parse_expr_sum_sub())
-            elif self.accept('OP_IS_NEQ'):
-                self.result = ExprBinaryCmp('NOT_EQUAL', self.result, self.parse_expr_sum_sub())
-            else:
-                break
-
-        return self.result
-
-
-
-
-    def parse_expr_lit_int(self):
-        lit = self.expect('LIT_INT')
-        return ExprLit(lit, 'INT')
-
-    def parse_expr_lit_float(self):
-        lit = self.expect('LIT_FLOAT')
-        return ExprLit(lit, 'FLOAT')
-
-    def parse_expr_lit_char(self):
-        lit = self.expect('LIT_CHAR')
-        return ExprLit(lit, 'CHAR')
-
-    def parse_expr_lit_str(self):
-        lit = self.expect('LIT_STR')
-        return ExprLit(lit, 'STR')
-
-    def parse_expr_lit_null(self):
-        lit = self.expect('KW_NULL')
-        return ExprLit(lit, 'NULL')
-
-    def parse_expr_lit_true(self):
-        lit = self.expect('KW_TRUE')
-        return ExprLit(lit, 'True')
-
-    def parse_expr_lit_false(self):
-        lit = self.expect('KW_FALSE')
-        return ExprLit(lit, 'False')
 
     # <MULT> ::= <PRIMARY> | <MULT> "*" <PRIMARY>
     # <MULT> ::= <PRIMARY> {"*" <PRIMARY>}
@@ -205,17 +210,12 @@ class Parser:
 
         return self.result
 
-    def parse_expr_paren(self):
-        self.expect('OP_PAREN_O')
-        self.result = self.parse_expr()
-        self.expect('OP_PAREN_C')
-        return self.result
-
     def parse_expr_unary(self):
         if self.peek('OP_INCR') or self.peek('OP_DECR') or self.peek('OP_NOT'):
             return self.parse_expr_unary_prefix()
         else:
             return self.parse_expr_primary()
+
 
     def parse_expr_unary_prefix(self):
         if self.accept('OP_INCR'):
@@ -260,9 +260,49 @@ class Parser:
         else:
             self.error(f'expr error {self.curr_token}')
 
+
+    def parse_expr_lit_int(self):
+        lit = self.expect('LIT_INT')
+        return ExprLit(lit, 'INT')
+
+    def parse_expr_lit_float(self):
+        lit = self.expect('LIT_FLOAT')
+        return ExprLit(lit, 'FLOAT')
+
+    def parse_expr_lit_char(self):
+        lit = self.expect('LIT_CHAR')
+        return ExprLit(lit, 'CHAR')
+
+    def parse_expr_lit_str(self):
+        lit = self.expect('LIT_STR')
+        return ExprLit(lit, 'STR')
+
+    def parse_expr_lit_null(self):
+        lit = self.expect('KW_NULL')
+        return ExprLit(lit, 'NULL')
+
+    def parse_expr_lit_true(self):
+        lit = self.expect('KW_TRUE')
+        return ExprLit(lit, 'True')
+
+    def parse_expr_lit_false(self):
+        lit = self.expect('KW_FALSE')
+        return ExprLit(lit, 'False')
+
+
+
+    def parse_expr_paren(self):
+        self.expect('OP_PAREN_O')
+        self.result = self.parse_expr()
+        self.expect('OP_PAREN_C')
+        return self.result
+
     def parse_expr_var(self):
         name = self.expect('IDENT')
         return ExprVar(name)
+
+
+
 
     def parse_param(self):
         type_ = self.parse_type()
@@ -501,7 +541,10 @@ class ExprBinaryArith(ExprBinary):
 class ExprBinaryCmp(ExprBinary):
     pass
 
-class ExprBinaryLog(ExprBinary):
+class ExprBinaryAND(ExprBinary):
+    pass
+
+class ExprBinaryOR(ExprBinary):
     pass
 
 class ExprBinaryRel(ExprBinary):
