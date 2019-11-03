@@ -179,7 +179,7 @@ class Parser:
         return self.result
 
     def parse_expr_unary(self):
-        if self.peek('OP_INCR') or self.peek('OP_DECR'):
+        if self.peek('OP_INCR') or self.peek('OP_DECR') or self.peek('OP_NOT'):
             return self.parse_expr_unary_prefix()
         else:
             return self.parse_expr_primary()
@@ -189,9 +189,15 @@ class Parser:
             op = 'INCREMENT'
         elif self.accept('OP_DECR'):
             op = 'DECREMENT'
+        elif self.accept('OP_NOT'):
+            op = 'NOT'
+            op_count = 1
+            while self.accept('OP_NOT'):
+                op_count += 1
+            name = self.expect('IDENT')
+            return ExprUnaryPrefix(name, op, op_count)
 
         name = self.expect('IDENT')
-
         return ExprUnaryPrefix(name, op)
 
     # <PRIMARY> ::= <LIT_INT> | <VAR> | <PAREN>
@@ -400,14 +406,17 @@ class Expr(Node):
 
 class ExprUnaryPrefix(Expr):
 
-    def __init__(self, var, op):
+    def __init__(self, var, op, op_count=None):
         self.var = var
         self.op = op
+        self.op_count = op_count
         super().__init__()
 
     def print_node(self, p):
         p.print('var', self.var)
         p.print_single('op', self.op)
+        if self.op_count:
+            p.print_single('op count', self.op_count)
 
 
 class ExprBinary(Expr):
