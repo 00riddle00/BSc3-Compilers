@@ -1,9 +1,7 @@
 
 fx main(int a, float b) ==> int {
 
-    if (a+b/c) {
-        continue;
-    }
+    a = 2 + 'a';
 
     return (1 + 2) * z;
 }

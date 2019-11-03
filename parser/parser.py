@@ -158,7 +158,19 @@ class Parser:
 
     def parse_expr_lit_int(self):
         lit = self.expect('LIT_INT')
-        return ExprLit(lit)
+        return ExprLit(lit, 'INT')
+
+    def parse_expr_lit_float(self):
+        lit = self.expect('LIT_FLOAT')
+        return ExprLit(lit, 'FLOAT')
+
+    def parse_expr_lit_char(self):
+        lit = self.expect('LIT_CHAR')
+        return ExprLit(lit, 'CHAR')
+
+    def parse_expr_lit_str(self):
+        lit = self.expect('LIT_STR')
+        return ExprLit(lit, 'STR')
 
     # <MULT> ::= <PRIMARY> | <MULT> "*" <PRIMARY>
     # <MULT> ::= <PRIMARY> {"*" <PRIMARY>}
@@ -217,6 +229,12 @@ class Parser:
                 return self.parse_expr_var()
         elif self.token_type() == 'LIT_INT':
             return self.parse_expr_lit_int()
+        elif self.token_type() == 'LIT_FLOAT':
+            return self.parse_expr_lit_float()
+        elif self.token_type() == 'LIT_CHAR':
+            return self.parse_expr_lit_char()
+        elif self.token_type() == 'LIT_STR':
+            return self.parse_expr_lit_str()
         elif self.token_type() == 'OP_PAREN_O':
             return self.parse_expr_paren()
         else:
@@ -479,12 +497,14 @@ class FnCall(Expr):
 
 class ExprLit(Expr):
 
-    def __init__(self, lit):
+    def __init__(self, lit, kind):
         self.lit = lit
+        self.kind = kind
         super().__init__()
 
     def print_node(self, p):
         p.print('lit', self.lit)
+        p.print_single('kind', self.kind)
 
 
 class ExprVar(Expr):
