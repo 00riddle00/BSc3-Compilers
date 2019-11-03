@@ -342,6 +342,7 @@ class Parser:
         if self.peek('IDENT'):
             if self.peek2('OP_PAREN_O'):
                 return self.parse_stmt_fn_call()
+            # todo refactor this mess
             for assign_op in ['OP_ASSIGN_EQ', 'OP_ASSIGN_SUM', 'OP_ASSIGN_SUB',
                           'OP_ASSIGN_MUL', 'OP_ASSIGN_DIV', 'OP_ASSIGN_MOD']:
                 # todo refactor peek2 fn
@@ -355,6 +356,8 @@ class Parser:
 
         if self.token_type() == 'KW_IF':
             return self.parse_stmt_if()
+        if self.token_type() == 'KW_FOR':
+            return self.parse_stmt_for()
         if self.token_type() == 'KW_WHILE':
             return self.parse_stmt_while()
         if self.token_type() == 'KW_BREAK':
@@ -407,6 +410,32 @@ class Parser:
             else_body = self.parse_stmt_block()
 
         return StmtIf(if_cond, if_body, elif_conds, elif_bodies, else_body)
+
+
+    def parse_stmt_for(self):
+        self.expect('KW_FOR')
+        self.expect('OP_PAREN_O')
+        for_init = self.parse_for_init()
+        self.expect('OP_SEMICOLON')
+        for_cond = self.parse_for_cond()
+        self.expect('OP_SEMICOLON')
+        for_incr = self.parse_for_incr()
+        self.expect('OP_PAREN_C')
+
+        for_body = self.parse_stmt_block()
+
+        return StmtFor(for_init, for_cond, for_incr, for_body)
+
+    def parse_for_cond(self):
+        if self.peek('IDENT'):
+            for assign_op in ['OP_ASSIGN_EQ', 'OP_ASSIGN_SUM', 'OP_ASSIGN_SUB',
+                              'OP_ASSIGN_MUL', 'OP_ASSIGN_DIV', 'OP_ASSIGN_MOD']:
+                if self.peek2(assign_op):
+                    return self.parse_stmt_assign()
+        else:
+            self.result =  self.parse_expr()
+            self.expect('OP_SEMICOLON')
+            return self.result
 
     def parse_stmt_while(self):
         self.expect('KW_WHILE')
