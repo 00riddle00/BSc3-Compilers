@@ -281,6 +281,8 @@ class Parser:
             return self.parse_stmt_while()
         if self.token_type() == 'KW_BREAK':
             return self.parse_stmt_break()
+        if self.token_type() == 'KW_CONTINUE':
+            return self.parse_stmt_continue()
         if self.token_type() == 'KW_RETURN':
             return self.parse_stmt_ret()
         if self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID']:
@@ -340,6 +342,11 @@ class Parser:
         break_kw = self.expect('KW_BREAK')
         self.expect('OP_SEMICOLON')
         return StmtBreak(break_kw)
+
+    def parse_stmt_continue(self):
+        continue_kw = self.expect('KW_CONTINUE')
+        self.expect('OP_SEMICOLON')
+        return StmtContinue(continue_kw)
 
     def parse_stmt_ret(self):
         return_kw = self.expect('KW_RETURN')
@@ -600,6 +607,16 @@ class StmtBreak(Stmt):
 
     def print_node(self, p):
         p.print('break_kw', self.break_kw)
+
+class StmtContinue(Stmt):
+
+    def __init__(self, continue_kw):
+        self.continue_kw = continue_kw
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('continue_kw', self.continue_kw)
+
 
 class StmtReturn(Stmt):
 
