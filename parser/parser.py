@@ -69,17 +69,14 @@ class Parser:
         self.expect('OP_SEMICOLON')
         return StmtAssign(var, op, value)
 
-    def parse_stmt_unary(self):
+    def parse_stmt_unary_prefix(self):
 
-        if self.accept('OP_INCR'):
-            op = 'INCREMENT'
-        elif self.accept('OP_DECR'):
-            op = 'DECREMENT'
-
-        name = self.expect('IDENT')
+        self.result = self.parse_expr_unary_prefix()
         self.expect('OP_SEMICOLON')
 
-        return StmtUnary(ExprUnary(name, 'DECREMENT'))
+        return StmtUnaryPrefix(self.result)
+
+
 
     def parse_stmt_fn_call(self):
         self.result = self.parse_fn_call()
@@ -168,10 +165,10 @@ class Parser:
 
     # older: <MULT> ::= <TERM> {OP_MULT <TERM>}
     def parse_expr_mult(self):
-        self.result = self.parse_expr_primary()
+        self.result = self.parse_expr_unary()
 
         while self.accept('OP_MUL'):
-            self.result = ExprBinaryArith('MUL', self.result, self.parse_expr_primary())
+            self.result = ExprBinaryArith('MUL', self.result, self.parse_expr_unary())
 
         return self.result
 
@@ -180,6 +177,22 @@ class Parser:
         self.result = self.parse_expr()
         self.expect('OP_PAREN_C')
         return self.result
+
+    def parse_expr_unary(self):
+        if self.peek('OP_INCR') or self.peek('OP_DECR'):
+            return self.parse_expr_unary_prefix()
+        else:
+            return self.parse_expr_primary()
+
+    def parse_expr_unary_prefix(self):
+        if self.accept('OP_INCR'):
+            op = 'INCREMENT'
+        elif self.accept('OP_DECR'):
+            op = 'DECREMENT'
+
+        name = self.expect('IDENT')
+
+        return ExprUnaryPrefix(name, op)
 
     # <PRIMARY> ::= <LIT_INT> | <VAR> | <PAREN>
     def parse_expr_primary(self):
@@ -244,7 +257,7 @@ class Parser:
                     return self.parse_stmt_assign()
 
         elif self.token_type() in ['OP_INCR', 'OP_DECR']:
-            return self.parse_stmt_unary()
+            return self.parse_stmt_unary_prefix()
 
         if self.token_type() == 'KW_IF':
             return self.parse_stmt_if()
@@ -385,7 +398,7 @@ class Expr(Node):
         super().__init__()
 
 
-class ExprUnary(Expr):
+class ExprUnaryPrefix(Expr):
 
     def __init__(self, var, op):
         self.var = var
@@ -602,14 +615,15 @@ class StmtFnCall(Stmt):
     def print_node(self, p):
         p.print('expr_call', self.expr_call)
 
-class StmtUnary(Stmt):
+class StmtUnaryPrefix(Stmt):
 
     def __init__(self, expr_unary):
         self.expr_unary = expr_unary
         super().__init__()
 
     def print_node(self, p):
-        p.print('expr_unary', self.expr_unary)
+        # todo naming
+        p.print('expr_unary_prefix', self.expr_unary)
 
 
 
