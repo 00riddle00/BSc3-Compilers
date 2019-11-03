@@ -303,7 +303,7 @@ class Parser:
             return self.parse_stmt_continue()
         if self.token_type() == 'KW_RETURN':
             return self.parse_stmt_ret()
-        if self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID']:
+        if self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID', 'KW_CHAR', 'KW_STR']:
             return self.parse_stmt_var_decl()
         else:
             self.error(inspect.stack()[0][3])
@@ -397,6 +397,12 @@ class Parser:
         elif self.token_type() == 'KW_VOID':
             self.expect('KW_VOID')
             return TypePrim('VOID')
+        elif self.token_type() == 'KW_CHAR':
+            self.expect('KW_CHAR')
+            return TypePrim('CHAR')
+        elif self.token_type() == 'KW_STR':
+            self.expect('KW_STR')
+            return TypePrim('STR')
         else:
             self.error(inspect.stack()[0][3])
 

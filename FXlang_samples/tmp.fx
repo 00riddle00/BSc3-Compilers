@@ -1,7 +1,7 @@
 
-fx main(int a, float b) ==> int {
+fx main(char a, float b) ==> int {
 
-    a = 2 + 'a';
+    string b;
 
     return (1 + 2) * z;
 }
