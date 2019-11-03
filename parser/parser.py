@@ -1,5 +1,6 @@
 from pprint import pprint
 from lexer import Token
+import inspect
 
 # <TERM> ::= <IDENT>
 # <MULT> ::= <MULT> "*" <TERM> | <TERM>
@@ -19,6 +20,7 @@ class Parser:
 
     def error(self, msg=''):
         print(f'parse error: {msg}')
+
         exit(1)
 
     def accept(self, token_type):
@@ -67,6 +69,10 @@ class Parser:
         self.expect('OP_SEMICOLON')
         return StmtAssign(var, op, value)
 
+    def parse_stmt_expr_call(self):
+        self.result = self.parse_expr_call()
+        self.expect('OP_SEMICOLON')
+        return StmtExprCall(self.result)
 
     def parse_expr_call(self):
         name = self.expect('IDENT')
@@ -217,6 +223,12 @@ class Parser:
 
     def parse_stmt(self):
         if self.peek('IDENT'):
+            if self.peek2('OP_PAREN_O'):
+                return self.parse_stmt_expr_call()
+            # todo refactor peek2 fn
+            # elif self.peek2('OP_INCR'):
+            #     return self.parse_expr_call()
+
             for assign_op in ['OP_ASSIGN_EQ', 'OP_ASSIGN_SUM', 'OP_ASSIGN_SUB',
                           'OP_ASSIGN_MUL', 'OP_ASSIGN_DIV', 'OP_ASSIGN_MOD']:
                 if self.peek2(assign_op):
@@ -233,7 +245,8 @@ class Parser:
         if self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID']:
             return self.parse_stmt_var_decl()
         else:
-            self.error()
+            self.error(inspect.stack()[0][3])
+
 
     def parse_stmt_block(self):
         self.expect('OP_BRACE_O')
@@ -319,7 +332,7 @@ class Parser:
             self.expect('KW_VOID')
             return TypePrim('VOID')
         else:
-            self.error()
+            self.error(inspect.stack()[0][3])
 
     def peek(self, token_type):
         self.curr_token = self.tokens[self.offset]
@@ -386,6 +399,8 @@ class ExprBinaryLog(ExprBinary):
 
 class ExprBinaryRel(ExprBinary):
     pass
+
+
 
 class ExprCall(Expr):
 
@@ -511,6 +526,15 @@ class StmtWhile(Stmt):
     def print_node(self, p):
         p.print('cond', self.cond)
         p.print('body', self.body)
+
+class StmtExprCall(Stmt):
+    def __init__(self, expr_call):
+        self.expr_call = expr_call
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('expr_call', self.expr_call)
+
 
 class StmtBreak(Stmt):
 
