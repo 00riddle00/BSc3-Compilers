@@ -69,7 +69,18 @@ class Parser:
         self.expect('OP_SEMICOLON')
         return StmtAssign(var, op, value)
 
-    def parse_fn_expr_call(self):
+    def parse_stmt_unary(self):
+        name = self.expect('IDENT')
+
+        if self.accept('OP_INCR'):
+            self.result = ExprUnary(name, 'INCREMENT')
+        elif self.accept('OP_DECR'):
+            self.result = ExprUnary(name, 'DECREMENT')
+
+        self.expect('OP_SEMICOLON')
+        return StmtUnary(self.result)
+
+    def parse_stmt_fn_call(self):
         self.result = self.parse_fn_call()
         self.expect('OP_SEMICOLON')
         return StmtFnCall(self.result)
@@ -224,10 +235,10 @@ class Parser:
     def parse_stmt(self):
         if self.peek('IDENT'):
             if self.peek2('OP_PAREN_O'):
-                return self.parse_fn_expr_call()
+                return self.parse_stmt_fn_call()
             # todo refactor peek2 fn
-            # elif self.peek2('OP_INCR'):
-            #     return self.parse_fn_call()
+            elif self.peek2('OP_INCR') or self.peek2('OP_DECR'):
+                return self.parse_stmt_unary()
 
             for assign_op in ['OP_ASSIGN_EQ', 'OP_ASSIGN_SUM', 'OP_ASSIGN_SUB',
                           'OP_ASSIGN_MUL', 'OP_ASSIGN_DIV', 'OP_ASSIGN_MOD']:
@@ -371,6 +382,18 @@ class Expr(Node):
     def __init__(self):
         pass
         super().__init__()
+
+
+class ExprUnary(Expr):
+
+    def __init__(self, var, op):
+        self.var = var
+        self.op = op
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('var', self.var)
+        p.print_single('op', self.op)
 
 
 class ExprBinary(Expr):
@@ -568,6 +591,27 @@ class StmtAssign(Stmt):
         p.print('var', self.var)
         p.print_single('op', self.op)
         p.print('value', self.value)
+
+
+class StmtFnCall(Stmt):
+    def __init__(self, expr_call):
+        self.expr_call = expr_call
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('expr_call', self.expr_call)
+
+class StmtUnary(Stmt):
+
+    def __init__(self, expr_unary):
+        self.expr_unary = expr_unary
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('expr_unary', self.expr_unary)
+
+
+
 
 class StmtVarDecl(Stmt):
 

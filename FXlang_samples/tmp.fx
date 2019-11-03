@@ -1,7 +1,7 @@
 
 fx main(int a, float b) ==> int {
 
-    fn_call(test);
+    a++;
 
     if (a+b) {
         break;
