@@ -70,15 +70,16 @@ class Parser:
         return StmtAssign(var, op, value)
 
     def parse_stmt_unary(self):
-        name = self.expect('IDENT')
 
         if self.accept('OP_INCR'):
-            self.result = ExprUnary(name, 'INCREMENT')
+            op = 'INCREMENT'
         elif self.accept('OP_DECR'):
-            self.result = ExprUnary(name, 'DECREMENT')
+            op = 'DECREMENT'
 
+        name = self.expect('IDENT')
         self.expect('OP_SEMICOLON')
-        return StmtUnary(self.result)
+
+        return StmtUnary(ExprUnary(name, 'DECREMENT'))
 
     def parse_stmt_fn_call(self):
         self.result = self.parse_fn_call()
@@ -236,14 +237,14 @@ class Parser:
         if self.peek('IDENT'):
             if self.peek2('OP_PAREN_O'):
                 return self.parse_stmt_fn_call()
-            # todo refactor peek2 fn
-            elif self.peek2('OP_INCR') or self.peek2('OP_DECR'):
-                return self.parse_stmt_unary()
-
             for assign_op in ['OP_ASSIGN_EQ', 'OP_ASSIGN_SUM', 'OP_ASSIGN_SUB',
                           'OP_ASSIGN_MUL', 'OP_ASSIGN_DIV', 'OP_ASSIGN_MOD']:
+                # todo refactor peek2 fn
                 if self.peek2(assign_op):
                     return self.parse_stmt_assign()
+
+        elif self.token_type() in ['OP_INCR', 'OP_DECR']:
+            return self.parse_stmt_unary()
 
         if self.token_type() == 'KW_IF':
             return self.parse_stmt_if()
