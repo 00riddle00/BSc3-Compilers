@@ -70,21 +70,12 @@ class Parser:
         self.expect('OP_SEMICOLON')
         return StmtAssign(var, op, value)
 
-    def parse_stmt_unary_prefix(self):
-
-        self.result = self.parse_expr_unary_prefix()
+    def parse_stmt_expr(self, expr):
+        self.result = expr
         self.expect('OP_SEMICOLON')
+        return StmtExpr(self.result)
 
-        return StmtUnaryPrefix(self.result)
-
-
-
-    def parse_stmt_fn_call(self):
-        self.result = self.parse_fn_call()
-        self.expect('OP_SEMICOLON')
-        return StmtFnCall(self.result)
-
-    def parse_fn_call(self):
+    def parse_expr_fn_call(self):
         name = self.expect('IDENT')
         args = []
         self.expect('OP_PAREN_O')
@@ -97,7 +88,7 @@ class Parser:
             args.append(self.parse_expr())
 
         self.expect('OP_PAREN_C')
-        return FnCall(name, args)
+        return ExprFnCall(name, args)
 
     def parse_decl(self):
         return self.parse_decl_fn()
@@ -341,7 +332,7 @@ class Parser:
     def parse_stmt(self):
         if self.peek('IDENT'):
             if self.peek2('OP_PAREN_O'):
-                return self.parse_stmt_fn_call()
+                return self.parse_stmt_expr(self.parse_expr_fn_call())
             # todo refactor this mess
             for assign_op in ['OP_ASSIGN_EQ', 'OP_ASSIGN_SUM', 'OP_ASSIGN_SUB',
                           'OP_ASSIGN_MUL', 'OP_ASSIGN_DIV', 'OP_ASSIGN_MOD']:
@@ -352,7 +343,7 @@ class Parser:
         # fixme here it is specified what prefix operators are legit to be contained in a legit statement!
         # fixme vagueness
         elif self.token_type() in ['OP_INCR', 'OP_DECR']:
-            return self.parse_stmt_unary_prefix()
+            return self.parse_stmt_expr(self.parse_expr_unary_prefix())
 
         if self.token_type() == 'KW_IF':
             return self.parse_stmt_if()
@@ -412,19 +403,19 @@ class Parser:
         return StmtIf(if_cond, if_body, elif_conds, elif_bodies, else_body)
 
 
-    def parse_stmt_for(self):
-        self.expect('KW_FOR')
-        self.expect('OP_PAREN_O')
-        for_init = self.parse_for_init()
-        self.expect('OP_SEMICOLON')
-        for_cond = self.parse_for_cond()
-        self.expect('OP_SEMICOLON')
-        for_incr = self.parse_for_incr()
-        self.expect('OP_PAREN_C')
-
-        for_body = self.parse_stmt_block()
-
-        return StmtFor(for_init, for_cond, for_incr, for_body)
+    # def parse_stmt_for(self):
+    #     self.expect('KW_FOR')
+    #     self.expect('OP_PAREN_O')
+    #     for_init = self.parse_for_init()
+    #     self.expect('OP_SEMICOLON')
+    #     for_cond = self.parse_for_cond()
+    #     self.expect('OP_SEMICOLON')
+    #     for_incr = self.parse_for_incr()
+    #     self.expect('OP_PAREN_C')
+    #
+    #     for_body = self.parse_stmt_block()
+    #
+    #     return StmtFor(for_init, for_cond, for_incr, for_body)
 
     def parse_for_cond(self):
         if self.peek('IDENT'):
@@ -566,7 +557,7 @@ class ExprBinary(Expr):
         p.print('left', self.left)
         p.print('right', self.right)
 
-class FnCall(Expr):
+class ExprFnCall(Expr):
 
     def __init__(self, name, args):
         self.name = name
@@ -693,13 +684,13 @@ class StmtWhile(Stmt):
         p.print('cond', self.cond)
         p.print('body', self.body)
 
-class StmtFnCall(Stmt):
-    def __init__(self, expr_call):
-        self.expr_call = expr_call
+class StmtExpr(Stmt):
+    def __init__(self, expr):
+        self.expr = expr
         super().__init__()
 
     def print_node(self, p):
-        p.print('expr_call', self.expr_call)
+        p.print('expr', self.expr)
 
 
 class StmtBreak(Stmt):
@@ -744,15 +735,6 @@ class StmtAssign(Stmt):
         p.print('var', self.var)
         p.print_single('op', self.op)
         p.print('value', self.value)
-
-
-class StmtFnCall(Stmt):
-    def __init__(self, expr_call):
-        self.expr_call = expr_call
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('expr_call', self.expr_call)
 
 class StmtUnaryPrefix(Stmt):
 
