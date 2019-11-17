@@ -1,1 +1,2 @@
-from .parser import Parser, ASTPrinter
+from .parser import Parser
+from .ast_printer import ASTPrinter

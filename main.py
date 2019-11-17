@@ -24,6 +24,3 @@ try:
     printer.print('root', root)
 except ValueError:
     print('exception while starting Parser')
-
-
-

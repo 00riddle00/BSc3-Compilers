@@ -1,23 +1,24 @@
 from pprint import pprint
 from lexer import Token
 import inspect
-
+from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnaryPrefix, ExprBinary, \
+    ExprFnCall, Param, Program, DeclFn, StmtBlock, StmtIf, StmtWhile, StmtBreak, \
+    StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl
 
 # <TERM> ::= <IDENT>
 # <MULT> ::= <MULT> "*" <TERM> | <TERM>
 # <ADD> ::= <ADD> "+" <MULT> | <MULT>
 
-
 class Parser:
     tokens: list
     offset: int
     curr_token: Token
-    result: str
+    result: Node
 
     def __init__(self, tokens) -> None:
         self.tokens = tokens
         self.offset = 0
-        self.result = ''
+        self.result = Node()
 
     def error(self, msg=''):
         print(f'parse error: {msg}')
@@ -190,9 +191,9 @@ class Parser:
             if self.accept('OP_MUL'):
                 self.result = ExprBinary('arith', 'MUL', self.result, self.parse_expr_unary())
             elif self.accept('OP_DIV'):
-                self.result = ExprBinary('arith', self.result, self.parse_expr_unary())
+                self.result = ExprBinary('arith', 'DIV', self.result, self.parse_expr_unary())
             elif self.accept('OP_MOD'):
-                self.result = ExprBinary('arith', self.result, self.parse_expr_unary())
+                self.result = ExprBinary('arith', 'MOD', self.result, self.parse_expr_unary())
             else:
                 break
 
@@ -224,7 +225,7 @@ class Parser:
     def parse_expr_primary(self):
         if self.peek('IDENT'):
             if self.peek2('OP_PAREN_O'):
-                return self.parse_fn_call()
+                return self.parse_expr_fn_call()
             else:
                 return self.parse_expr_var()
 
@@ -337,8 +338,8 @@ class Parser:
 
         if self.token_type() == 'KW_IF':
             return self.parse_stmt_if()
-        if self.token_type() == 'KW_FOR':
-            return self.parse_stmt_for()
+        # if self.token_type() == 'KW_FOR':
+        #     return self.parse_stmt_for()
         if self.token_type() == 'KW_WHILE':
             return self.parse_stmt_while()
         if self.token_type() == 'KW_BREAK':
@@ -494,318 +495,3 @@ class Parser:
 
     def debug(self, msg):
         print(f'[debug:{msg}:{self.curr_token.type}:{self.curr_token.value}]')
-
-
-class Node(object):
-
-    def __init__(self):
-        pass
-
-    def print_node(self, p):
-        print(f'print not implemented for {self.__class__}')
-
-
-class Expr(Node):
-
-    def __init__(self):
-        pass
-        super().__init__()
-
-
-class ExprUnaryPrefix(Expr):
-
-    def __init__(self, var, op, op_count=None):
-        self.var = var
-        self.op = op
-        self.op_count = op_count
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('var', self.var)
-        p.print_single('op', self.op)
-        if self.op_count:
-            p.print_single('op count', self.op_count)
-
-
-class ExprBinary(Expr):
-
-    # todo atribute list everywhere (with type hints)
-
-    def __init__(self, kind, op, left, right):
-        self.kind = kind
-        self.op = op
-        self.left = left
-        self.right = right
-        super().__init__()
-
-    def print_node(self, p):
-        p.print_single('kind', self.kind)
-        p.print_single('op', self.op)
-        p.print('left', self.left)
-        p.print('right', self.right)
-
-
-class ExprFnCall(Expr):
-
-    def __init__(self, name, args):
-        self.name = name
-        self.args = args
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('name', self.name)
-        p.print('args', self.args)
-
-
-class ExprLit(Expr):
-
-    def __init__(self, lit, kind):
-        self.lit = lit
-        self.kind = kind
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('lit', self.lit)
-        p.print_single('kind', self.kind)
-
-
-class ExprVar(Expr):
-
-    def __init__(self, name):
-        self.name = name
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('name', self.name)
-
-
-class Param(Node):
-
-    def __init__(self, name, type):
-        self.name = name
-        self.type = type
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('name', self.name)
-        p.print('type', self.type)
-
-
-class Program(Node):
-    # std::vector<Decl*>
-    def __init__(self, decls):
-        self.decls = decls
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('decls', self.decls)
-
-
-class Decl(Node):
-
-    def __init__(self):
-        pass
-        super().__init__()
-
-
-class DeclFn(Decl):
-
-    def __init__(self, name, params, ret_type, body):
-        self.name = name
-        self.params = params
-        self.ret_type = ret_type
-        self.body = body
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('name', self.name)
-        p.print('params', self.params)
-        p.print('ret_type', self.ret_type)
-        p.print('body', self.body)
-
-
-class Stmt(Node):
-
-    def __init__(self):
-        pass
-        super().__init__()
-
-
-class StmtBlock(Stmt):
-
-    def __init__(self, stmts):
-        self.stmts = stmts
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('stmts', self.stmts)
-
-
-class StmtIf(Stmt):
-
-    def __init__(self, if_cond, if_body, elif_conds=None, elif_bodies=None, else_body=None):
-        self.if_cond = if_cond
-        self.if_body = if_body
-        self.elif_conds = elif_conds
-        self.elif_bodies = elif_bodies
-        self.else_body = else_body
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('if_cond', self.if_cond)
-        p.print('if_body', self.if_body)
-        if self.elif_conds:
-            for ind in range(len(self.elif_conds)):
-                p.print(f'elif_cond[{ind}]', self.elif_conds[ind])
-                p.print(f'elif_body[{ind}]', self.elif_bodies[ind])
-        if self.else_body:
-            p.print('else_body', self.else_body)
-
-
-class StmtWhile(Stmt):
-
-    def __init__(self, cond, body):
-        self.cond = cond
-        self.body = body
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('cond', self.cond)
-        p.print('body', self.body)
-
-
-class StmtExpr(Stmt):
-    def __init__(self, expr):
-        self.expr = expr
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('expr', self.expr)
-
-
-class StmtBreak(Stmt):
-
-    def __init__(self, break_kw):
-        self.break_kw = break_kw
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('break_kw', self.break_kw)
-
-
-class StmtContinue(Stmt):
-
-    def __init__(self, continue_kw):
-        self.continue_kw = continue_kw
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('continue_kw', self.continue_kw)
-
-
-class StmtReturn(Stmt):
-
-    def __init__(self, return_kw, value):
-        self.return_kw = return_kw
-        self.value = value
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('return_kw', self.return_kw)
-        p.print('value', self.value)
-
-
-class StmtAssign(Stmt):
-
-    def __init__(self, var, op, value):
-        self.var = var
-        self.op = op
-        self.value = value
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('var', self.var)
-        p.print_single('op', self.op)
-        p.print('value', self.value)
-
-
-class StmtUnaryPrefix(Stmt):
-
-    def __init__(self, expr_unary):
-        self.expr_unary = expr_unary
-        super().__init__()
-
-    def print_node(self, p):
-        # todo naming
-        p.print('expr_unary_prefix', self.expr_unary)
-
-
-class StmtVarDecl(Stmt):
-
-    def __init__(self, name, type_):
-        self.name = name
-        self.type = type_
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('name', self.name)
-        p.print('type', self.type)
-
-
-class Type(Node):
-
-    def __init__(self):
-        pass
-        super().__init__()
-
-
-class TypePrim(Type):
-
-    def __init__(self, kind):
-        self.kind = kind
-        super().__init__()
-
-    def print_node(self, p):
-        p.print_single('kind', self.kind)
-
-
-class ASTPrinter:
-
-    def __init__(self):
-        self.indent_level = 0
-
-    def print(self, title, object):
-        if isinstance(object, Node):
-            self.print_node(title, object)
-        elif isinstance(object, list):
-            self.print_array(title, object)
-        elif isinstance(object, Token):
-            self.print_token(title, object)
-        elif not object:
-            self.print_single(title, 'NULL')
-        else:
-            print(f'bad argument {object.__class__.__name__}')
-            # print(f'bad argument {object.__class__}')
-            exit(1)
-
-    def print_array(self, title, array):
-        if not array:
-            self.print_single(title, '[]')
-
-        for ind, el in enumerate(array):
-            # print(f'{title}[{ind}], {el}')
-            self.print(f'{title}[{ind}]', el)
-
-    def print_node(self, title, node):
-        self.print_single(title, f'{node.__class__.__name__}:')
-        self.indent_level += 1
-        node.print_node(self)
-        self.indent_level -= 1
-
-    def print_single(self, title, text):
-        prefix = '  ' * self.indent_level
-        print(f'{prefix}{title}: {text}')
-
-    def print_token(self, title, token):
-        text = f'{token.value} (ln={token.line_no})'
-        self.print_single(title, text)
