@@ -120,7 +120,7 @@ class Parser:
 
         while True:
             if self.accept('KW_OR'):
-                self.result = ExprBinaryOR('OR', self.result, self.parse_expr_and())
+                self.result = ExprBinary('logical_or', 'OR', self.result, self.parse_expr_and())
             else:
                 break
 
@@ -132,7 +132,7 @@ class Parser:
         # todo remove useless while
         while True:
             if self.accept('KW_AND'):
-                self.result = ExprBinaryAND('AND', self.result, self.parse_expr_cmp())
+                self.result = ExprBinary('logical_and', 'AND', self.result, self.parse_expr_cmp())
             else:
                 break
 
@@ -144,9 +144,9 @@ class Parser:
 
         while True:
             if self.accept('OP_IS_EQ'):
-                self.result = ExprBinaryCmp('EQUAL', self.result, self.parse_expr_rel())
+                self.result = ExprBinary('cmp', 'EQUAL', self.result, self.parse_expr_rel())
             elif self.accept('OP_IS_NEQ'):
-                self.result = ExprBinaryCmp('NOT_EQUAL', self.result, self.parse_expr_rel())
+                self.result = ExprBinary('cmp', 'NOT_EQUAL', self.result, self.parse_expr_rel())
             else:
                 break
 
@@ -159,13 +159,13 @@ class Parser:
         while True:
 
             if self.accept('OP_G'):
-                self.result = ExprBinaryRel('GREATER', self.result, self.parse_expr_sum_sub())
+                self.result = ExprBinary('rel', 'GREATER', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_GE'):
-                self.result = ExprBinaryRel('GREATER_OR_EQUAL', self.result, self.parse_expr_sum_sub())
+                self.result = ExprBinary('rel', 'GREATER_OR_EQUAL', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_L'):
-                self.result = ExprBinaryRel('LESS', self.result, self.parse_expr_sum_sub())
+                self.result = ExprBinary('rel', 'LESS', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_LE'):
-                self.result = ExprBinaryRel('LESS_OR_EQUAL', self.result, self.parse_expr_sum_sub())
+                self.result = ExprBinary('rel', 'LESS_OR_EQUAL', self.result, self.parse_expr_sum_sub())
             else:
                 break
 
@@ -181,9 +181,9 @@ class Parser:
 
         while True:
             if self.accept('OP_SUM'):
-                self.result = ExprBinaryArith('ADD', self.result, self.parse_expr_mul_div_mod())
+                self.result = ExprBinary('arith', 'ADD', self.result, self.parse_expr_mul_div_mod())
             elif self.accept('OP_SUB'):
-                self.result = ExprBinaryArith('SUB', self.result, self.parse_expr_mul_div_mod())
+                self.result = ExprBinary('arith', 'SUB', self.result, self.parse_expr_mul_div_mod())
             else:
                 break
 
@@ -200,11 +200,11 @@ class Parser:
         # fixme useless while loop
         while True:
             if self.accept('OP_MUL'):
-                self.result = ExprBinaryArith('MUL', self.result, self.parse_expr_unary())
+                self.result = ExprBinary('arith', 'MUL', self.result, self.parse_expr_unary())
             elif self.accept('OP_DIV'):
-                self.result = ExprBinaryArith('DIV', self.result, self.parse_expr_unary())
+                self.result = ExprBinary('arith', self.result, self.parse_expr_unary())
             elif self.accept('OP_MOD'):
-                self.result = ExprBinaryArith('MOD', self.result, self.parse_expr_unary())
+                self.result = ExprBinary('arith', self.result, self.parse_expr_unary())
             else:
                 break
 
@@ -551,35 +551,20 @@ class ExprUnaryPrefix(Expr):
 
 class ExprBinary(Expr):
 
-    # todo atr list everywhere
+    # todo atribute list everywhere (with type hints)
 
-    def __init__(self, op, left, right):
+    def __init__(self, kind, op, left, right):
+        self.kind = kind
         self.op = op
         self.left = left
         self.right = right
         super().__init__()
 
     def print_node(self, p):
+        p.print_single('kind', self.kind)
         p.print_single('op', self.op)
         p.print('left', self.left)
         p.print('right', self.right)
-
-class ExprBinaryArith(ExprBinary):
-    pass
-
-class ExprBinaryCmp(ExprBinary):
-    pass
-
-class ExprBinaryAND(ExprBinary):
-    pass
-
-class ExprBinaryOR(ExprBinary):
-    pass
-
-class ExprBinaryRel(ExprBinary):
-    pass
-
-
 
 class FnCall(Expr):
 

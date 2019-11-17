@@ -1,7 +1,17 @@
 
-fx main(char a, float b) ==> int {
+fx main() ==> void {
 
-    b = 1 + 2 AND 3 OR 4 > 2;
+    if (a+b) {
+        return a+b*c;
+    } elif (a+b) {
+        return a+b*c;
+    }
+    elif (a+b) {
+        return a+b*c;
+    }
+    elif (a+b) {
+        return a+b*c;
+    } else {
 
-    return (1 + 2) * z;
+    }
 }
