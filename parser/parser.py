@@ -3,7 +3,9 @@ from lexer import Token
 import inspect
 from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnaryPrefix, ExprBinary, \
     ExprFnCall, Param, Program, DeclFn, StmtBlock, StmtIf, StmtWhile, StmtBreak, \
-    StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl
+    StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, \
+    IfBody, IfBranch, IfCondition
+
 
 # <TERM> ::= <IDENT>
 # <MULT> ::= <MULT> "*" <TERM> | <TERM>
@@ -370,27 +372,32 @@ class Parser:
     def parse_stmt_if(self):
         self.expect('KW_IF')
         self.expect('OP_PAREN_O')
-        if_cond = self.parse_expr()
+        if_cond = IfCondition(self.parse_expr())
         self.expect('OP_PAREN_C')
-        if_body = self.parse_stmt_block()
+        if_body = IfBody(self.parse_stmt_block())
 
-        elif_conds = []
-        elif_bodies = []
-        else_body = None
+        if_branch = IfBranch('if', if_cond, if_body)
+
+        elif_branches = None
+        else_branch = None
 
         if self.token_type() == 'KW_ELIF':
+            elif_branches = []
 
             while self.accept('KW_ELIF'):
                 self.expect('OP_PAREN_O')
-                elif_conds.append(self.parse_expr())
+                elif_cond = IfCondition(self.parse_expr())
                 self.expect('OP_PAREN_C')
-                elif_bodies.append(self.parse_stmt_block())
+                elif_body = IfBody(self.parse_stmt_block())
+                elif_branches.append(IfBranch('elif', elif_cond, elif_body))
 
         if self.token_type() == 'KW_ELSE':
             self.expect('KW_ELSE')
-            else_body = self.parse_stmt_block()
+            else_cond = None
+            else_body = IfBody(self.parse_stmt_block())
+            else_branch = IfBranch('else', else_cond, else_body)
 
-        return StmtIf(if_cond, if_body, elif_conds, elif_bodies, else_body)
+        return StmtIf(if_branch, elif_branches, else_branch)
 
     # def parse_stmt_for(self):
     #     self.expect('KW_FOR')

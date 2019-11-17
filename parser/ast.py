@@ -160,25 +160,68 @@ class StmtBlock(Stmt):
         p.print('stmts', self.stmts)
 
 
-class StmtIf(Stmt):
+class IfBranch(Node):
 
-    def __init__(self, if_cond, if_body, elif_conds=None, elif_bodies=None, else_body=None):
-        self.if_cond = if_cond
-        self.if_body = if_body
-        self.elif_conds = elif_conds
-        self.elif_bodies = elif_bodies
-        self.else_body = else_body
+    def __init__(self, kind, cond, body):
+        self.kind = kind
+        self.cond = cond
+        self.body = body
         super().__init__()
 
     def print_node(self, p):
-        p.print('if_cond', self.if_cond)
-        p.print('if_body', self.if_body)
-        if self.elif_conds:
-            for ind in range(len(self.elif_conds)):
-                p.print(f'elif_cond[{ind}]', self.elif_conds[ind])
-                p.print(f'elif_body[{ind}]', self.elif_bodies[ind])
-        if self.else_body:
-            p.print('else_body', self.else_body)
+        p.print_single('kind', self.kind)
+        if self.cond or self.kind != 'else':
+            p.print('cond', self.cond)
+        p.print('body', self.body)
+
+
+class IfCondition(Expr):
+
+    def __init__(self, expr):
+        self.expr = expr
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('expr', self.expr)
+
+
+class IfBody(StmtBlock):
+
+    def __init__(self, stmts):
+        super().__init__(stmts)
+
+    def print_node(self, p):
+        super().print_node(p)
+
+
+class StmtIf(Stmt):
+
+    # def __init__(self, if_cond, if_body, elif_conds=None, elif_bodies=None, else_body=None):
+    def __init__(self, if_branch, elif_branches=None, else_branch=None):
+        self.if_branch = if_branch
+        self.elif_branches = elif_branches
+        self.else_branch = else_branch
+        # self.if_cond = if_cond
+        # self.if_body = if_body
+        # self.elif_conds = elif_conds
+        # self.elif_bodies = elif_bodies
+        # self.else_body = else_body
+        super().__init__()
+
+    def print_node(self, p):
+        count = 0
+        p.print(f'if_branch[{count}]', self.if_branch)
+        # p.print('if_cond', self.if_cond)
+        # p.print('if_body', self.if_body)
+        if self.elif_branches:
+            for ind in range(len(self.elif_branches)):
+                count = ind + 1
+                p.print(f'if_branch[{count}]', self.elif_branches[ind])
+                # p.print(f'elif_cond[{ind}]', self.elif_conds[ind])
+                # p.print(f'elif_body[{ind}]', self.elif_bodies[ind])
+            count += 1
+        if self.else_branch:
+            p.print(f'if_branch[{count}]', self.else_branch)
 
 
 class StmtWhile(Stmt):
