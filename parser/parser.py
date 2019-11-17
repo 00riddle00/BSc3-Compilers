@@ -2,6 +2,7 @@ from pprint import pprint
 from lexer import Token
 import inspect
 
+
 # <TERM> ::= <IDENT>
 # <MULT> ::= <MULT> "*" <TERM> | <TERM>
 # <ADD> ::= <ADD> "+" <MULT> | <MULT>
@@ -129,7 +130,6 @@ class Parser:
 
         return self.result
 
-
     def parse_expr_cmp(self):
         self.result = self.parse_expr_rel()
 
@@ -142,7 +142,6 @@ class Parser:
                 break
 
         return self.result
-
 
     def parse_expr_rel(self):
         self.result = self.parse_expr_sum_sub()
@@ -162,7 +161,6 @@ class Parser:
 
         return self.result
 
-
     # <ADD> ::= <MULT> | <ADD> "+" <MULT>
     # <ADD> ::= <MULT> {("+" | "-") <MULT>}
 
@@ -179,7 +177,6 @@ class Parser:
                 break
 
         return self.result
-
 
     # <MULT> ::= <PRIMARY> | <MULT> "*" <PRIMARY>
     # <MULT> ::= <PRIMARY> {"*" <PRIMARY>}
@@ -206,7 +203,6 @@ class Parser:
             return self.parse_expr_unary_prefix()
         else:
             return self.parse_expr_primary()
-
 
     def parse_expr_unary_prefix(self):
         if self.accept('OP_INCR'):
@@ -251,7 +247,6 @@ class Parser:
         else:
             self.error(f'expr error {self.curr_token}')
 
-
     def parse_expr_lit_int(self):
         lit = self.expect('LIT_INT')
         return ExprLit(lit, 'INT')
@@ -280,8 +275,6 @@ class Parser:
         lit = self.expect('KW_FALSE')
         return ExprLit(lit, 'False')
 
-
-
     def parse_expr_paren(self):
         self.expect('OP_PAREN_O')
         self.result = self.parse_expr()
@@ -291,9 +284,6 @@ class Parser:
     def parse_expr_var(self):
         name = self.expect('IDENT')
         return ExprVar(name)
-
-
-
 
     def parse_param(self):
         type_ = self.parse_type()
@@ -335,7 +325,7 @@ class Parser:
                 return self.parse_stmt_expr(self.parse_expr_fn_call())
             # todo refactor this mess
             for assign_op in ['OP_ASSIGN_EQ', 'OP_ASSIGN_SUM', 'OP_ASSIGN_SUB',
-                          'OP_ASSIGN_MUL', 'OP_ASSIGN_DIV', 'OP_ASSIGN_MOD']:
+                              'OP_ASSIGN_MUL', 'OP_ASSIGN_DIV', 'OP_ASSIGN_MOD']:
                 # todo refactor peek2 fn
                 if self.peek2(assign_op):
                     return self.parse_stmt_assign()
@@ -361,7 +351,6 @@ class Parser:
             return self.parse_stmt_var_decl()
         else:
             self.error(inspect.stack()[0][3])
-
 
     def parse_stmt_block(self):
         self.expect('OP_BRACE_O')
@@ -402,7 +391,6 @@ class Parser:
 
         return StmtIf(if_cond, if_body, elif_conds, elif_bodies, else_body)
 
-
     # def parse_stmt_for(self):
     #     self.expect('KW_FOR')
     #     self.expect('OP_PAREN_O')
@@ -424,7 +412,7 @@ class Parser:
                 if self.peek2(assign_op):
                     return self.parse_stmt_assign()
         else:
-            self.result =  self.parse_expr()
+            self.result = self.parse_expr()
             self.expect('OP_SEMICOLON')
             return self.result
 
@@ -508,7 +496,6 @@ class Parser:
         print(f'[debug:{msg}:{self.curr_token.type}:{self.curr_token.value}]')
 
 
-
 class Node(object):
 
     def __init__(self):
@@ -556,6 +543,7 @@ class ExprBinary(Expr):
         p.print_single('op', self.op)
         p.print('left', self.left)
         p.print('right', self.right)
+
 
 class ExprFnCall(Expr):
 
@@ -655,7 +643,7 @@ class StmtBlock(Stmt):
 
 class StmtIf(Stmt):
 
-    def __init__(self, if_cond, if_body, elif_conds = None, elif_bodies = None, else_body = None):
+    def __init__(self, if_cond, if_body, elif_conds=None, elif_bodies=None, else_body=None):
         self.if_cond = if_cond
         self.if_body = if_body
         self.elif_conds = elif_conds
@@ -673,6 +661,7 @@ class StmtIf(Stmt):
         if self.else_body:
             p.print('else_body', self.else_body)
 
+
 class StmtWhile(Stmt):
 
     def __init__(self, cond, body):
@@ -683,6 +672,7 @@ class StmtWhile(Stmt):
     def print_node(self, p):
         p.print('cond', self.cond)
         p.print('body', self.body)
+
 
 class StmtExpr(Stmt):
     def __init__(self, expr):
@@ -701,6 +691,7 @@ class StmtBreak(Stmt):
 
     def print_node(self, p):
         p.print('break_kw', self.break_kw)
+
 
 class StmtContinue(Stmt):
 
@@ -723,6 +714,7 @@ class StmtReturn(Stmt):
         p.print('return_kw', self.return_kw)
         p.print('value', self.value)
 
+
 class StmtAssign(Stmt):
 
     def __init__(self, var, op, value):
@@ -736,6 +728,7 @@ class StmtAssign(Stmt):
         p.print_single('op', self.op)
         p.print('value', self.value)
 
+
 class StmtUnaryPrefix(Stmt):
 
     def __init__(self, expr_unary):
@@ -745,8 +738,6 @@ class StmtUnaryPrefix(Stmt):
     def print_node(self, p):
         # todo naming
         p.print('expr_unary_prefix', self.expr_unary)
-
-
 
 
 class StmtVarDecl(Stmt):
@@ -818,4 +809,3 @@ class ASTPrinter:
     def print_token(self, title, token):
         text = f'{token.value} (ln={token.line_no})'
         self.print_single(title, text)
-
