@@ -354,32 +354,28 @@ class Parser:
     def parse_stmt_if(self):
         self.expect('KW_IF')
         self.expect('OP_PAREN_O')
-        if_cond = IfCondition(self.parse_expr())
+        cond = IfCondition(self.parse_expr())
         self.expect('OP_PAREN_C')
-        if_body = IfBody(self.parse_stmt_block())
+        body = IfBody(self.parse_stmt_block())
 
-        if_branch = IfBranch('if', if_cond, if_body)
-
-        elif_branches = None
-        else_branch = None
+        branches = [IfBranch(cond, body)]
 
         if self.token_type() == 'KW_ELIF':
-            elif_branches = []
 
             while self.accept('KW_ELIF'):
                 self.expect('OP_PAREN_O')
-                elif_cond = IfCondition(self.parse_expr())
+                cond = IfCondition(self.parse_expr())
                 self.expect('OP_PAREN_C')
-                elif_body = IfBody(self.parse_stmt_block())
-                elif_branches.append(IfBranch('elif', elif_cond, elif_body))
+                body = IfBody(self.parse_stmt_block())
+                branches.append(IfBranch(cond, body))
+
+        stmt_block = None
 
         if self.token_type() == 'KW_ELSE':
             self.expect('KW_ELSE')
-            else_cond = None
-            else_body = IfBody(self.parse_stmt_block())
-            else_branch = IfBranch('else', else_cond, else_body)
+            stmt_block = self.parse_stmt_block()
 
-        return StmtIf(if_branch, elif_branches, else_branch)
+        return StmtIf(branches, stmt_block)
 
     # def parse_stmt_for(self):
     #     self.expect('KW_FOR')
