@@ -1,9 +1,9 @@
 
-fx main() ==> voyd {
+fx main() ==> void {
 
     if [a+b) {
         return a+b*c;
     } else {
-        +return a+b*c;
+        return a+b*c;
     }
 }

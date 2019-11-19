@@ -10,15 +10,18 @@ file_to_lex = f'{samples_dir}/tmp.fx'
 if len(argv) == 2:
     file_to_lex = f'{samples_dir}/{argv[1]}'
 
-_input = Input(file_to_lex)
-lexer = Lexer([_input])
-lexer.lex_all()
-lexer.dump_tokens()
-
 try:
-    parser = Parser(_input, lexer.tokens)
-    root = parser.parse_program()
-    printer = ASTPrinter()
-    printer.print('root', root)
-except ParserError as pe:
-    pe.print_err()
+    _input = Input(file_to_lex)
+    lexer = Lexer([_input])
+    lexer.lex_all()
+    lexer.dump_tokens()
+except LexerError as le:
+    le.print_err()
+
+# try:
+#     parser = Parser(lexer.tokens)
+#     root = parser.parse_program()
+#     printer = ASTPrinter()
+#     printer.print('root', root)
+# except ParserError as pe:
+#     pe.print_err()
