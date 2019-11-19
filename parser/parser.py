@@ -6,10 +6,6 @@ from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnaryPrefix, ExprBinary, 
     StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, \
     IfBody, IfBranch, IfCondition
 
-# <TERM> ::= <IDENT>
-# <MULT> ::= <MULT> "*" <TERM> | <TERM>
-# <ADD> ::= <ADD> "+" <MULT> | <MULT>
-
 assign_ops = {
     'OP_ASSIGN_EQ': 'EQUALS',
     'OP_ASSIGN_SUM': 'PLUS_EQUALS',
@@ -102,7 +98,6 @@ class Parser:
         body = self.parse_stmt_block()
         return DeclFn(name, params, ret_type, body)
 
-    # <EXPR> ::= <ADD>
     def parse_expr(self):
         return self.parse_expr_or()
 
@@ -160,10 +155,6 @@ class Parser:
 
         return self.result
 
-    # <ADD> ::= <MULT> | <ADD> "+" <MULT>
-    # <ADD> ::= <MULT> {("+" | "-") <MULT>}
-
-    # older: <ADD> ::= <MULT> {OP_PLUS <MULT>}
     def parse_expr_sum_sub(self):
         self.result = self.parse_expr_mul_div_mod()
 
@@ -177,10 +168,6 @@ class Parser:
 
         return self.result
 
-    # <MULT> ::= <PRIMARY> | <MULT> "*" <PRIMARY>
-    # <MULT> ::= <PRIMARY> {"*" <PRIMARY>}
-
-    # older: <MULT> ::= <TERM> {OP_MULT <TERM>}
     def parse_expr_mul_div_mod(self):
         self.result = self.parse_expr_unary()
 
@@ -221,7 +208,6 @@ class Parser:
         name = self.expect('IDENT')
         return ExprUnaryPrefix(name, op)
 
-    # <PRIMARY> ::= <LIT_INT> | <VAR> | <PAREN>
     def parse_expr_primary(self):
         if self.peek('IDENT'):
             if self.peek2('OP_PAREN_O'):
@@ -308,7 +294,6 @@ class Parser:
 
         return params
 
-    # <START> ::= {<DEF_FN>} EOF
     def parse_program(self):
         decls = []
 
