@@ -1,5 +1,6 @@
 from pprint import pprint
-from lexer import Token
+from lexer import Token, Input
+from errors import ParserError
 import inspect
 from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnaryPrefix, ExprBinary, \
     ExprFnCall, Param, Program, DeclFn, StmtBlock, StmtIf, StmtWhile, StmtBreak, \
@@ -17,20 +18,17 @@ assign_ops = {
 
 
 class Parser:
+    curr_input: Input
     tokens: list
     offset: int
     curr_token: Token
     result: Node
 
-    def __init__(self, tokens) -> None:
+    def __init__(self, curr_input, tokens) -> None:
+        self.curr_input = curr_input
         self.tokens = tokens
         self.offset = 0
         self.result = Node()
-
-    def error(self, msg=''):
-        print(f'parse error: {msg}')
-
-        exit(1)
 
     def accept(self, token_type):
         # todo wrap into 'current' fn
@@ -45,10 +43,7 @@ class Parser:
             self.offset += 1
             return self.curr_token
         else:
-            print(f'syntax error in line {self.curr_token.line_no}')
-            # todo add prety prints
-            print(f'  expected={token_type}, found={self.curr_token.type}')
-            exit(1)
+            raise ParserError(self, '', token_type)
 
     def parse_stmt_assign(self):
         # todo do not allow var to be keyword (ex TRUE, NULL)
@@ -60,7 +55,7 @@ class Parser:
             self.expect(self.token_type())
             op = assign_ops[self.token_type()]
         else:
-            self.error('invalid assign op')
+            raise ParserError(self, 'invalid assign op')
 
         value = self.parse_expr()
         self.expect('OP_SEMICOLON')
@@ -232,7 +227,7 @@ class Parser:
         elif self.token_type() == 'OP_PAREN_O':
             return self.parse_expr_paren()
         else:
-            self.error(f'expr error {self.curr_token}')
+            raise ParserError(self, f'expr error {self.curr_token}')
 
     def parse_expr_lit_int(self):
         lit = self.expect('LIT_INT')
@@ -335,7 +330,7 @@ class Parser:
         if self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID', 'KW_CHAR', 'KW_STR']:
             return self.parse_stmt_var_decl()
         else:
-            self.error(inspect.stack()[0][3])
+            raise ParserError(self, f'called from fn: {inspect.stack()[0][3]}')
 
     def parse_stmt_block(self):
         self.expect('OP_BRACE_O')
@@ -461,7 +456,7 @@ class Parser:
             self.expect('KW_STR')
             return TypePrim('STR')
         else:
-            self.error(inspect.stack()[0][3])
+            raise ParserError(self, f'called from fn: {inspect.stack()[0][3]}')
 
     def peek(self, token_type):
         self.curr_token = self.tokens[self.offset]
