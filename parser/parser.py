@@ -6,10 +6,19 @@ from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnaryPrefix, ExprBinary, 
     StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, \
     IfBody, IfBranch, IfCondition
 
-
 # <TERM> ::= <IDENT>
 # <MULT> ::= <MULT> "*" <TERM> | <TERM>
 # <ADD> ::= <ADD> "+" <MULT> | <MULT>
+
+assign_ops = {
+    'OP_ASSIGN_EQ': 'EQUALS',
+    'OP_ASSIGN_SUM': 'PLUS_EQUALS',
+    'OP_ASSIGN_SUB': 'MINUS_EQUALS',
+    'OP_ASSIGN_MUL': 'MULT_EQUALS',
+    'OP_ASSIGN_DIV': 'DIV_EQUALS',
+    'OP_ASSIGN_MOD': 'MOD_EQUALS',
+}
+
 
 class Parser:
     tokens: list
@@ -49,24 +58,11 @@ class Parser:
         # todo do not allow var to be keyword (ex TRUE, NULL)
         var = self.expect('IDENT')
 
-        if self.token_type() == 'OP_ASSIGN_EQ':
-            self.expect('OP_ASSIGN_EQ')
-            op = 'EQUALS'
-        elif self.token_type() == 'OP_ASSIGN_SUM':
-            self.expect('OP_ASSIGN_SUM')
-            op = 'PLUS_EQUALS'
-        elif self.token_type() == 'OP_ASSIGN_SUB':
-            self.expect('OP_ASSIGN_SUB')
-            op = 'MINUS_EQUALS'
-        elif self.token_type() == 'OP_ASSIGN_MUL':
-            self.expect('OP_ASSIGN_MUL')
-            op = 'MULT_EQUALS'
-        elif self.token_type() == 'OP_ASSIGN_DIV':
-            self.expect('OP_ASSIGN_DIV')
-            op = 'DIV_EQUALS'
-        elif self.token_type() == 'OP_ASSIGN_MOD':
-            self.expect('OP_ASSIGN_MOD')
-            op = 'MOD_EQUALS'
+        op = ''
+
+        if self.token_type() in assign_ops.keys():
+            self.expect(self.token_type())
+            op = assign_ops[self.token_type()]
         else:
             self.error('invalid assign op')
 
@@ -208,6 +204,8 @@ class Parser:
             return self.parse_expr_primary()
 
     def parse_expr_unary_prefix(self):
+        op = ''
+
         if self.accept('OP_INCR'):
             op = 'INCREMENT'
         elif self.accept('OP_DECR'):
@@ -327,8 +325,7 @@ class Parser:
             if self.peek2('OP_PAREN_O'):
                 return self.parse_stmt_expr(self.parse_expr_fn_call())
             # todo refactor this mess
-            for assign_op in ['OP_ASSIGN_EQ', 'OP_ASSIGN_SUM', 'OP_ASSIGN_SUB',
-                              'OP_ASSIGN_MUL', 'OP_ASSIGN_DIV', 'OP_ASSIGN_MOD']:
+            for assign_op in assign_ops.keys():
                 # todo refactor peek2 fn
                 if self.peek2(assign_op):
                     return self.parse_stmt_assign()
@@ -415,8 +412,7 @@ class Parser:
 
     def parse_for_cond(self):
         if self.peek('IDENT'):
-            for assign_op in ['OP_ASSIGN_EQ', 'OP_ASSIGN_SUM', 'OP_ASSIGN_SUB',
-                              'OP_ASSIGN_MUL', 'OP_ASSIGN_DIV', 'OP_ASSIGN_MOD']:
+            for assign_op in assign_ops.keys():
                 if self.peek2(assign_op):
                     return self.parse_stmt_assign()
         else:
