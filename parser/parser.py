@@ -30,16 +30,18 @@ class Parser:
 
     def accept(self, token_type):
         # todo wrap into 'current' fn
-        self.curr_token = self.tokens[self.offset]
-        if self.curr_token.type == token_type:
+        accepted_token = self.tokens[self.offset]
+        if accepted_token.type == token_type:
             self.offset += 1
-            return self.curr_token
+            self.curr_token = self.tokens[self.offset]
+            return accepted_token
 
     def expect(self, token_type):
-        self.curr_token = self.tokens[self.offset]
-        if self.curr_token.type == token_type:
+        expected_token = self.tokens[self.offset]
+        if expected_token.type == token_type:
             self.offset += 1
-            return self.curr_token
+            self.curr_token = self.tokens[self.offset]
+            return expected_token
         else:
             self.err(token_type)
 
@@ -457,9 +459,8 @@ class Parser:
             self.err('<Primary_type>', 'type error')
 
     def peek(self, token_type):
-        self.curr_token = self.tokens[self.offset]
-        if self.curr_token.type == token_type:
-            return self.curr_token
+        peeked_token = self.tokens[self.offset + 0]
+        return peeked_token.type == token_type
 
     def peek2(self, next_token_type):
         next_token = self.tokens[self.offset + 1]
@@ -474,6 +475,6 @@ class Parser:
     def err(self, exp_token=None, msg=None, debug=False):
         if debug:
             # ...
-            raise ParserError(msg, *self.curr_input.get_info(), exp_token, self.token_type())
+            raise ParserError(msg, *self.curr_token.get_info(), exp_token, self.token_type())
         else:
-            raise ParserError(msg, *self.curr_input.get_info(), exp_token, self.token_type())
+            raise ParserError(msg, *self.curr_token.get_info(), exp_token, self.token_type())

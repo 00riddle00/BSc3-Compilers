@@ -106,7 +106,8 @@ class Input:
     name: str
     text: str
     offset: int
-    offset_prev: int
+    offset_prev_line: int
+    offset_token_start: int
     pos: int
     curr_ln: int
     size: int
@@ -123,7 +124,8 @@ class Input:
         self.size = len(self.text)
         self.curr_ln = 1
         self.offset = 0
-        self.offset_prev = 0
+        self.offset_prev_line = 0
+        self.offset_token_start = 0
 
     def read_char(self):
         char = self.text[self.offset]
@@ -137,25 +139,44 @@ class Input:
         return self.offset >= self.size
 
     def next_line(self):
-        self.offset_prev = self.offset
+        self.offset_prev_line = self.offset
         self.curr_ln += 1
+        self.offset_token_start = 0
 
-    def get_pos(self):
-        return self.offset - self.offset_prev
+    def ignore_space(self):
+        self.offset_token_start += 1
+
+    # todo
+    def ignore_tabstop(self):
+        pass
+
+    # todo
+    def ignore_cr(self):
+        pass
+
+    def get_char_pos(self):
+        return self.offset - self.offset_prev_line
 
     def get_info(self):
-        return [self.name, self.curr_ln, self.get_pos()]
+        return [self.name, self.curr_ln, self.get_char_pos()]
 
 
 class Token:
     type_: str
     value: str
+    file: str
     line_no: int
+    pos: int
 
-    def __init__(self, type_, value, line_no):
+    def __init__(self, type_, value, file, line_no, pos):
         self.type = type_
         self.value = value
+        self.file = file
         self.line_no = line_no
+        self.pos = pos
+
+    def get_info(self):
+        return [self.file, self.line_no, self.pos]
 
 
 class Lexer:
@@ -204,11 +225,13 @@ class Lexer:
 
     def complete_token(self, token_type, reverse=False, delta=0):
         self.tokens.append(
-            Token(token_type, self.buffer, self.token_start_ln))
+            Token(token_type, self.buffer, self.curr_input.name, self.curr_input.curr_ln,
+                  self.curr_input.offset_token_start))
         self.buffer = ''
         self.state = 'START'
         if reverse:
             self.curr_input.reverse_read(delta)
+        self.curr_input.offset_token_start = self.curr_input.offset
 
     def dump_tokens(self):
         print(f'{"ID":>3}| {"LN":>3}| {"TYPE":<22} | {"VALUE":<14}')
@@ -216,7 +239,8 @@ class Lexer:
             print(f'{index:>3}|'
                   f' {token.line_no:>3}|'
                   f' {token.type:<22} |'
-                  f' {token.value:<14}')
+                  f' {token.value:<14}'
+                  f' |{token.pos:<14}')
 
     def lex_all(self):
 
@@ -271,13 +295,15 @@ class Lexer:
         elif self.curr_char == '#':
             self.state = 'COMMENT_START'
         elif self.curr_char == ' ':
-            pass  # ignore
+            self.curr_input.ignore_space()
         elif self.curr_char == '\n':
             self.curr_input.next_line()
+        # todo count position
         elif self.curr_char == '\t':
-            pass  # ignore
+            self.curr_input.ignore_tabstop()
+        # todo count position
         elif self.curr_char == '\r':
-            pass  # ignore
+            self.curr_input.ignore_cr()
         elif self.curr_char == '<':
             self.begin_token('OP_L')
         elif self.curr_char == '>':
@@ -525,7 +551,7 @@ class Lexer:
             self.state = 'LIT_CHAR_ESCAPE'
         elif self.curr_char in ['\n', '\r', '\t']:
             self.err('char type cannot contain newlines, tabstops or'
-                             ' carriage returns')
+                     ' carriage returns')
         else:
             self.add()
             self.state = 'LIT_CHAR_ADDED'
