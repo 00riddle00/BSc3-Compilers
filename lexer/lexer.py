@@ -1,4 +1,5 @@
 from pprint import pprint
+from errors import LexerError, LexerDebugError, InputError
 
 # List of all lexemes
 
@@ -112,11 +113,13 @@ class Input:
 
     def __init__(self, filename):
         if not type(filename) == str:
-            print("Error: wrong argument type passed to Input constructor")
-            exit(1)
+            raise InputError(f"Wrong argument type passed to Input constructor: exp=str, got={type(filename)}")
         self.name = filename
-        with open(self.name) as f:
-            self.text = ''.join(f.readlines())
+        try:
+            with open(self.name) as f:
+                self.text = ''.join(f.readlines())
+        except IOError as e:
+            raise InputError(e)
         self.size = len(self.text)
         self.curr_ln = 1
         self.offset = 0
@@ -136,6 +139,12 @@ class Input:
     def next_line(self):
         self.offset_prev = self.offset
         self.curr_ln += 1
+
+    def get_pos(self):
+        return self.offset - self.offset_prev
+
+    def get_info(self):
+        return [self.name, self.curr_ln, self.get_pos()]
 
 
 class Token:
@@ -160,10 +169,12 @@ class Lexer:
 
     def __init__(self, inputs) -> None:
         if not type(inputs) == list:
-            self.lexer_error('Wrong argument type passed to Lexer constructor.')
-        for _input in inputs:
-            if not type(_input == Input):
-                self.lexer_error('Input list has an element of incorrect type.')
+            self.err(
+                f"Wrong argument type passed to Lexer constructor: exp=[Input, Input, ...], got={type(inputs)}")
+        for i, _input in enumerate(inputs):
+            if not type(_input) == Input:
+                self.err(
+                    f'Input list has an element (index={i}) of incorrect type: exp=Input, got={type(_input)}')
         self.inputs = inputs
 
         self.buffer = ''
@@ -227,15 +238,15 @@ class Lexer:
             if self.state == 'START':
                 self.complete_token('EOF')
             elif self.state in ('COMMENT_ML', 'COMMENT_ML_MINUS_1', 'COMMENT_ML_MINUS_2'):
-                self.lexer_error('unterminated comment')
+                self.err('unterminated comment')
             elif self.state in ('LIT_FLOAT_E', 'LIT_FLOAT_E_SIGN'):
-                self.lexer_error('unterminated float expression')
+                self.err('unterminated float expression')
             elif self.state in ('LIT_CHAR', 'LIT_CHAR_ADDED'):
-                self.lexer_error('unterminated char')
+                self.err('unterminated char')
             elif self.state == 'LIT_STR':
-                self.lexer_error('unterminated string')
+                self.err('unterminated string')
             elif self.state in ('LIT_CHAR_ESC', 'LIT_STR_ESCAPE'):
-                self.lexer_error('unterminated escape symbol')
+                self.err('unterminated escape symbol')
             else:
                 self.lex_char()
                 self.complete_token('EOF')
@@ -306,7 +317,7 @@ class Lexer:
         elif self.curr_char == '@':
             self.begin_token('INCLUDE')
         else:
-            self.lexer_error('invalid character, usable only as char or inside a string', buffer=True)
+            self.err('invalid character, usable only as char or inside a string')
 
     def lex_char(self):
         if self.state == 'COMMENT_START':
@@ -374,7 +385,7 @@ class Lexer:
         elif self.state == 'INCLUDE':
             self.lex_include()
         else:
-            raise self.lexer_error(f'invalid state {self.state}')
+            self.err(f'invalid state {self.state}')
 
     def lex_comment_start(self):
         if self.curr_char == '\n':
@@ -459,7 +470,7 @@ class Lexer:
             self.add()
             self.state = 'IDENT'
         else:
-            raise self.lexer_error('invalid struct member ident', buffer=True)
+            self.err('invalid struct member ident')
 
     def lex_lit_int(self):
         if self.is_digit():
@@ -468,7 +479,7 @@ class Lexer:
             self.add()
             self.state = 'LIT_FLOAT'
         elif self.is_ident_head():
-            self.lexer_error('invalid int suffix')
+            self.err('invalid int suffix')
         else:
             self.curr_input.reverse_read()
             self.complete_token('LIT_INT')
@@ -491,14 +502,14 @@ class Lexer:
             self.add()
             self.state = 'LIT_FLOAT_E_SIGN'
         else:
-            self.lexer_error('Invalid float exponent')
+            self.err('Invalid float exponent')
 
     def lex_lit_float_e_sign(self):
         if self.is_digit():
             self.add()
             self.state = 'LIT_FLOAT_W_E'
         else:
-            self.lexer_error('Invalid float exponent')
+            self.err('Invalid float exponent')
 
     def lex_lit_float_w_e(self):
         if self.is_digit():
@@ -513,8 +524,8 @@ class Lexer:
         elif self.curr_char == '\\':
             self.state = 'LIT_CHAR_ESCAPE'
         elif self.curr_char in ['\n', '\r', '\t']:
-            self.lexer_error('char type cannot contain newlines, tabstops or'
-                             ' carriage returns', buffer=True)
+            self.err('char type cannot contain newlines, tabstops or'
+                             ' carriage returns')
         else:
             self.add()
             self.state = 'LIT_CHAR_ADDED'
@@ -532,14 +543,14 @@ class Lexer:
             self.buffer += '\\t'
         else:
             self.buffer += "\\"
-            self.lexer_error(f'invalid escape sequence used in a char: \\{self.curr_char}', buffer=True)
+            self.err(f'invalid escape sequence used in a char: \\{self.curr_char}')
         self.state = 'LIT_CHAR_ADDED'
 
     def lex_lit_char_added(self):
         if self.curr_char == "'":
             self.complete_token('LIT_CHAR')
         else:
-            self.lexer_error('char type cannot consist of multiple chars', buffer=True)
+            self.err('char type cannot consist of multiple chars')
 
     def lex_lit_str(self):
         if self.curr_char == '"':
@@ -565,7 +576,7 @@ class Lexer:
             self.buffer += "\t"
         else:
             self.buffer += "\\"
-            self.lexer_error(f'invalid escape sequence used in a string: \\{self.curr_char}', buffer=True)
+            self.err(f'invalid escape sequence used in a string: \\{self.curr_char}')
         self.state = 'LIT_STR'
 
     def lex_op_l(self):
@@ -672,31 +683,8 @@ class Lexer:
     def is_digit(self):
         return len(self.curr_char) == 1 and ord(self.curr_char) in range(ord('0'), ord('9') + 1)
 
-    def lexer_error(self, msg=None, buffer=False):
-        top_right_delim = 33 * '!'
-        top_left_delim = 33 * '!'
-        v_delim = 5 * '!'
-        bottom_delim = 81 * '!'
-
-        print(f'{top_left_delim} [Lexer error] {top_right_delim}')
-        print(f'{v_delim} [file={self.curr_input.name}:'
-              f'line={self.curr_input.curr_ln}:'
-              f'position={self.curr_input.offset - self.curr_input.offset_prev}]')
-        if not msg:
-            msg = 'Something went wrong'
-        print(f'{v_delim} [Error message]: {msg}'),
-        if buffer:
-            print(f'{v_delim} [Item being lexed (pretty print)]:'),
-            pprint(self.buffer + self.curr_char)
-        print(f'{v_delim} [state]: {self.state}')
-        print(f'{v_delim} [output so far]:')
-        self.dump_tokens()
-        print(bottom_delim)
-        exit(1)
-
-    def debug(self, msg=None):
-        self.dump_tokens()
-        print(self.buffer)
-        print(self.state)
-        print(msg)
-        exit(1)
+    def err(self, msg, debug=False):
+        if debug:
+            raise LexerDebugError(msg, *self.curr_input.get_info(), self.state, self.curr_char, self.buffer)
+        else:
+            raise LexerError(msg, *self.curr_input.get_info())
