@@ -5,6 +5,6 @@ fx main() ==> void {
         a %= d;
         return a+b*c;
     } else {
-        return a+b*c;
+        return a+b*c
     }
 }

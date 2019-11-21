@@ -59,5 +59,7 @@ class ParserError(CompilerError):
         self.curr_token = curr_token
 
     def print_err(self):
+        if not self.msg:
+            self.msg = ''
         print(f'[ParseERROR] [file={self.file}:line={self.line}:pos={self.pos}] [{self.msg}] '
               f'[expected={self.exp_token}, found={self.curr_token}]')
