@@ -20,13 +20,11 @@ try:
     lexer = Lexer([_input])
     lexer.lex_all()
     lexer.dump_tokens()
-except LexerError as le:
-    le.print_err()
-
-try:
     parser = Parser(_input, lexer.tokens)
     root = parser.parse_program()
     printer = ASTPrinter()
     printer.print('root', root)
+except LexerError as le:
+    le.print_err()
 except ParserError as pe:
     pe.print_err()
