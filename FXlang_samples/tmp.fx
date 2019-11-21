@@ -2,16 +2,9 @@
 fx main() ==> void {
 
     if (a+b) {
-        return a+b*c;
-    } elif (a+b) {
-        return a+b*c;
-    }
-    elif (a+b) {
-        return a+b*c;
-    }
-    elif (a+b) {
+        a %= d;
         return a+b*c;
     } else {
-        return a+b*c;
+        return a+b*c
     }
 }

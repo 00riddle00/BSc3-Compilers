@@ -1,6 +1,5 @@
-from pprint import pprint
-from lexer import Token
-import inspect
+from lexer import Token, Input
+from errors import ParserError
 from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnaryPrefix, ExprBinary, \
     ExprFnCall, Param, Program, DeclFn, StmtBlock, StmtIf, StmtWhile, StmtBreak, \
     StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, \
@@ -17,38 +16,34 @@ assign_ops = {
 
 
 class Parser:
+    curr_input: Input
     tokens: list
     offset: int
     curr_token: Token
     result: Node
 
-    def __init__(self, tokens) -> None:
+    def __init__(self, curr_input, tokens) -> None:
+        self.curr_input = curr_input
         self.tokens = tokens
         self.offset = 0
         self.result = Node()
 
-    def error(self, msg=''):
-        print(f'parse error: {msg}')
-
-        exit(1)
-
     def accept(self, token_type):
         # todo wrap into 'current' fn
-        self.curr_token = self.tokens[self.offset]
-        if self.curr_token.type == token_type:
+        accepted_token = self.tokens[self.offset]
+        if accepted_token.type == token_type:
             self.offset += 1
-            return self.curr_token
+            self.curr_token = self.tokens[self.offset]
+            return accepted_token
 
     def expect(self, token_type):
-        self.curr_token = self.tokens[self.offset]
-        if self.curr_token.type == token_type:
+        expected_token = self.tokens[self.offset]
+        if expected_token.type == token_type:
             self.offset += 1
-            return self.curr_token
+            self.curr_token = self.tokens[self.offset]
+            return expected_token
         else:
-            print(f'syntax error in line {self.curr_token.line_no}')
-            # todo add prety prints
-            print(f'  expected={token_type}, found={self.curr_token.type}')
-            exit(1)
+            self.err(token_type)
 
     def parse_stmt_assign(self):
         # todo do not allow var to be keyword (ex TRUE, NULL)
@@ -57,10 +52,10 @@ class Parser:
         op = ''
 
         if self.token_type() in assign_ops.keys():
-            self.expect(self.token_type())
             op = assign_ops[self.token_type()]
+            self.accept(self.token_type())
         else:
-            self.error('invalid assign op')
+            self.err('invalid assign op')
 
         value = self.parse_expr()
         self.expect('OP_SEMICOLON')
@@ -232,7 +227,7 @@ class Parser:
         elif self.token_type() == 'OP_PAREN_O':
             return self.parse_expr_paren()
         else:
-            self.error(f'expr error {self.curr_token}')
+            self.err('<expr_primary_start>', 'expr error')
 
     def parse_expr_lit_int(self):
         lit = self.expect('LIT_INT')
@@ -335,7 +330,7 @@ class Parser:
         if self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID', 'KW_CHAR', 'KW_STR']:
             return self.parse_stmt_var_decl()
         else:
-            self.error(inspect.stack()[0][3])
+            self.err('<stmt_start>', 'stmt error')
 
     def parse_stmt_block(self):
         self.expect('OP_BRACE_O')
@@ -457,12 +452,11 @@ class Parser:
             self.expect('KW_STR')
             return TypePrim('STR')
         else:
-            self.error(inspect.stack()[0][3])
+            self.err('<Primary_type>', 'type error')
 
     def peek(self, token_type):
-        self.curr_token = self.tokens[self.offset]
-        if self.curr_token.type == token_type:
-            return self.curr_token
+        peeked_token = self.tokens[self.offset + 0]
+        return peeked_token.type == token_type
 
     def peek2(self, next_token_type):
         next_token = self.tokens[self.offset + 1]
@@ -471,11 +465,12 @@ class Parser:
     def token_type(self):
         return self.tokens[self.offset].type
 
-    # fixme for debug
-    def print_tokens(self):
-        for token in self.tokens:
-            print(f'{token.type},', end='')
-        print('\n')
-
     def debug(self, msg):
         print(f'[debug:{msg}:{self.curr_token.type}:{self.curr_token.value}]')
+
+    def err(self, exp_token=None, msg=None, debug=False):
+        if debug:
+            # ...
+            raise ParserError(msg, *self.curr_token.get_info(), exp_token, self.token_type())
+        else:
+            raise ParserError(msg, *self.curr_token.get_info(), exp_token, self.token_type())
