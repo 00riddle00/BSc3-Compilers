@@ -59,7 +59,7 @@ from errors import LexerError, LexerDebugError, InputError
 # <OP_ASSIGN_DIV>
 # <OP_ASSIGN_MOD>
 
-# <OP_PTR_DEREF> // not implemented
+# <OP_PTR>
 # <OP_PTR_ADDR>
 
 # <OP_DOT_ACCESS_MEMBER>
@@ -338,6 +338,8 @@ class Lexer:
             self.complete_token('OP_SEMICOLON')
         elif self.curr_char == ',':
             self.complete_token('OP_COMMA')
+        elif self.curr_char == '$':
+            self.complete_token('OP_PTR')
         elif self.curr_char == '&':
             self.complete_token('OP_PTR_ADDR')
         elif self.curr_char == '@':
