@@ -53,31 +53,16 @@ class ExprVar(Expr):
         p.print('name', self.name)
 
 
-class ExprPtrDeref(Expr):
+class ExprUnary(Expr):
 
-    def __init__(self, dereferenced, op):
-        self.dereferenced = dereferenced
+    def __init__(self, inner, op):
+        self.inner = inner
         self.op = op
         super().__init__()
 
     def print_node(self, p):
-        p.print('dereferenced', self.dereferenced)
+        p.print('inner', self.inner)
         p.print_single('op', self.op)
-
-
-class ExprUnaryPrefix(Expr):
-
-    def __init__(self, prefixed, op, op_count=1):
-        self.prefixed = prefixed
-        self.op = op
-        self.op_count = op_count
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('prefixed', self.prefixed)
-        p.print_single('op', self.op)
-        if self.op_count > 1:
-            p.print_single('op count', self.op_count)
 
 
 class ExprBinary(Expr):

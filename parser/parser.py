@@ -1,9 +1,9 @@
 from lexer import Token, Input
 from errors import ParserError
-from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnaryPrefix, ExprBinary, \
+from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnary, ExprBinary, \
     ExprFnCall, Param, Program, DeclFn, StmtBlock, StmtIf, StmtWhile, StmtBreak, \
     StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, \
-    IfBody, IfBranch, IfCondition, ExprPtrDeref
+    IfBody, IfBranch, IfCondition
 
 assign_ops = {
     'OP_ASSIGN_EQ': 'EQUALS',
@@ -13,10 +13,12 @@ assign_ops = {
     'OP_ASSIGN_DIV': 'DIV_EQUALS',
     'OP_ASSIGN_MOD': 'MOD_EQUALS',
 }
-
-unary_lhs_ops = {
+unary_ops = {
     'OP_INCR': 'INCR',
     'OP_DECR': 'DECR',
+    'OP_NOT': 'NOT',
+    'OP_PTR': 'PTR_DEREF',
+    'OP_PTR_ADDR': 'PTR_ADDR',
 }
 
 
@@ -58,10 +60,12 @@ class Parser:
                 stmt = self.parse_stmt_assign()
         # fixme here it is specified what prefix operators are legit to be contained in a legit statement!
         # fixme vagueness
-        elif self.token_type() in unary_lhs_ops.keys():
-            stmt = self.parse_stmt_expr(self.parse_expr_unary_prefix(side='lhs'))
-        elif self.token_type() == 'OP_PTR':
-            stmt = self.parse_stmt_assign()
+        elif self.token_type() in unary_ops.keys():
+            unary_expr = self.parse_expr_unary()
+            if self.token_type() in assign_ops.keys():
+                stmt = self.parse_stmt_assign(unary_expr)
+            else:
+                stmt = unary_expr
         elif self.token_type() == 'KW_IF':
             return self.parse_stmt_if()
         # if self.token_type() == 'KW_FOR':
@@ -82,12 +86,10 @@ class Parser:
         self.expect('OP_SEMICOLON')
         return stmt
 
-    def parse_stmt_assign(self):
+    def parse_stmt_assign(self, lhs=None):
         # todo do not allow var to be keyword (ex TRUE, NULL)
-        if self.peek('OP_PTR'):
-            lhs = self.parse_prefixed(side='lhs')
-        else:
-            lhs = self.parse_var()
+        if not lhs:
+            lhs = self.parse_expr_unary()
 
         op = ''
 
@@ -99,24 +101,6 @@ class Parser:
 
         value = self.parse_expr()
         return StmtAssign(lhs, op, value)
-
-    def parse_prefixed(self, side='rhs'):
-        if self.peek('IDENT'):
-            if side == 'rhs':
-                if self.peek2('OP_PAREN_O'):
-                    fn_call = self.parse_expr_fn_call()
-                    return fn_call
-            var = self.expect('IDENT')
-            return var
-        elif self.accept('OP_PAREN_O'):
-            prefixed = self.parse_prefixed(side)
-            self.expect('OP_PAREN_C')
-            return prefixed
-        elif self.peek('OP_PTR'):
-            ptr_deref = self.parse_expr_unary_prefix(side)
-            return ptr_deref
-        else:
-            pass
 
     def parse_var(self):
         if self.peek('IDENT'):
@@ -255,29 +239,18 @@ class Parser:
         return self.result
 
     def parse_expr_unary(self):
-        if self.peek('OP_INCR') or self.peek('OP_DECR') or self.peek('OP_NOT') or self.peek('OP_PTR'):
-            return self.parse_expr_unary_prefix()
+        if self.token_type() in unary_ops.keys():
+            op = unary_ops[self.token_type()]
+            self.accept(self.token_type())
+            if self.accept('OP_PAREN_O'):
+                expr = self.parse_expr()
+                self.accept('OP_PAREN_C')
+                return ExprUnary(expr, op)
+            else:
+                expr = self.parse_expr()
+                return ExprUnary(expr, op)
         else:
             return self.parse_expr_primary()
-
-    def parse_expr_unary_prefix(self, side='rhs'):
-        op = ''
-        op_count = 0
-
-        if self.accept('OP_INCR'):
-            op = 'INCR'
-        elif self.accept('OP_DECR'):
-            op = 'DECR'
-        elif self.accept('OP_NOT'):
-            op = 'NOT'
-            op_count = 1
-            while self.accept('OP_NOT'):
-                op_count += 1
-        elif self.accept('OP_PTR'):
-            op = 'OP_PTR'
-
-        prefixed = self.parse_prefixed(side)
-        return ExprUnaryPrefix(prefixed, op, op_count)
 
     def parse_expr_primary(self):
         if self.peek('IDENT'):
