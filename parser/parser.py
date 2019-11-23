@@ -14,6 +14,11 @@ assign_ops = {
     'OP_ASSIGN_MOD': 'MOD_EQUALS',
 }
 
+unary_lhs_ops = {
+    'OP_INCR': 'INCR',
+    'OP_DECR': 'DECR',
+}
+
 
 class Parser:
     curr_input: Input
@@ -45,11 +50,9 @@ class Parser:
         else:
             self.err(token_type)
 
-    def parse_stmt_assign(self, var=None):
+    def parse_stmt_assign(self):
         # todo do not allow var to be keyword (ex TRUE, NULL)
-        if not var:
-            # var = self.expect('IDENT')
-            var = self.parse_var_paren()
+        var = self.parse_var()
 
         op = ''
 
@@ -62,14 +65,24 @@ class Parser:
         value = self.parse_expr()
         return StmtAssign(var, op, value)
 
-    def parse_var_paren(self):
-        if self.peek('OP_PAREN_O'):
-            self.accept('OP_PAREN_O')
-            var = self.parse_var_paren()
+    def parse_var(self):
+        if self.peek('IDENT'):
+            return self.accept('IDENT')
+        elif self.accept('OP_PAREN_O'):
+            var = self.parse_var()
             self.expect('OP_PAREN_C')
+            return var
+        elif self.accept('OP_MUL'):
+            return self.parse_var()
         else:
-            var = self.expect('IDENT')
-        return var
+            pass
+
+    def parse_assign_op(self):
+        if self.token_type() in assign_ops.keys():
+            return assign_ops[self.token_type()]
+        # todo err
+        else:
+            pass
 
     def parse_stmt_expr(self, expr):
         self.result = expr
@@ -188,8 +201,6 @@ class Parser:
 
         return self.result
 
-
-
     def parse_expr_unary(self):
         if self.peek('OP_INCR') or self.peek('OP_DECR') or self.peek('OP_NOT') or self.peek('OP_PTR_DEREF'):
             return self.parse_expr_unary_prefix()
@@ -201,9 +212,9 @@ class Parser:
         op_count = 0
 
         if self.accept('OP_INCR'):
-            op = 'INCREMENT'
+            op = 'INCR'
         elif self.accept('OP_DECR'):
-            op = 'DECREMENT'
+            op = 'DECR'
         elif self.accept('OP_NOT'):
             op = 'NOT'
             op_count = 1
@@ -215,8 +226,8 @@ class Parser:
             while self.accept('PTR_DEREF'):
                 op_count += 1
 
-        name = self.expect('IDENT')
-        return ExprUnaryPrefix(name, op, op_count)
+        var = self.parse_var()
+        return ExprUnaryPrefix(var, op, op_count)
 
     def parse_expr_primary(self):
         if self.peek('IDENT'):
@@ -315,38 +326,18 @@ class Parser:
 
         return Program(decls)
 
-    def parse_stmt_paren(self):
-        self.expect('OP_PAREN_O')
-
-        if self.peek('OP_PAREN_O'):
-            stmt_obj = self.parse_stmt_paren()
-        elif self.peek('IDENT'):
-            if self.peek2('OP_PAREN_O'):
-                stmt_obj = self.parse_stmt_expr(self.parse_expr_fn_call())
-            else:
-                var = self.parse_var_paren()
-                self.expect('OP_PAREN_C')
-                return self.parse_stmt_assign(var)
-        elif self.token_type() in ['OP_INCR', 'OP_DECR']:
-            stmt_obj = self.parse_stmt_expr(self.parse_expr_unary_prefix())
-
-        self.expect('OP_PAREN_C')
-        return stmt_obj
-
     def parse_stmt(self):
-        if self.peek('OP_PAREN_O'):
-            stmt = self.parse_stmt_paren()
-        elif self.peek('IDENT'):
+        if self.peek('IDENT'):
             if self.peek2('OP_PAREN_O'):
                 stmt = self.parse_stmt_expr(self.parse_expr_fn_call())
-            # todo refactor this mess
             else:
                 stmt = self.parse_stmt_assign()
         # fixme here it is specified what prefix operators are legit to be contained in a legit statement!
         # fixme vagueness
-        elif self.token_type() in ['OP_INCR', 'OP_DECR']:
+        elif self.token_type() in unary_lhs_ops.keys():
             stmt = self.parse_stmt_expr(self.parse_expr_unary_prefix())
-
+        elif self.token_type() == 'OP_MUL':
+            stmt = self.parse_stmt_assign()
         elif self.token_type() == 'KW_IF':
             return self.parse_stmt_if()
         # if self.token_type() == 'KW_FOR':
