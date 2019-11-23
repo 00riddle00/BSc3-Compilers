@@ -169,25 +169,6 @@ class IfBranch(Node):
         p.print('body', self.body)
 
 
-class IfCondition(Expr):
-
-    def __init__(self, expr):
-        self.expr = expr
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('expr', self.expr)
-
-
-class IfBody(StmtBlock):
-
-    def __init__(self, stmts):
-        super().__init__(stmts)
-
-    def print_node(self, p):
-        super().print_node(p)
-
-
 class StmtIf(Stmt):
 
     def __init__(self, branches, stmt_block=None):
@@ -221,7 +202,7 @@ class StmtBreak(Stmt):
         super().__init__()
 
     def print_node(self, p):
-        p.print('break_kw', self.break_kw)
+        p.print('keyword', self.break_kw)
 
 
 class StmtContinue(Stmt):
@@ -231,19 +212,21 @@ class StmtContinue(Stmt):
         super().__init__()
 
     def print_node(self, p):
-        p.print('continue_kw', self.continue_kw)
+        p.print('keyword', self.continue_kw)
 
 
 class StmtReturn(Stmt):
 
-    def __init__(self, return_kw, value):
+    def __init__(self, return_kw, value=None):
         self.return_kw = return_kw
         self.value = value
         super().__init__()
 
     def print_node(self, p):
-        p.print('return_kw', self.return_kw)
-        p.print('value', self.value)
+        if not self.value:
+            p.print('keyword', self.return_kw)
+        else:
+            p.print('value', self.value)
 
 
 class StmtExpr(Stmt):

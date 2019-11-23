@@ -2,8 +2,7 @@ from lexer import Token, Input
 from errors import ParserError
 from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnary, ExprBinary, \
     ExprFnCall, Param, Program, DeclFn, StmtBlock, StmtIf, StmtWhile, StmtBreak, \
-    StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, \
-    IfBody, IfBranch, IfCondition
+    StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, IfBranch
 
 assign_ops = {
     'OP_ASSIGN_EQ': 'EQUALS',
@@ -347,9 +346,9 @@ class Parser:
     def parse_stmt_if(self):
         self.expect('KW_IF')
         self.expect('OP_PAREN_O')
-        cond = IfCondition(self.parse_expr())
+        cond = self.parse_expr()
         self.expect('OP_PAREN_C')
-        body = IfBody(self.parse_stmt_block())
+        body = self.parse_stmt_block()
 
         branches = [IfBranch(cond, body)]
 
@@ -357,9 +356,9 @@ class Parser:
 
             while self.accept('KW_ELIF'):
                 self.expect('OP_PAREN_O')
-                cond = IfCondition(self.parse_expr())
+                cond = self.parse_expr()
                 self.expect('OP_PAREN_C')
-                body = IfBody(self.parse_stmt_block())
+                body = self.parse_stmt_block()
                 branches.append(IfBranch(cond, body))
 
         stmt_block = None
@@ -404,6 +403,7 @@ class Parser:
 
     def parse_stmt_break(self):
         break_kw = self.expect('KW_BREAK')
+        print(type(break_kw))
         return StmtBreak(break_kw)
 
     def parse_stmt_continue(self):

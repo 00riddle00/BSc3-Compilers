@@ -38,5 +38,8 @@ class ASTPrinter:
         print(f'{prefix}{title}: {text}')
 
     def print_token(self, title, token):
-        text = f'{token.value} (ln={token.line_no})'
+        if token.value == '':
+            text = f'{token.type} (ln={token.line_no})'
+        else:
+            text = f'{token.value} (ln={token.line_no})'
         self.print_single(title, text)
