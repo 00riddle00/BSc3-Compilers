@@ -248,10 +248,10 @@ class Lexer:
             self.curr_input = _input
 
             # uncomment for debugging
-            print(81 * '#')
-            print(f'[file]: {self.curr_input.name}')
-            pprint(self.curr_input.text)
-            print(81 * '#')
+            # print(81 * '#')
+            # print(f'[file]: {self.curr_input.name}')
+            # pprint(self.curr_input.text)
+            # print(81 * '#')
 
             while self.running and not self.curr_input.is_input_read():
                 self.curr_char = self.curr_input.read_char()

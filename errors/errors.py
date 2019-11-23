@@ -1,6 +1,70 @@
 from abc import abstractmethod
 from pprint import pprint
 
+user_friendly_names = {
+    'KW_INCLUDE': '@',
+    'KW_FN': 'fx',
+    'KW_FN_RET_ARROW': '==',
+    'KW_FN_IN': 'in',
+    'KW_FN_OUT': 'out',
+    'KW_IF': 'if',
+    'KW_ELIF': 'elif',
+    'KW_ELSE': 'else',
+    'KW_FOR': 'for',
+    'KW_WHILE': 'while',
+    'KW_BREAK': 'break',
+    'KW_CONTINUE': 'continue',
+    'KW_RETURN': 'return',
+    'KW_VOID': 'void',
+    'KW_INT': 'int',
+    'KW_FLOAT': 'float',
+    'KW_BOOL': 'bool',
+    'KW_CHAR': 'char',
+    'KW_STR': 'string',
+    'KW_STRUCT': 'struct',
+    'KW_NULL': 'NULL',
+    'KW_TRUE': 'True',
+    'KW_FALSE': 'False',
+    'KW_AND': 'AND',
+    'KW_OR': 'OR',
+    'IDENT': 'identifier',
+    'LIT_INT': 'int literal',
+    'LIT_FLOAT': 'float literal',
+    'LIT_CHAR': 'char literal',
+    'LIT_STR': 'string literal',
+    'OP_G': '',
+    'OP_GE': '=',
+    'OP_L': '',
+    'OP_LE': '=',
+    'OP_IS_EQ': '==',
+    'OP_IS_NEQ': '!=',
+    'OP_SUM': '+',
+    'OP_SUB': '-',
+    'OP_MUL': '*',
+    'OP_DIV': '/',
+    'OP_MOD': '%',
+    'OP_NOT': '!',
+    'OP_INCR': '++',
+    'OP_DECR': '--',
+    'OP_ASSIGN_EQ': '=',
+    'OP_ASSIGN_SUM': '+=',
+    'OP_ASSIGN_SUB': '-=',
+    'OP_ASSIGN_MUL': '*=',
+    'OP_ASSIGN_DIV': '/=',
+    'OP_ASSIGN_MOD': '%=',
+    'OP_PTR': '$',
+    'OP_PTR_ADDR': '&',
+    'OP_DOT_ACCESS_MEMBER': '.',
+    'OP_PTR_ACCESS_MEMBER': '-',
+    'OP_PAREN_O': '(',
+    'OP_PAREN_C': ')',
+    'OP_BRACE_O': '{',
+    'OP_BRACE_C': '}',
+    'OP_BRACKET_O': '[',
+    'OP_BRACKET_C': ']',
+    'OP_SEMICOLON': ';',
+    'OP_COMMA': ',',
+}
 
 class CompilerError(BaseException):
 
@@ -24,7 +88,7 @@ class InputError(CompilerError):
 class LexerError(CompilerError):
 
     def print_err(self):
-        print(f'[LexERROR] [file={self.file}:line={self.line}:pos={self.pos}] [{self.msg}]')
+        print(f'[LexERROR] [file={self.file}:{self.line}:{self.pos}] [{self.msg}]')
 
 
 class LexerDebugError(LexerError):
@@ -61,5 +125,5 @@ class ParserError(CompilerError):
     def print_err(self):
         if not self.msg:
             self.msg = ''
-        print(f'[ParseERROR] [file={self.file}:line={self.line}:pos={self.pos}] [{self.msg}] '
-              f'[expected={self.exp_token}, found={self.curr_token}]')
+        print(f'[ParseERROR] [{self.file}:{self.line}:{self.pos}] [{self.msg}] '
+              f'[expected={user_friendly_names[self.exp_token]}, found={user_friendly_names[self.curr_token]}]')
