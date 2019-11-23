@@ -53,16 +53,28 @@ class ExprVar(Expr):
         p.print('name', self.name)
 
 
+class ExprPtrDeref(Expr):
+
+    def __init__(self, dereferenced, op):
+        self.dereferenced = dereferenced
+        self.op = op
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('dereferenced', self.dereferenced)
+        p.print_single('op', self.op)
+
+
 class ExprUnaryPrefix(Expr):
 
-    def __init__(self, prefixable, op, op_count=1):
-        self.prefixable = prefixable
+    def __init__(self, prefixed, op, op_count=1):
+        self.prefixed = prefixed
         self.op = op
         self.op_count = op_count
         super().__init__()
 
     def print_node(self, p):
-        p.print('prefixable', self.prefixable)
+        p.print('prefixed', self.prefixed)
         p.print_single('op', self.op)
         if self.op_count > 1:
             p.print_single('op count', self.op_count)
@@ -260,14 +272,14 @@ class StmtExpr(Stmt):
 
 class StmtAssign(Stmt):
 
-    def __init__(self, var, op, value):
-        self.var = var
+    def __init__(self, lhs, op, value):
+        self.lhs = lhs
         self.op = op
         self.value = value
         super().__init__()
 
     def print_node(self, p):
-        p.print('var', self.var)
+        p.print('lhs', self.lhs)
         p.print_single('op', self.op)
         p.print('value', self.value)
 

@@ -3,7 +3,7 @@ from errors import ParserError
 from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnaryPrefix, ExprBinary, \
     ExprFnCall, Param, Program, DeclFn, StmtBlock, StmtIf, StmtWhile, StmtBreak, \
     StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, \
-    IfBody, IfBranch, IfCondition
+    IfBody, IfBranch, IfCondition, ExprPtrDeref
 
 assign_ops = {
     'OP_ASSIGN_EQ': 'EQUALS',
@@ -84,7 +84,10 @@ class Parser:
 
     def parse_stmt_assign(self):
         # todo do not allow var to be keyword (ex TRUE, NULL)
-        var = self.parse_var()
+        if self.peek('OP_PTR'):
+            lhs = self.parse_prefixed(side='lhs')
+        else:
+            lhs = self.parse_var()
 
         op = ''
 
@@ -95,9 +98,9 @@ class Parser:
             self.err('assign_op', 'invalid assign op')
 
         value = self.parse_expr()
-        return StmtAssign(var, op, value)
+        return StmtAssign(lhs, op, value)
 
-    def parse_prefixable(self, side='rhs'):
+    def parse_prefixed(self, side='rhs'):
         if self.peek('IDENT'):
             if side == 'rhs':
                 if self.peek2('OP_PAREN_O'):
@@ -106,12 +109,12 @@ class Parser:
             var = self.expect('IDENT')
             return var
         elif self.accept('OP_PAREN_O'):
-            prefixable = self.parse_prefixable(side)
+            prefixed = self.parse_prefixed(side)
             self.expect('OP_PAREN_C')
-            return prefixable
-        elif self.accept('OP_PTR'):
-            prefixable = self.parse_prefixable(side)
-            return prefixable
+            return prefixed
+        elif self.peek('OP_PTR'):
+            ptr_deref = self.parse_expr_unary_prefix(side)
+            return ptr_deref
         else:
             pass
 
@@ -252,7 +255,7 @@ class Parser:
         return self.result
 
     def parse_expr_unary(self):
-        if self.peek('OP_INCR') or self.peek('OP_DECR') or self.peek('OP_NOT') or self.peek('OP_PTR_DEREF'):
+        if self.peek('OP_INCR') or self.peek('OP_DECR') or self.peek('OP_NOT') or self.peek('OP_PTR'):
             return self.parse_expr_unary_prefix()
         else:
             return self.parse_expr_primary()
@@ -270,14 +273,11 @@ class Parser:
             op_count = 1
             while self.accept('OP_NOT'):
                 op_count += 1
-        elif self.accept('OP_PTR_DEREF'):
-            op = 'PTR_DEREF'
-            op_count = 1
-            while self.accept('PTR_DEREF'):
-                op_count += 1
+        elif self.accept('OP_PTR'):
+            op = 'OP_PTR'
 
-        prefixable = self.parse_prefixable(side)
-        return ExprUnaryPrefix(prefixable, op, op_count)
+        prefixed = self.parse_prefixed(side)
+        return ExprUnaryPrefix(prefixed, op, op_count)
 
     def parse_expr_primary(self):
         if self.peek('IDENT'):
