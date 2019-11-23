@@ -45,9 +45,11 @@ class Parser:
         else:
             self.err(token_type)
 
-    def parse_stmt_assign(self):
+    def parse_stmt_assign(self, var=None):
         # todo do not allow var to be keyword (ex TRUE, NULL)
-        var = self.expect('IDENT')
+        if not var:
+            # var = self.expect('IDENT')
+            var = self.parse_var_paren()
 
         op = ''
 
@@ -55,15 +57,22 @@ class Parser:
             op = assign_ops[self.token_type()]
             self.accept(self.token_type())
         else:
-            self.err('invalid assign op')
+            self.err('assign_op', 'invalid assign op')
 
         value = self.parse_expr()
-        self.expect('OP_SEMICOLON')
         return StmtAssign(var, op, value)
+
+    def parse_var_paren(self):
+        if self.peek('OP_PAREN_O'):
+            self.accept('OP_PAREN_O')
+            var = self.parse_var_paren()
+            self.expect('OP_PAREN_C')
+        else:
+            var = self.expect('IDENT')
+        return var
 
     def parse_stmt_expr(self, expr):
         self.result = expr
-        self.expect('OP_SEMICOLON')
         return StmtExpr(self.result)
 
     def parse_expr_fn_call(self):
@@ -179,14 +188,17 @@ class Parser:
 
         return self.result
 
+
+
     def parse_expr_unary(self):
-        if self.peek('OP_INCR') or self.peek('OP_DECR') or self.peek('OP_NOT'):
+        if self.peek('OP_INCR') or self.peek('OP_DECR') or self.peek('OP_NOT') or self.peek('OP_PTR_DEREF'):
             return self.parse_expr_unary_prefix()
         else:
             return self.parse_expr_primary()
 
     def parse_expr_unary_prefix(self):
         op = ''
+        op_count = 0
 
         if self.accept('OP_INCR'):
             op = 'INCREMENT'
@@ -197,11 +209,14 @@ class Parser:
             op_count = 1
             while self.accept('OP_NOT'):
                 op_count += 1
-            name = self.expect('IDENT')
-            return ExprUnaryPrefix(name, op, op_count)
+        elif self.accept('OP_PTR_DEREF'):
+            op = 'PTR_DEREF'
+            op_count = 1
+            while self.accept('PTR_DEREF'):
+                op_count += 1
 
         name = self.expect('IDENT')
-        return ExprUnaryPrefix(name, op)
+        return ExprUnaryPrefix(name, op, op_count)
 
     def parse_expr_primary(self):
         if self.peek('IDENT'):
@@ -300,37 +315,57 @@ class Parser:
 
         return Program(decls)
 
-    def parse_stmt(self):
-        if self.peek('IDENT'):
-            if self.peek2('OP_PAREN_O'):
-                return self.parse_stmt_expr(self.parse_expr_fn_call())
-            # todo refactor this mess
-            for assign_op in assign_ops.keys():
-                # todo refactor peek2 fn
-                if self.peek2(assign_op):
-                    return self.parse_stmt_assign()
+    def parse_stmt_paren(self):
+        self.expect('OP_PAREN_O')
 
+        if self.peek('OP_PAREN_O'):
+            stmt_obj = self.parse_stmt_paren()
+        elif self.peek('IDENT'):
+            if self.peek2('OP_PAREN_O'):
+                stmt_obj = self.parse_stmt_expr(self.parse_expr_fn_call())
+            else:
+                var = self.parse_var_paren()
+                self.expect('OP_PAREN_C')
+                return self.parse_stmt_assign(var)
+        elif self.token_type() in ['OP_INCR', 'OP_DECR']:
+            stmt_obj = self.parse_stmt_expr(self.parse_expr_unary_prefix())
+
+        self.expect('OP_PAREN_C')
+        return stmt_obj
+
+    def parse_stmt(self):
+        if self.peek('OP_PAREN_O'):
+            stmt = self.parse_stmt_paren()
+        elif self.peek('IDENT'):
+            if self.peek2('OP_PAREN_O'):
+                stmt = self.parse_stmt_expr(self.parse_expr_fn_call())
+            # todo refactor this mess
+            else:
+                stmt = self.parse_stmt_assign()
         # fixme here it is specified what prefix operators are legit to be contained in a legit statement!
         # fixme vagueness
         elif self.token_type() in ['OP_INCR', 'OP_DECR']:
-            return self.parse_stmt_expr(self.parse_expr_unary_prefix())
+            stmt = self.parse_stmt_expr(self.parse_expr_unary_prefix())
 
-        if self.token_type() == 'KW_IF':
+        elif self.token_type() == 'KW_IF':
             return self.parse_stmt_if()
         # if self.token_type() == 'KW_FOR':
         #     return self.parse_stmt_for()
-        if self.token_type() == 'KW_WHILE':
+        elif self.token_type() == 'KW_WHILE':
             return self.parse_stmt_while()
-        if self.token_type() == 'KW_BREAK':
-            return self.parse_stmt_break()
-        if self.token_type() == 'KW_CONTINUE':
-            return self.parse_stmt_continue()
-        if self.token_type() == 'KW_RETURN':
-            return self.parse_stmt_ret()
-        if self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID', 'KW_CHAR', 'KW_STR']:
-            return self.parse_stmt_var_decl()
+        elif self.token_type() == 'KW_BREAK':
+            stmt = self.parse_stmt_break()
+        elif self.token_type() == 'KW_CONTINUE':
+            stmt = self.parse_stmt_continue()
+        elif self.token_type() == 'KW_RETURN':
+            stmt = self.parse_stmt_ret()
+        elif self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID', 'KW_CHAR', 'KW_STR']:
+            stmt = self.parse_stmt_var_decl()
         else:
             self.err('<stmt_start>', 'stmt error')
+
+        self.expect('OP_SEMICOLON')
+        return stmt
 
     def parse_stmt_block(self):
         self.expect('OP_BRACE_O')
@@ -406,12 +441,10 @@ class Parser:
 
     def parse_stmt_break(self):
         break_kw = self.expect('KW_BREAK')
-        self.expect('OP_SEMICOLON')
         return StmtBreak(break_kw)
 
     def parse_stmt_continue(self):
         continue_kw = self.expect('KW_CONTINUE')
-        self.expect('OP_SEMICOLON')
         return StmtContinue(continue_kw)
 
     def parse_stmt_ret(self):
@@ -422,14 +455,11 @@ class Parser:
         else:
             value = None
 
-        self.expect('OP_SEMICOLON')
-
         return StmtReturn(return_kw, value)
 
     def parse_stmt_var_decl(self):
         type_ = self.parse_type()
         name = self.expect('IDENT')
-        self.expect('OP_SEMICOLON')
         return StmtVarDecl(name, type_)
 
     def parse_type(self):

@@ -55,7 +55,7 @@ class ExprVar(Expr):
 
 class ExprUnaryPrefix(Expr):
 
-    def __init__(self, var, op, op_count=None):
+    def __init__(self, var, op, op_count=1):
         self.var = var
         self.op = op
         self.op_count = op_count
@@ -64,7 +64,7 @@ class ExprUnaryPrefix(Expr):
     def print_node(self, p):
         p.print('var', self.var)
         p.print_single('op', self.op)
-        if self.op_count:
+        if self.op_count > 1:
             p.print_single('op count', self.op_count)
 
 

@@ -1,10 +1,12 @@
 
 fx main() ==> void {
 
+    ++a;
+
     if (a+b) {
-        a %= d;
+        a %= ++d;
         return a+b*c;
     } else {
-        return a+b*c
+        return a+b*c;
     }
 }
