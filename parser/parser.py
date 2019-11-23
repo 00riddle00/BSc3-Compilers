@@ -50,6 +50,38 @@ class Parser:
         else:
             self.err(token_type)
 
+    def parse_stmt(self):
+        if self.peek('IDENT'):
+            if self.peek2('OP_PAREN_O'):
+                stmt = self.parse_stmt_expr(self.parse_expr_fn_call())
+            else:
+                stmt = self.parse_stmt_assign()
+        # fixme here it is specified what prefix operators are legit to be contained in a legit statement!
+        # fixme vagueness
+        elif self.token_type() in unary_lhs_ops.keys():
+            stmt = self.parse_stmt_expr(self.parse_expr_unary_prefix(side='lhs'))
+        elif self.token_type() == 'OP_PTR':
+            stmt = self.parse_stmt_assign()
+        elif self.token_type() == 'KW_IF':
+            return self.parse_stmt_if()
+        # if self.token_type() == 'KW_FOR':
+        #     return self.parse_stmt_for()
+        elif self.token_type() == 'KW_WHILE':
+            return self.parse_stmt_while()
+        elif self.token_type() == 'KW_BREAK':
+            stmt = self.parse_stmt_break()
+        elif self.token_type() == 'KW_CONTINUE':
+            stmt = self.parse_stmt_continue()
+        elif self.token_type() == 'KW_RETURN':
+            stmt = self.parse_stmt_ret()
+        elif self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID', 'KW_CHAR', 'KW_STR']:
+            stmt = self.parse_stmt_var_decl()
+        else:
+            self.err('<stmt_start>', 'stmt error')
+
+        self.expect('OP_SEMICOLON')
+        return stmt
+
     def parse_stmt_assign(self):
         # todo do not allow var to be keyword (ex TRUE, NULL)
         var = self.parse_var()
@@ -64,6 +96,24 @@ class Parser:
 
         value = self.parse_expr()
         return StmtAssign(var, op, value)
+
+    def parse_prefixable(self, side='rhs'):
+        if self.peek('IDENT'):
+            if side == 'rhs':
+                if self.peek2('OP_PAREN_O'):
+                    fn_call = self.parse_expr_fn_call()
+                    return fn_call
+            var = self.expect('IDENT')
+            return var
+        elif self.accept('OP_PAREN_O'):
+            prefixable = self.parse_prefixable(side)
+            self.expect('OP_PAREN_C')
+            return prefixable
+        elif self.accept('OP_PTR'):
+            prefixable = self.parse_prefixable(side)
+            return prefixable
+        else:
+            pass
 
     def parse_var(self):
         if self.peek('IDENT'):
@@ -207,7 +257,7 @@ class Parser:
         else:
             return self.parse_expr_primary()
 
-    def parse_expr_unary_prefix(self):
+    def parse_expr_unary_prefix(self, side='rhs'):
         op = ''
         op_count = 0
 
@@ -226,8 +276,8 @@ class Parser:
             while self.accept('PTR_DEREF'):
                 op_count += 1
 
-        var = self.parse_var()
-        return ExprUnaryPrefix(var, op, op_count)
+        prefixable = self.parse_prefixable(side)
+        return ExprUnaryPrefix(prefixable, op, op_count)
 
     def parse_expr_primary(self):
         if self.peek('IDENT'):
@@ -325,38 +375,6 @@ class Parser:
                 decls.append(self.parse_decl())
 
         return Program(decls)
-
-    def parse_stmt(self):
-        if self.peek('IDENT'):
-            if self.peek2('OP_PAREN_O'):
-                stmt = self.parse_stmt_expr(self.parse_expr_fn_call())
-            else:
-                stmt = self.parse_stmt_assign()
-        # fixme here it is specified what prefix operators are legit to be contained in a legit statement!
-        # fixme vagueness
-        elif self.token_type() in unary_lhs_ops.keys():
-            stmt = self.parse_stmt_expr(self.parse_expr_unary_prefix())
-        elif self.token_type() == 'OP_PTR':
-            stmt = self.parse_stmt_assign()
-        elif self.token_type() == 'KW_IF':
-            return self.parse_stmt_if()
-        # if self.token_type() == 'KW_FOR':
-        #     return self.parse_stmt_for()
-        elif self.token_type() == 'KW_WHILE':
-            return self.parse_stmt_while()
-        elif self.token_type() == 'KW_BREAK':
-            stmt = self.parse_stmt_break()
-        elif self.token_type() == 'KW_CONTINUE':
-            stmt = self.parse_stmt_continue()
-        elif self.token_type() == 'KW_RETURN':
-            stmt = self.parse_stmt_ret()
-        elif self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID', 'KW_CHAR', 'KW_STR']:
-            stmt = self.parse_stmt_var_decl()
-        else:
-            self.err('<stmt_start>', 'stmt error')
-
-        self.expect('OP_SEMICOLON')
-        return stmt
 
     def parse_stmt_block(self):
         self.expect('OP_BRACE_O')
