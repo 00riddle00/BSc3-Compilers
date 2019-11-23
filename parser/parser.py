@@ -81,7 +81,7 @@ class Parser:
         elif self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID', 'KW_CHAR', 'KW_STR']:
             stmt = self.parse_stmt_var_decl()
         else:
-            self.err('<stmt_start>', 'stmt error')
+            self.err('legit token in the beginning of a statement')
 
         self.expect('OP_SEMICOLON')
         return stmt
@@ -97,29 +97,10 @@ class Parser:
             op = assign_ops[self.token_type()]
             self.accept(self.token_type())
         else:
-            self.err('assign_op', 'invalid assign op')
+            self.err('assign operator')
 
         value = self.parse_expr()
         return StmtAssign(lhs, op, value)
-
-    def parse_var(self):
-        if self.peek('IDENT'):
-            return self.accept('IDENT')
-        elif self.accept('OP_PAREN_O'):
-            var = self.parse_var()
-            self.expect('OP_PAREN_C')
-            return var
-        elif self.accept('OP_PTR'):
-            return self.parse_var()
-        else:
-            pass
-
-    def parse_assign_op(self):
-        if self.token_type() in assign_ops.keys():
-            return assign_ops[self.token_type()]
-        # todo err
-        else:
-            pass
 
     def parse_stmt_expr(self, expr):
         self.result = expr
@@ -276,7 +257,7 @@ class Parser:
         elif self.token_type() == 'OP_PAREN_O':
             return self.parse_expr_paren()
         else:
-            self.err('<expr_primary_start>', 'expr error')
+            self.err('type literal/NULL/parenthesis')
 
     def parse_expr_lit_int(self):
         lit = self.expect('LIT_INT')
@@ -464,7 +445,7 @@ class Parser:
             self.expect('KW_STR')
             return TypePrim('STR')
         else:
-            self.err('<Primary_type>', 'type error')
+            self.err('type name')
 
     def peek(self, token_type):
         peeked_token = self.tokens[self.offset + 0]

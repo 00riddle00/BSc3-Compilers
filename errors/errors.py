@@ -125,5 +125,8 @@ class ParserError(CompilerError):
     def print_err(self):
         if not self.msg:
             self.msg = ''
+        exp = self.exp_token
+        if exp in user_friendly_names.keys():
+            exp = user_friendly_names[exp]
         print(f'[ParseERROR] [{self.file}:{self.line}:{self.pos}] [{self.msg}] '
-              f'[expected={user_friendly_names[self.exp_token]}, found={user_friendly_names[self.curr_token]}]')
+              f'[expected={exp}, found={user_friendly_names[self.curr_token]}]')
