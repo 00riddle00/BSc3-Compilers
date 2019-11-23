@@ -72,7 +72,7 @@ class Parser:
             var = self.parse_var()
             self.expect('OP_PAREN_C')
             return var
-        elif self.accept('OP_MUL'):
+        elif self.accept('OP_PTR'):
             return self.parse_var()
         else:
             pass
@@ -336,7 +336,7 @@ class Parser:
         # fixme vagueness
         elif self.token_type() in unary_lhs_ops.keys():
             stmt = self.parse_stmt_expr(self.parse_expr_unary_prefix())
-        elif self.token_type() == 'OP_MUL':
+        elif self.token_type() == 'OP_PTR':
             stmt = self.parse_stmt_assign()
         elif self.token_type() == 'KW_IF':
             return self.parse_stmt_if()
