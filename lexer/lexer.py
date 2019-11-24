@@ -209,6 +209,7 @@ class Lexer:
         self.buffer += self.curr_char
 
     def begin_token(self, new_state):
+        self.curr_input.offset_token_start = self.curr_input.get_char_pos()
         self.token_start_ln = self.curr_input.curr_ln
         self.state = new_state
 
@@ -223,15 +224,21 @@ class Lexer:
 
         self.complete_token(token_type)
 
+    def complete_at_once(self, token_type):
+        self.curr_input.offset_token_start = self.curr_input.get_char_pos()
+        self.complete_token(token_type)
+
     def complete_token(self, token_type, reverse=False, delta=0):
         self.tokens.append(
             Token(token_type, self.buffer, self.curr_input.name, self.curr_input.curr_ln,
                   self.curr_input.offset_token_start))
+        print(f'{token_type}-{self.curr_input.offset_token_start}-{self.curr_input.offset}-{self.curr_input.get_char_pos()}')
         self.buffer = ''
         self.state = 'START'
         if reverse:
             self.curr_input.reverse_read(delta)
-        self.curr_input.offset_token_start = self.curr_input.offset
+        self.curr_input.offset_token_start = self.curr_input.get_char_pos() + 1
+        # self.curr_input.offset_token_start = self.curr_input.offset
 
     def dump_tokens(self):
         print(f'{"ID":>3}| {"LN":>3}| {"TYPE":<22} | {"VALUE":<14}')
@@ -248,10 +255,10 @@ class Lexer:
             self.curr_input = _input
 
             # uncomment for debugging
-            # print(81 * '#')
-            # print(f'[file]: {self.curr_input.name}')
-            # pprint(self.curr_input.text)
-            # print(81 * '#')
+            print(81 * '#')
+            print(f'[file]: {self.curr_input.name}')
+            pprint(self.curr_input.text)
+            print(81 * '#')
 
             while self.running and not self.curr_input.is_input_read():
                 self.curr_char = self.curr_input.read_char()
@@ -260,7 +267,7 @@ class Lexer:
             self.curr_char = 'EOF'
 
             if self.state == 'START':
-                self.complete_token('EOF')
+                self.complete_at_once('EOF')
             elif self.state in ('COMMENT_ML', 'COMMENT_ML_MINUS_1', 'COMMENT_ML_MINUS_2'):
                 self.err('unterminated comment')
             elif self.state in ('LIT_FLOAT_E', 'LIT_FLOAT_E_SIGN'):
@@ -273,7 +280,7 @@ class Lexer:
                 self.err('unterminated escape symbol')
             else:
                 self.lex_char()
-                self.complete_token('EOF')
+                self.complete_at_once('EOF')
 
     def lex_start(self):
         if self.is_letter():
@@ -323,25 +330,25 @@ class Lexer:
         elif self.curr_char == '!':
             self.begin_token('OP_NOT')
         elif self.curr_char == '(':
-            self.complete_token('OP_PAREN_O')
+            self.complete_at_once('OP_PAREN_O')
         elif self.curr_char == ')':
-            self.complete_token('OP_PAREN_C')
+            self.complete_at_once('OP_PAREN_C')
         elif self.curr_char == '{':
-            self.complete_token('OP_BRACE_O')
+            self.complete_at_once('OP_BRACE_O')
         elif self.curr_char == '}':
-            self.complete_token('OP_BRACE_C')
+            self.complete_at_once('OP_BRACE_C')
         elif self.curr_char == '[':
-            self.complete_token('OP_BRACKET_O')
+            self.complete_at_once('OP_BRACKET_O')
         elif self.curr_char == ']':
             self.begin_token('OP_BRACKET_C')
         elif self.curr_char == ';':
-            self.complete_token('OP_SEMICOLON')
+            self.complete_at_once('OP_SEMICOLON')
         elif self.curr_char == ',':
-            self.complete_token('OP_COMMA')
+            self.complete_at_once('OP_COMMA')
         elif self.curr_char == '$':
-            self.complete_token('OP_PTR')
+            self.complete_at_once('OP_PTR')
         elif self.curr_char == '&':
-            self.complete_token('OP_PTR_ADDR')
+            self.complete_at_once('OP_PTR_ADDR')
         elif self.curr_char == '@':
             self.begin_token('INCLUDE')
         else:
