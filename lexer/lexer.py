@@ -203,7 +203,6 @@ class Lexer:
         self.state = new_state
 
     def complete_ident(self):
-        self.curr_input.reverse_read()
 
         if self.buffer in KEYWORDS:
             token_type = KEYWORDS[self.buffer]
@@ -211,24 +210,20 @@ class Lexer:
         else:
             token_type = 'IDENT'
 
-        self.complete_token(token_type)
+        self.complete_token(token_type, delta=1)
 
     def complete_at_once(self, token_type):
         self.curr_input.offset_token_start = self.curr_input.get_char_pos()
         self.complete_token(token_type)
 
-    def complete_token(self, token_type, reverse=False, delta=0):
+    def complete_token(self, token_type, delta=0):
         self.tokens.append(
             Token(token_type, self.buffer, self.curr_input.name, self.curr_input.curr_ln,
                   self.curr_input.offset_token_start))
-        print(
-            f'{token_type}-{self.curr_input.offset_token_start}-{self.curr_input.offset}-{self.curr_input.get_char_pos()}')
         self.buffer = ''
         self.state = 'START'
-        if reverse:
+        if delta:
             self.curr_input.reverse_read(delta)
-        self.curr_input.offset_token_start = self.curr_input.get_char_pos() + 1
-        # self.curr_input.offset_token_start = self.curr_input.offset
 
     def dump_tokens(self):
         print(f'{"ID":>3}| {"LN":>3}| {"TYPE":<22} | {"VALUE":<14}')
@@ -245,10 +240,10 @@ class Lexer:
             self.curr_input = _input
 
             # uncomment for debugging
-            print(81 * '#')
-            print(f'[file]: {self.curr_input.name}')
-            pprint(self.curr_input.text)
-            print(81 * '#')
+            # print(81 * '#')
+            # print(f'[file]: {self.curr_input.name}')
+            # pprint(self.curr_input.text)
+            # print(81 * '#')
 
             while self.running and not self.curr_input.is_input_read():
                 self.curr_char = self.curr_input.read_char()
@@ -504,8 +499,7 @@ class Lexer:
         elif self.is_ident_head():
             self.err('invalid int suffix')
         else:
-            self.curr_input.reverse_read()
-            self.complete_token('LIT_INT')
+            self.complete_token('LIT_INT', delta=1)
 
     def lex_lit_float(self):
         if self.is_digit():
@@ -514,8 +508,7 @@ class Lexer:
             self.add()
             self.state = 'LIT_FLOAT_E'
         else:
-            self.curr_input.reverse_read()
-            self.complete_token('LIT_FLOAT')
+            self.complete_token('LIT_FLOAT', delta=1)
 
     def lex_lit_float_e(self):
         if self.is_digit():
@@ -538,8 +531,7 @@ class Lexer:
         if self.is_digit():
             self.add()
         else:
-            self.curr_input.reverse_read()
-            self.complete_token('LIT_FLOAT')
+            self.complete_token('LIT_FLOAT', delta=1)
 
     def lex_lit_char(self):
         if self.curr_char == "'":
@@ -606,15 +598,13 @@ class Lexer:
         if self.curr_char == '=':
             self.complete_token('OP_LE')
         else:
-            self.curr_input.reverse_read()
-            self.complete_token('OP_L')
+            self.complete_token('OP_L', delta=1)
 
     def lex_op_g(self):
         if self.curr_char == '=':
             self.complete_token('OP_GE')
         else:
-            self.curr_input.reverse_read()
-            self.complete_token('OP_G')
+            self.complete_token('OP_G', delta=1)
 
     def lex_op_sum(self):
         if self.curr_char == '+':
@@ -625,8 +615,7 @@ class Lexer:
             self.add()
             self.state = 'LIT_INT'
         else:
-            self.curr_input.reverse_read()
-            self.complete_token('OP_SUM')
+            self.complete_token('OP_SUM', delta=1)
 
     def lex_op_sub(self):
         if self.curr_char == '-':
@@ -637,51 +626,44 @@ class Lexer:
             self.add()
             self.state = 'LIT_INT'
         else:
-            self.curr_input.reverse_read()
             self.buffer = ''
-            self.complete_token('OP_SUB')
+            self.complete_token('OP_SUB', delta=1)
 
     def lex_op_mul(self):
         if self.curr_char == '=':
             self.complete_token('OP_ASSIGN_MUL')
         else:
-            self.curr_input.reverse_read()
-            self.complete_token('OP_MUL')
+            self.complete_token('OP_MUL', delta=1)
 
     def lex_op_div(self):
         if self.curr_char == '=':
             self.complete_token('OP_ASSIGN_DIV')
         else:
-            self.curr_input.reverse_read()
-            self.complete_token('OP_DIV')
+            self.complete_token('OP_DIV', delta=1)
 
     def lex_op_mod(self):
         if self.curr_char == '=':
             self.complete_token('OP_ASSIGN_MOD')
         else:
-            self.curr_input.reverse_read()
-            self.complete_token('OP_MOD')
+            self.complete_token('OP_MOD', delta=1)
 
     def lex_op_assign_eq(self):
         if self.curr_char == '=':
             self.state = 'OP_IS_EQ'
         else:
-            self.curr_input.reverse_read()
-            self.complete_token('OP_ASSIGN_EQ')
+            self.complete_token('OP_ASSIGN_EQ', delta=1)
 
     def lex_op_is_eq(self):
         if self.curr_char == '>':
             self.complete_token(KEYWORDS['==>'])
         else:
-            self.curr_input.reverse_read()
-            self.complete_token('OP_IS_EQ')
+            self.complete_token('OP_IS_EQ', delta=1)
 
     def lex_op_not(self):
         if self.curr_char == '=':
             self.complete_token('OP_IS_NEQ')
         else:
-            self.curr_input.reverse_read()
-            self.complete_token('OP_NOT')
+            self.complete_token('OP_NOT', delta=1)
 
     def lex_include(self):
         if self.curr_char == '\n':
