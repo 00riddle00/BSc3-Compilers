@@ -65,17 +65,17 @@ class Parser:
                 stmt = self.parse_stmt_assign(unary_expr)
             else:
                 stmt = unary_expr
-        elif self.token_type() == 'KW_IF':
+        elif self.peek('KW_IF'):
             return self.parse_stmt_if()
-        # if self.token_type() == 'KW_FOR':
+        # if self.peek('KW_FOR'):
         #     return self.parse_stmt_for()
-        elif self.token_type() == 'KW_WHILE':
+        elif self.peek('KW_WHILE'):
             return self.parse_stmt_while()
-        elif self.token_type() == 'KW_BREAK':
+        elif self.peek('KW_BREAK'):
             stmt = self.parse_stmt_break()
-        elif self.token_type() == 'KW_CONTINUE':
+        elif self.peek('KW_CONTINUE'):
             stmt = self.parse_stmt_continue()
-        elif self.token_type() == 'KW_RETURN':
+        elif self.peek('KW_RETURN'):
             stmt = self.parse_stmt_ret()
         elif self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID', 'KW_CHAR', 'KW_STR']:
             stmt = self.parse_stmt_var_decl()
@@ -239,21 +239,21 @@ class Parser:
             else:
                 return self.parse_expr_var()
 
-        elif self.token_type() == 'LIT_INT':
+        elif self.peek('LIT_INT'):
             return self.parse_expr_lit_int()
-        elif self.token_type() == 'LIT_FLOAT':
+        elif self.peek('LIT_FLOAT'):
             return self.parse_expr_lit_float()
-        elif self.token_type() == 'LIT_CHAR':
+        elif self.peek('LIT_CHAR'):
             return self.parse_expr_lit_char()
-        elif self.token_type() == 'LIT_STR':
+        elif self.peek('LIT_STR'):
             return self.parse_expr_lit_str()
-        if self.token_type() == 'KW_NULL':
+        if self.peek('KW_NULL'):
             return self.parse_expr_lit_null()
-        elif self.token_type() == 'KW_TRUE':
+        elif self.peek('KW_TRUE'):
             return self.parse_expr_lit_true()
-        elif self.token_type() == 'KW_FALSE':
+        elif self.peek('KW_FALSE'):
             return self.parse_expr_lit_false()
-        elif self.token_type() == 'OP_PAREN_O':
+        elif self.peek('OP_PAREN_O'):
             return self.parse_expr_paren()
         else:
             self.err('type literal/NULL/parenthesis')
@@ -322,7 +322,7 @@ class Parser:
         decls = []
 
         while True:
-            if self.token_type() == 'EOF':
+            if self.peek('EOF'):
                 break
             else:
                 decls.append(self.parse_decl())
@@ -352,7 +352,7 @@ class Parser:
 
         branches = [IfBranch(cond, body)]
 
-        if self.token_type() == 'KW_ELIF':
+        if self.peek('KW_ELIF'):
 
             while self.accept('KW_ELIF'):
                 self.expect('OP_PAREN_O')
@@ -363,7 +363,7 @@ class Parser:
 
         stmt_block = None
 
-        if self.token_type() == 'KW_ELSE':
+        if self.peek('KW_ELSE'):
             self.expect('KW_ELSE')
             stmt_block = self.parse_stmt_block()
 
@@ -426,22 +426,22 @@ class Parser:
         return StmtVarDecl(name, type_)
 
     def parse_type(self):
-        if self.token_type() == 'KW_BOOL':
+        if self.peek('KW_BOOL'):
             self.expect('KW_BOOL')
             return TypePrim('BOOL')
-        elif self.token_type() == 'KW_FLOAT':
+        elif self.peek('KW_FLOAT'):
             self.expect('KW_FLOAT')
             return TypePrim('FLOAT')
-        elif self.token_type() == 'KW_INT':
+        elif self.peek('KW_INT'):
             self.expect('KW_INT')
             return TypePrim('INT')
-        elif self.token_type() == 'KW_VOID':
+        elif self.peek('KW_VOID'):
             self.expect('KW_VOID')
             return TypePrim('VOID')
-        elif self.token_type() == 'KW_CHAR':
+        elif self.peek('KW_CHAR'):
             self.expect('KW_CHAR')
             return TypePrim('CHAR')
-        elif self.token_type() == 'KW_STR':
+        elif self.peek('KW_STR'):
             self.expect('KW_STR')
             return TypePrim('STR')
         else:
