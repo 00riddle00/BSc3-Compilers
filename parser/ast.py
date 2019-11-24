@@ -214,8 +214,6 @@ class ExprFnCall(Expr):
 
 class ExprBinary(Expr):
 
-    # todo attribute list everywhere (with type hints)
-
     def __init__(self, kind, op, left, right):
         self.kind = kind
         self.op = op
