@@ -68,15 +68,6 @@ class TypePointer(Type):
     def print_node(self, p):
         p.print('inner', self.inner)
 
-# class TypePointer(Type):
-#
-#     def __init__(self, inner):
-#         self.inner = inner
-#         super().__init__()
-#
-#     def print_node(self, p):
-#         p.print('inner', self.inner)
-
 
 class TypePrim(Type):
 
@@ -179,14 +170,17 @@ class StmtReturn(Stmt):
 
 class StmtVarDecl(Stmt):
 
-    def __init__(self, name, type_):
+    def __init__(self, name, type_, value=None):
         self.name = name
         self.type = type_
+        self.value = value
         super().__init__()
 
     def print_node(self, p):
         p.print('name', self.name)
         p.print('type', self.type)
+        if self.value:
+            p.print('value', self.value)
 
 
 class StmtAssign(Stmt):

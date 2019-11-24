@@ -244,7 +244,10 @@ class Parser:
     def parse_stmt_var_decl(self):
         type_ = self.parse_type()
         name = self.expect('IDENT')
-        return StmtVarDecl(name, type_)
+        value = None
+        if self.accept('OP_ASSIGN_EQ'):
+            value = self.parse_expr()
+        return StmtVarDecl(name, type_, value)
 
     def parse_stmt_assign(self, lhs=None):
         if not lhs:
