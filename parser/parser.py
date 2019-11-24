@@ -20,7 +20,7 @@ unary_ops = {
     'OP_PTR_ADDR': 'PTR_ADDR',
 }
 
-primary_types_keyws = {
+primary_types_keywords = {
     'KW_BOOL': 'BOOL',
     'KW_FLOAT': 'FLOAT',
     'KW_INT': 'INT',
@@ -85,7 +85,7 @@ class Parser:
             stmt = self.parse_stmt_continue()
         elif self.peek('KW_RETURN'):
             stmt = self.parse_stmt_ret()
-        elif self.curr_token.type in primary_types_keyws.keys():
+        elif self.curr_token.type in primary_types_keywords.keys():
             stmt = self.parse_stmt_var_decl()
         else:
             self.err('legit token in the beginning of a statement')
@@ -432,9 +432,9 @@ class Parser:
 
     def parse_type(self):
         token_type = self.curr_token.type
-        if token_type in primary_types_keyws.keys():
+        if token_type in primary_types_keywords.keys():
             self.expect(token_type)
-            return TypePrim(primary_types_keyws[token_type])
+            return TypePrim(primary_types_keywords[token_type])
         else:
             self.err('type name')
 
