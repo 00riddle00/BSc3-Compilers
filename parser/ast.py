@@ -42,9 +42,9 @@ class DeclFn(Decl):
 
 class Param(Node):
 
-    def __init__(self, name, type):
+    def __init__(self, name, type_):
         self.name = name
-        self.type = type
+        self.type = type_
         super().__init__()
 
     def print_node(self, p):
@@ -214,7 +214,7 @@ class ExprFnCall(Expr):
 
 class ExprBinary(Expr):
 
-    # todo atribute list everywhere (with type hints)
+    # todo attribute list everywhere (with type hints)
 
     def __init__(self, kind, op, left, right):
         self.kind = kind
