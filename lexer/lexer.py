@@ -143,17 +143,6 @@ class Input:
         self.curr_ln += 1
         self.offset_token_start = 0
 
-    def ignore_space(self):
-        self.offset_token_start += 1
-
-    # todo
-    def ignore_tabstop(self):
-        pass
-
-    # todo
-    def ignore_cr(self):
-        pass
-
     def get_char_pos(self):
         return self.offset - self.offset_prev_line
 
@@ -302,15 +291,13 @@ class Lexer:
         elif self.curr_char == '#':
             self.state = 'COMMENT_START'
         elif self.curr_char == ' ':
-            self.curr_input.ignore_space()
+            pass # ignore
         elif self.curr_char == '\n':
             self.curr_input.next_line()
-        # todo count position
         elif self.curr_char == '\t':
-            self.curr_input.ignore_tabstop()
-        # todo count position
+            pass # ignore
         elif self.curr_char == '\r':
-            self.curr_input.ignore_cr()
+            pass # ignore
         elif self.curr_char == '<':
             self.begin_token('OP_L')
         elif self.curr_char == '>':
