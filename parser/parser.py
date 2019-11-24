@@ -2,7 +2,7 @@ from lexer import Token, Input
 from errors import ParserError, ParserDebugError
 from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnary, ExprBinary, \
     ExprFnCall, Param, Program, DeclFn, StmtBlock, StmtIf, StmtWhile, StmtBreak, \
-    StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, IfBranch, TypePointer
+    StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, IfBranch, TypePointer, StmtFor
 
 assign_ops = {
     'OP_ASSIGN_EQ': 'EQUALS',
@@ -28,6 +28,15 @@ primary_types_keywords = {
     'KW_CHAR': 'CHAR',
     'KW_STR': 'STR',
 }
+
+statement_keywords = [
+    'KW_IF',
+    'KW_FOR',
+    'KW_WHILE',
+    'KW_BREAK',
+    'KW_CONTINUE',
+    'KW_RETURN',
+]
 
 
 class Parser:
@@ -107,7 +116,6 @@ class Parser:
 
     def parse_type(self):
         token_type = self.curr_token.type
-        print(token_type)
         if token_type in primary_types_keywords.keys():
             self.expect(token_type)
             type_ = TypePrim(primary_types_keywords[token_type])
@@ -138,6 +146,7 @@ class Parser:
                 stmt = self.parse_stmt_expr(self.parse_expr_fn_call())
             else:
                 stmt = self.parse_stmt_assign()
+                print('aff')
         elif self.curr_token.type in unary_ops.keys():
             unary_expr = self.parse_expr_unary()
             if self.curr_token.type in assign_ops.keys():
@@ -146,8 +155,8 @@ class Parser:
                 stmt = unary_expr
         elif self.peek('KW_IF'):
             return self.parse_stmt_if()
-        # if self.peek('KW_FOR'):
-        #     return self.parse_stmt_for()
+        elif self.peek('KW_FOR'):
+            return self.parse_stmt_for()
         elif self.peek('KW_WHILE'):
             return self.parse_stmt_while()
         elif self.peek('KW_BREAK'):
@@ -190,19 +199,30 @@ class Parser:
 
         return StmtIf(branches, stmt_block)
 
-    # def parse_stmt_for(self):
-    #     self.expect('KW_FOR')
-    #     self.expect('OP_PAREN_O')
-    #     for_init = self.parse_for_init()
-    #     self.expect('OP_SEMICOLON')
-    #     for_cond = self.parse_for_cond()
-    #     self.expect('OP_SEMICOLON')
-    #     for_incr = self.parse_for_incr()
-    #     self.expect('OP_PAREN_C')
-    #
-    #     for_body = self.parse_stmt_block()
-    #
-    #     return StmtFor(for_init, for_cond, for_incr, for_body)
+    def parse_stmt_for(self):
+        self.expect('KW_FOR')
+        self.expect('OP_PAREN_O')
+
+        for_init = for_cond = for_incr = ''
+
+        if not self.accept('OP_SEMICOLON'):
+            if self.curr_token.type not in statement_keywords:
+                for_init = self.parse_stmt()
+            else:
+                self.err('for init condition (assignment, declaration, expression)')
+
+        if not self.accept('OP_SEMICOLON'):
+            for_cond = self.parse_expr()
+            self.expect('OP_SEMICOLON')
+
+        if not self.accept('OP_PAREN_C'):
+            for_incr = self.parse_expr()
+
+        self.expect('OP_PAREN_C')
+
+        for_body = self.parse_stmt_block()
+
+        return StmtFor(for_init, for_cond, for_incr, for_body)
 
     def parse_for_cond(self):
         if self.peek('IDENT'):

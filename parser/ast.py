@@ -122,6 +122,22 @@ class StmtIf(Stmt):
             p.print(f'else', self.stmt_block)
 
 
+class StmtFor(Stmt):
+
+    def __init__(self, for_init, for_cond, for_incr, for_body):
+        self.for_init = for_init
+        self.for_cond = for_cond
+        self.for_incr = for_incr
+        self.for_body = for_body
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('init', self.for_init)
+        p.print('cond', self.for_cond)
+        p.print('increment', self.for_incr)
+        p.print('body', self.for_body)
+
+
 class StmtWhile(Stmt):
 
     def __init__(self, cond, body):
