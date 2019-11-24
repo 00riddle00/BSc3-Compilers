@@ -146,7 +146,6 @@ class Parser:
                 stmt = self.parse_stmt_expr(self.parse_expr_fn_call())
             else:
                 stmt = self.parse_stmt_assign()
-                print('aff')
         elif self.curr_token.type in unary_ops.keys():
             unary_expr = self.parse_expr_unary()
             if self.curr_token.type in assign_ops.keys():
