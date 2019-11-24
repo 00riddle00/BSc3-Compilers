@@ -156,7 +156,6 @@ class Parser:
     def parse_expr_and(self):
         self.result = self.parse_expr_cmp()
 
-        # todo remove useless while
         while True:
             if self.accept('KW_AND'):
                 self.result = ExprBinary('logical_and', 'AND', self.result, self.parse_expr_cmp())
@@ -212,7 +211,6 @@ class Parser:
     def parse_expr_mul_div_mod(self):
         self.result = self.parse_expr_unary()
 
-        # fixme useless while loop
         while True:
             if self.accept('OP_MUL'):
                 self.result = ExprBinary('arith', 'MUL', self.result, self.parse_expr_unary())
