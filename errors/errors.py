@@ -66,6 +66,7 @@ user_friendly_names = {
     'OP_COMMA': ',',
 }
 
+
 class CompilerError(BaseException):
 
     def __init__(self, msg, file=None, line=None, pos=None):

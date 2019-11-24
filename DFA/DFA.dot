@@ -60,11 +60,11 @@ digraph finite_state_machine {
 
     _START_ -> _IDENT_ [label = "(?=[^bcefiosvAFNOT])[_a-zA-Z]"];
     _IDENT_ -> _IDENT_ [label = "[_a-zA-Z0-9]"];
-    _IDENT_ -> _STRUCT_MEMBER_ [label = "\\."];
+    _IDENT_ -> _STRUCT_MEMBER_IDENT_ [label = "\\."];
     _IDENT_ -> IDENT [label = "ELSE"];
 
-    _STRUCT_MEMBER_ -> OP_DOT_ACCESS_MEMBER [label = "[_a-zA-Z]"];
-    _STRUCT_MEMBER_ -> ERROR [ label = "ELSE" ];
+    _STRUCT_MEMBER_IDENT_ -> OP_DOT_ACCESS_MEMBER [label = "[_a-zA-Z]"];
+    _STRUCT_MEMBER_IDENT_ -> ERROR [ label = "ELSE" ];
 
     _START_ -> _LIT_INT_ [ label = "[0-9]"];
     _LIT_INT_ -> _LIT_INT_ [label = "[0-9]"];

@@ -146,7 +146,7 @@ class Input:
     def get_char_pos(self):
         return self.offset - self.offset_prev_line
 
-    def get_info(self):
+    def get_char_info(self):
         return [self.name, self.curr_ln, self.get_char_pos()]
 
 
@@ -164,7 +164,7 @@ class Token:
         self.line_no = line_no
         self.pos = pos
 
-    def get_info(self):
+    def get_char_info(self):
         return [self.file, self.line_no, self.pos]
 
 
@@ -203,7 +203,6 @@ class Lexer:
         self.state = new_state
 
     def complete_ident(self):
-
         if self.buffer in KEYWORDS:
             token_type = KEYWORDS[self.buffer]
             self.buffer = ''
@@ -212,7 +211,7 @@ class Lexer:
 
         self.complete_token(token_type, delta=1)
 
-    def complete_at_once(self, token_type):
+    def complete_token_at_once(self, token_type):
         self.curr_input.offset_token_start = self.curr_input.get_char_pos()
         self.complete_token(token_type)
 
@@ -224,14 +223,6 @@ class Lexer:
         self.state = 'START'
         if delta:
             self.curr_input.reverse_read(delta)
-
-    def dump_tokens(self):
-        print(f'{"ID":>3}| {"LN":>3}| {"TYPE":<22} | {"VALUE":<14}')
-        for index, token in enumerate(self.tokens):
-            print(f'{index:>3}|'
-                  f' {token.line_no:>3}|'
-                  f' {token.type:<22} |'
-                  f' {token.value:<14}')
 
     def lex_all(self):
 
@@ -251,7 +242,7 @@ class Lexer:
             self.curr_char = 'EOF'
 
             if self.state == 'START':
-                self.complete_at_once('EOF')
+                self.complete_token_at_once('EOF')
             elif self.state in ('COMMENT_ML', 'COMMENT_ML_MINUS_1', 'COMMENT_ML_MINUS_2'):
                 self.err('unterminated comment')
             elif self.state in ('LIT_FLOAT_E', 'LIT_FLOAT_E_SIGN'):
@@ -264,13 +255,10 @@ class Lexer:
                 self.err('unterminated escape symbol')
             else:
                 self.lex_char()
-                self.complete_at_once('EOF')
+                self.complete_token_at_once('EOF')
 
     def lex_start(self):
-        if self.is_letter():
-            self.add()
-            self.begin_token('IDENT')
-        elif self.curr_char == '_':
+        if self.is_ident_head():
             self.add()
             self.begin_token('IDENT')
         elif self.is_digit():
@@ -283,20 +271,6 @@ class Lexer:
             self.begin_token('LIT_CHAR')
         elif self.curr_char == '"':
             self.begin_token('LIT_STR')
-        elif self.curr_char == '#':
-            self.state = 'COMMENT_START'
-        elif self.curr_char == ' ':
-            pass  # ignore
-        elif self.curr_char == '\n':
-            self.curr_input.next_line()
-        elif self.curr_char == '\t':
-            pass  # ignore
-        elif self.curr_char == '\r':
-            pass  # ignore
-        elif self.curr_char == '<':
-            self.begin_token('OP_L')
-        elif self.curr_char == '>':
-            self.begin_token('OP_G')
         elif self.curr_char == '+':
             self.begin_token('OP_SUM')
         elif self.curr_char == '-':
@@ -307,50 +281,56 @@ class Lexer:
             self.begin_token('OP_DIV')
         elif self.curr_char == '%':
             self.begin_token('OP_MOD')
+        elif self.curr_char == '<':
+            self.begin_token('OP_L')
+        elif self.curr_char == '>':
+            self.begin_token('OP_G')
         elif self.curr_char == '=':
             self.begin_token('OP_ASSIGN_EQ')
         elif self.curr_char == '!':
             self.begin_token('OP_NOT')
         elif self.curr_char == '(':
-            self.complete_at_once('OP_PAREN_O')
+            self.complete_token_at_once('OP_PAREN_O')
         elif self.curr_char == ')':
-            self.complete_at_once('OP_PAREN_C')
+            self.complete_token_at_once('OP_PAREN_C')
         elif self.curr_char == '{':
-            self.complete_at_once('OP_BRACE_O')
+            self.complete_token_at_once('OP_BRACE_O')
         elif self.curr_char == '}':
-            self.complete_at_once('OP_BRACE_C')
+            self.complete_token_at_once('OP_BRACE_C')
         elif self.curr_char == '[':
-            self.complete_at_once('OP_BRACKET_O')
+            self.complete_token_at_once('OP_BRACKET_O')
         elif self.curr_char == ']':
             self.begin_token('OP_BRACKET_C')
         elif self.curr_char == ';':
-            self.complete_at_once('OP_SEMICOLON')
+            self.complete_token_at_once('OP_SEMICOLON')
         elif self.curr_char == ',':
-            self.complete_at_once('OP_COMMA')
+            self.complete_token_at_once('OP_COMMA')
         elif self.curr_char == '$':
-            self.complete_at_once('OP_PTR')
+            self.complete_token_at_once('OP_PTR')
         elif self.curr_char == '&':
-            self.complete_at_once('OP_PTR_ADDR')
+            self.complete_token_at_once('OP_PTR_ADDR')
         elif self.curr_char == '@':
             self.begin_token('INCLUDE')
+        elif self.curr_char == '#':
+            self.state = 'COMMENT_START'
+        elif self.curr_char == ' ':
+            pass  # ignore
+        elif self.curr_char == '\n':
+            self.curr_input.next_line()
+        elif self.curr_char == '\t':
+            pass  # ignore
+        elif self.curr_char == '\r':
+            pass  # ignore
         else:
             self.err('invalid character, usable only as char or inside a string')
 
     def lex_char(self):
-        if self.state == 'COMMENT_START':
-            self.lex_comment_start()
-        if self.state == 'COMMENT_SL':
-            self.lex_comment_sl()
-        elif self.state == 'COMMENT_SL_PLUS_2':
-            self.lex_comment_sl_plus_2()
-        elif self.state == 'COMMENT_ML':
-            self.lex_comment_ml()
-        elif self.state == 'COMMENT_ML_MINUS_1':
-            self.lex_comment_ml_minus_1()
-        elif self.state == 'COMMENT_ML_MINUS_2':
-            self.lex_comment_ml_minus_2()
+        if self.state == 'START':
+            self.lex_start()
         elif self.state == 'IDENT':
             self.lex_ident()
+        elif self.state == 'STRUCT_MEMBER_IDENT':
+            self.lex_struct_member_ident()
         elif self.state == 'LIT_INT':
             self.lex_lit_int()
         elif self.state == 'LIT_FLOAT':
@@ -371,14 +351,6 @@ class Lexer:
             self.lex_lit_str()
         elif self.state == 'LIT_STR_ESCAPE':
             self.lex_lit_str_escape()
-        elif self.state == 'OP_BRACKET_C':
-            self.lex_op_bracket_close()
-        elif self.state == 'OP_PAREN_C':
-            self.lex_op_paren_close()
-        elif self.state == 'OP_L':
-            self.lex_op_l()
-        elif self.state == 'OP_G':
-            self.lex_op_g()
         elif self.state == 'OP_SUM':
             self.lex_op_sum()
         elif self.state == 'OP_SUB':
@@ -389,72 +361,38 @@ class Lexer:
             self.lex_op_div()
         elif self.state == 'OP_MOD':
             self.lex_op_mod()
+        elif self.state == 'OP_L':
+            self.lex_op_l()
+        elif self.state == 'OP_G':
+            self.lex_op_g()
         elif self.state == 'OP_ASSIGN_EQ':
             self.lex_op_assign_eq()
         elif self.state == 'OP_IS_EQ':
             self.lex_op_is_eq()
         elif self.state == 'OP_NOT':
             self.lex_op_not()
-        elif self.state == 'STRUCT_MEMBER':
-            self.lex_struct_member()
-        elif self.state == 'START':
-            self.lex_start()
+        elif self.state == 'OP_BRACKET_C':
+            self.lex_op_bracket_close()
+        elif self.state == 'OP_PAREN_C':
+            self.lex_op_paren_close()
         elif self.state == 'INCLUDE':
             self.lex_include()
+        elif self.state == 'COMMENT_START':
+            self.lex_comment_start()
+        elif self.state == 'COMMENT_SL':
+            self.lex_comment_sl()
+        elif self.state == 'COMMENT_SL_PLUS_2':
+            self.lex_comment_sl_plus_2()
+        elif self.state == 'COMMENT_ML':
+            self.lex_comment_ml()
+        elif self.state == 'COMMENT_ML_MINUS_1':
+            self.lex_comment_ml_minus_1()
+        elif self.state == 'COMMENT_ML_MINUS_2':
+            self.lex_comment_ml_minus_2()
         else:
             self.err(f'invalid state {self.state}')
 
-    def lex_comment_start(self):
-        if self.curr_char == '\n':
-            self.curr_input.next_line()
-            self.state = 'START'
-        elif self.curr_char == '#':
-            self.state = 'COMMENT_SL_PLUS_2'
-        else:
-            self.state = 'COMMENT_SL'
-
-    def lex_comment_sl(self):
-        if self.curr_char == '\n':
-            self.curr_input.next_line()
-            self.state = 'START'
-        else:
-            pass  # ignore
-
-    def lex_comment_sl_plus_2(self):
-        if self.curr_char == '\n':
-            self.curr_input.next_line()
-            self.state = 'START'
-        elif self.curr_char == '#':
-            self.state = 'COMMENT_ML'
-        else:
-            self.state = 'COMMENT_SL'
-
-    def lex_comment_ml(self):
-        if self.curr_char == '#':
-            self.state = 'COMMENT_ML_MINUS_1'
-        elif self.curr_char == '\n':
-            self.curr_input.next_line()
-        else:
-            pass  # ignore
-
-    def lex_comment_ml_minus_1(self):
-        if self.curr_char == '#':
-            self.state = 'COMMENT_ML_MINUS_2'
-        elif self.curr_char == '\n':
-            self.curr_input.next_line()
-            self.state = 'COMMENT_ML'
-        else:
-            self.state = 'COMMENT_ML'
-
-    def lex_comment_ml_minus_2(self):
-        if self.curr_char == '#':
-            self.state = 'START'
-        elif self.curr_char == '\n':
-            self.curr_input.next_line()
-            self.state = 'COMMENT_ML'
-        else:
-            self.state = 'COMMENT_ML'
-
+    # lex identifiers
     def lex_ident(self):
         if self.is_letter():
             self.add()
@@ -465,23 +403,11 @@ class Lexer:
         elif self.curr_char == '.':
             self.complete_token('IDENT')
             self.add()
-            self.state = 'STRUCT_MEMBER'
+            self.state = 'STRUCT_MEMBER_IDENT'
         else:
             self.complete_ident()
 
-    def lex_op_bracket_close(self):
-        self.complete_token('OP_BRACKET_C')
-        if self.curr_char == '.':
-            self.add()
-            self.state = 'STRUCT_MEMBER'
-
-    def lex_op_paren_close(self):
-        self.complete_token('OP_PAREN_C')
-        if self.curr_char == '.':
-            self.add()
-            self.state = 'STRUCT_MEMBER'
-
-    def lex_struct_member(self):
+    def lex_struct_member_ident(self):
         if self.is_ident_head():
             self.complete_token('OP_DOT_ACCESS_MEMBER')
             self.add()
@@ -489,6 +415,7 @@ class Lexer:
         else:
             self.err('invalid struct member ident')
 
+    # lex type literals
     def lex_lit_int(self):
         if self.is_digit():
             self.add()
@@ -593,18 +520,7 @@ class Lexer:
             self.err(f'invalid escape sequence used in a string: \\{self.curr_char}')
         self.state = 'LIT_STR'
 
-    def lex_op_l(self):
-        if self.curr_char == '=':
-            self.complete_token('OP_LE')
-        else:
-            self.complete_token('OP_L', delta=1)
-
-    def lex_op_g(self):
-        if self.curr_char == '=':
-            self.complete_token('OP_GE')
-        else:
-            self.complete_token('OP_G', delta=1)
-
+    # lex operators
     def lex_op_sum(self):
         if self.curr_char == '+':
             self.complete_token('OP_INCR')
@@ -646,6 +562,18 @@ class Lexer:
         else:
             self.complete_token('OP_MOD', delta=1)
 
+    def lex_op_l(self):
+        if self.curr_char == '=':
+            self.complete_token('OP_LE')
+        else:
+            self.complete_token('OP_L', delta=1)
+
+    def lex_op_g(self):
+        if self.curr_char == '=':
+            self.complete_token('OP_GE')
+        else:
+            self.complete_token('OP_G', delta=1)
+
     def lex_op_assign_eq(self):
         if self.curr_char == '=':
             self.state = 'OP_IS_EQ'
@@ -664,6 +592,19 @@ class Lexer:
         else:
             self.complete_token('OP_NOT', delta=1)
 
+    def lex_op_bracket_close(self):
+        self.complete_token('OP_BRACKET_C')
+        if self.curr_char == '.':
+            self.add()
+            self.state = 'STRUCT_MEMBER_IDENT'
+
+    def lex_op_paren_close(self):
+        self.complete_token('OP_PAREN_C')
+        if self.curr_char == '.':
+            self.add()
+            self.state = 'STRUCT_MEMBER_IDENT'
+
+    # lex include keyword
     def lex_include(self):
         if self.curr_char == '\n':
             self.curr_input.next_line()
@@ -674,21 +615,84 @@ class Lexer:
         else:
             self.add()
 
+    # lex comments
+    def lex_comment_start(self):
+        if self.curr_char == '\n':
+            self.curr_input.next_line()
+            self.state = 'START'
+        elif self.curr_char == '#':
+            self.state = 'COMMENT_SL_PLUS_2'
+        else:
+            self.state = 'COMMENT_SL'
+
+    def lex_comment_sl(self):
+        if self.curr_char == '\n':
+            self.curr_input.next_line()
+            self.state = 'START'
+        else:
+            pass  # ignore
+
+    def lex_comment_sl_plus_2(self):
+        if self.curr_char == '\n':
+            self.curr_input.next_line()
+            self.state = 'START'
+        elif self.curr_char == '#':
+            self.state = 'COMMENT_ML'
+        else:
+            self.state = 'COMMENT_SL'
+
+    def lex_comment_ml(self):
+        if self.curr_char == '#':
+            self.state = 'COMMENT_ML_MINUS_1'
+        elif self.curr_char == '\n':
+            self.curr_input.next_line()
+        else:
+            pass  # ignore
+
+    def lex_comment_ml_minus_1(self):
+        if self.curr_char == '#':
+            self.state = 'COMMENT_ML_MINUS_2'
+        elif self.curr_char == '\n':
+            self.curr_input.next_line()
+            self.state = 'COMMENT_ML'
+        else:
+            self.state = 'COMMENT_ML'
+
+    def lex_comment_ml_minus_2(self):
+        if self.curr_char == '#':
+            self.state = 'START'
+        elif self.curr_char == '\n':
+            self.curr_input.next_line()
+            self.state = 'COMMENT_ML'
+        else:
+            self.state = 'COMMENT_ML'
+
+    # print tokens
+    def dump_tokens(self):
+        print(f'{"ID":>3}| {"LN":>3}| {"TYPE":<22} | {"VALUE":<14}')
+
+        for index, token in enumerate(self.tokens):
+            print(f'{index:>3}|'
+                  f' {token.line_no:>3}|'
+                  f' {token.type:<22} |'
+                  f' {token.value:<14}')
+
+    # helper functions
     def is_letter(self):
         c = self.curr_char
         return len(c) == 1 and (ord(c) in range(ord('A'), ord('Z') + 1) or ord(c) in range(ord('a'), ord('z') + 1))
 
     def is_ident_head(self):
-        if self.curr_char == '_':
+        if self.curr_char == '_' or self.is_letter():
             return True
-        c = self.curr_char
-        return len(c) == 1 and (ord(c) in range(ord('A'), ord('Z') + 1) or ord(c) in range(ord('a'), ord('z') + 1))
+        else:
+            return False
 
     def is_digit(self):
         return len(self.curr_char) == 1 and ord(self.curr_char) in range(ord('0'), ord('9') + 1)
 
     def err(self, msg, debug=False):
         if debug:
-            raise LexerDebugError(msg, *self.curr_input.get_info(), self.state, self.curr_char, self.buffer)
+            raise LexerDebugError(msg, *self.curr_input.get_char_info(), self.state, self.curr_char, self.buffer)
         else:
-            raise LexerError(msg, *self.curr_input.get_info())
+            raise LexerError(msg, *self.curr_input.get_char_info())
