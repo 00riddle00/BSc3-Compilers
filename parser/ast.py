@@ -7,113 +7,6 @@ class Node(object):
         print(f'print not implemented for {self.__class__}')
 
 
-class Type(Node):
-
-    def __init__(self):
-        pass
-        super().__init__()
-
-
-class TypePrim(Type):
-
-    def __init__(self, kind):
-        self.kind = kind
-        super().__init__()
-
-    def print_node(self, p):
-        p.print_single('kind', self.kind)
-
-
-class Expr(Node):
-
-    def __init__(self):
-        pass
-        super().__init__()
-
-
-class ExprLit(Expr):
-
-    def __init__(self, lit, kind):
-        self.lit = lit
-        self.kind = kind
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('lit', self.lit)
-        p.print_single('kind', self.kind)
-
-
-class ExprVar(Expr):
-
-    def __init__(self, name):
-        self.name = name
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('name', self.name)
-
-
-class ExprUnary(Expr):
-
-    def __init__(self, inner, op):
-        self.inner = inner
-        self.op = op
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('inner', self.inner)
-        p.print_single('op', self.op)
-
-
-class ExprBinary(Expr):
-
-    # todo atribute list everywhere (with type hints)
-
-    def __init__(self, kind, op, left, right):
-        self.kind = kind
-        self.op = op
-        self.left = left
-        self.right = right
-        super().__init__()
-
-    def print_node(self, p):
-        p.print_single('kind', self.kind)
-        p.print_single('op', self.op)
-        p.print('left', self.left)
-        p.print('right', self.right)
-
-
-class ExprFnCall(Expr):
-
-    def __init__(self, name, args):
-        self.name = name
-        self.args = args
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('name', self.name)
-        p.print('args', self.args)
-
-
-class Decl(Node):
-
-    def __init__(self):
-        pass
-        super().__init__()
-
-
-class Param(Node):
-
-    def __init__(self, name, type):
-        self.name = name
-        self.type = type
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('name', self.name)
-        p.print('type', self.type)
-
-
 class Program(Node):
     # std::vector<Decl*>
     def __init__(self, decls):
@@ -122,6 +15,13 @@ class Program(Node):
 
     def print_node(self, p):
         p.print('decls', self.decls)
+
+
+class Decl(Node):
+
+    def __init__(self):
+        pass
+        super().__init__()
 
 
 class DeclFn(Decl):
@@ -140,14 +40,36 @@ class DeclFn(Decl):
         p.print('body', self.body)
 
 
-class Stmt(Node):
+class Param(Node):
+
+    def __init__(self, name, type):
+        self.name = name
+        self.type = type
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('name', self.name)
+        p.print('type', self.type)
+
+
+class Type(Node):
 
     def __init__(self):
         pass
         super().__init__()
 
 
-class StmtBlock(Stmt):
+class TypePrim(Type):
+
+    def __init__(self, kind):
+        self.kind = kind
+        super().__init__()
+
+    def print_node(self, p):
+        p.print_single('kind', self.kind)
+
+
+class StmtBlock(Node):
 
     def __init__(self, stmts):
         self.stmts = stmts
@@ -155,6 +77,13 @@ class StmtBlock(Stmt):
 
     def print_node(self, p):
         p.print('stmts', self.stmts)
+
+
+class Stmt(Node):
+
+    def __init__(self):
+        pass
+        super().__init__()
 
 
 class IfBranch(Node):
@@ -229,13 +158,16 @@ class StmtReturn(Stmt):
             p.print('value', self.value)
 
 
-class StmtExpr(Stmt):
-    def __init__(self, expr):
-        self.expr = expr
+class StmtVarDecl(Stmt):
+
+    def __init__(self, name, type_):
+        self.name = name
+        self.type = type_
         super().__init__()
 
     def print_node(self, p):
-        p.print('expr', self.expr)
+        p.print('name', self.name)
+        p.print('type', self.type)
 
 
 class StmtAssign(Stmt):
@@ -252,13 +184,81 @@ class StmtAssign(Stmt):
         p.print('value', self.value)
 
 
-class StmtVarDecl(Stmt):
+class StmtExpr(Stmt):
+    def __init__(self, expr):
+        self.expr = expr
+        super().__init__()
 
-    def __init__(self, name, type_):
+    def print_node(self, p):
+        p.print('expr', self.expr)
+
+
+class Expr(Node):
+
+    def __init__(self):
+        pass
+        super().__init__()
+
+
+class ExprFnCall(Expr):
+
+    def __init__(self, name, args):
         self.name = name
-        self.type = type_
+        self.args = args
         super().__init__()
 
     def print_node(self, p):
         p.print('name', self.name)
-        p.print('type', self.type)
+        p.print('args', self.args)
+
+
+class ExprBinary(Expr):
+
+    # todo atribute list everywhere (with type hints)
+
+    def __init__(self, kind, op, left, right):
+        self.kind = kind
+        self.op = op
+        self.left = left
+        self.right = right
+        super().__init__()
+
+    def print_node(self, p):
+        p.print_single('kind', self.kind)
+        p.print_single('op', self.op)
+        p.print('left', self.left)
+        p.print('right', self.right)
+
+
+class ExprUnary(Expr):
+
+    def __init__(self, inner, op):
+        self.inner = inner
+        self.op = op
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('inner', self.inner)
+        p.print_single('op', self.op)
+
+
+class ExprVar(Expr):
+
+    def __init__(self, name):
+        self.name = name
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('name', self.name)
+
+
+class ExprLit(Expr):
+
+    def __init__(self, lit, kind):
+        self.lit = lit
+        self.kind = kind
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('lit', self.lit)
+        p.print_single('kind', self.kind)

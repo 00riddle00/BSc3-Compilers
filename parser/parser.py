@@ -60,6 +60,73 @@ class Parser:
         else:
             self.err(token_type)
 
+    def parse_program(self):
+        decls = []
+
+        while True:
+            if self.peek('EOF'):
+                break
+            else:
+                decls.append(self.parse_decl())
+
+        return Program(decls)
+
+    def parse_decl(self):
+        return self.parse_decl_fn()
+
+    def parse_decl_fn(self):
+        self.expect('KW_FN')
+        name = self.expect('IDENT')
+        params = self.parse_params()
+        self.expect('KW_FN_RET_ARROW')
+        ret_type = self.parse_type()
+        body = self.parse_stmt_block()
+        return DeclFn(name, params, ret_type, body)
+
+    def parse_param(self):
+        type_ = self.parse_type()
+        name = self.expect('IDENT')
+        return Param(name, type_)
+
+    def parse_params(self):
+        params = []
+
+        self.expect('OP_PAREN_O')
+
+        if self.peek('OP_PAREN_C'):
+            self.accept('OP_PAREN_C')
+            return params
+        else:
+            params.append(self.parse_param())
+
+        while not self.accept('OP_PAREN_C'):
+            self.expect('OP_COMMA')
+            params.append(self.parse_param())
+
+        return params
+
+    def parse_type(self):
+        token_type = self.curr_token.type
+        if token_type in primary_types_keywords.keys():
+            self.expect(token_type)
+            return TypePrim(primary_types_keywords[token_type])
+        else:
+            self.err('type name')
+
+    def parse_stmt_block(self):
+        self.expect('OP_BRACE_O')
+
+        stmts = []
+
+        while True:
+            if self.accept('OP_BRACE_C'):
+                break
+            else:
+                stmts.append(self.parse_stmt())
+                pass
+
+        return StmtBlock(stmts)
+
     def parse_stmt(self):
         stmt = ''
         if self.peek('IDENT'):
@@ -92,6 +159,88 @@ class Parser:
 
         self.expect('OP_SEMICOLON')
         return stmt
+
+    def parse_stmt_if(self):
+        self.expect('KW_IF')
+        self.expect('OP_PAREN_O')
+        cond = self.parse_expr()
+        self.expect('OP_PAREN_C')
+        body = self.parse_stmt_block()
+
+        branches = [IfBranch(cond, body)]
+
+        if self.peek('KW_ELIF'):
+
+            while self.accept('KW_ELIF'):
+                self.expect('OP_PAREN_O')
+                cond = self.parse_expr()
+                self.expect('OP_PAREN_C')
+                body = self.parse_stmt_block()
+                branches.append(IfBranch(cond, body))
+
+        stmt_block = None
+
+        if self.peek('KW_ELSE'):
+            self.expect('KW_ELSE')
+            stmt_block = self.parse_stmt_block()
+
+        return StmtIf(branches, stmt_block)
+
+    # def parse_stmt_for(self):
+    #     self.expect('KW_FOR')
+    #     self.expect('OP_PAREN_O')
+    #     for_init = self.parse_for_init()
+    #     self.expect('OP_SEMICOLON')
+    #     for_cond = self.parse_for_cond()
+    #     self.expect('OP_SEMICOLON')
+    #     for_incr = self.parse_for_incr()
+    #     self.expect('OP_PAREN_C')
+    #
+    #     for_body = self.parse_stmt_block()
+    #
+    #     return StmtFor(for_init, for_cond, for_incr, for_body)
+
+    def parse_for_cond(self):
+        if self.peek('IDENT'):
+            for assign_op in assign_ops.keys():
+                if self.peek2(assign_op):
+                    return self.parse_stmt_assign()
+        else:
+            self.result = self.parse_expr()
+            self.expect('OP_SEMICOLON')
+            return self.result
+
+    def parse_stmt_while(self):
+        self.expect('KW_WHILE')
+        self.expect('OP_PAREN_O')
+        cond = self.parse_expr()
+        self.expect('OP_PAREN_C')
+        body = self.parse_stmt_block()
+        return StmtWhile(cond, body)
+
+    def parse_stmt_break(self):
+        break_kw = self.expect('KW_BREAK')
+        print(type(break_kw))
+        return StmtBreak(break_kw)
+
+    def parse_stmt_continue(self):
+        continue_kw = self.expect('KW_CONTINUE')
+        return StmtContinue(continue_kw)
+
+    def parse_stmt_ret(self):
+        return_kw = self.expect('KW_RETURN')
+
+        if self.curr_token.type != 'OP_SEMICOLON':
+            value = self.parse_expr()
+        else:
+            value = None
+
+        return StmtReturn(return_kw, value)
+
+    def parse_stmt_var_decl(self):
+        type_ = self.parse_type()
+        name = self.expect('IDENT')
+        return StmtVarDecl(name, type_)
 
     def parse_stmt_assign(self, lhs=None):
         if not lhs:
@@ -126,18 +275,6 @@ class Parser:
 
         self.expect('OP_PAREN_C')
         return ExprFnCall(name, args)
-
-    def parse_decl(self):
-        return self.parse_decl_fn()
-
-    def parse_decl_fn(self):
-        self.expect('KW_FN')
-        name = self.expect('IDENT')
-        params = self.parse_params()
-        self.expect('KW_FN_RET_ARROW')
-        ret_type = self.parse_type()
-        body = self.parse_stmt_block()
-        return DeclFn(name, params, ret_type, body)
 
     def parse_expr(self):
         return self.parse_expr_or()
@@ -300,143 +437,6 @@ class Parser:
     def parse_expr_var(self):
         name = self.expect('IDENT')
         return ExprVar(name)
-
-    def parse_param(self):
-        type_ = self.parse_type()
-        name = self.expect('IDENT')
-        return Param(name, type_)
-
-    def parse_params(self):
-        params = []
-
-        self.expect('OP_PAREN_O')
-
-        if self.peek('OP_PAREN_C'):
-            self.accept('OP_PAREN_C')
-            return params
-        else:
-            params.append(self.parse_param())
-
-        while not self.accept('OP_PAREN_C'):
-            self.expect('OP_COMMA')
-            params.append(self.parse_param())
-
-        return params
-
-    def parse_program(self):
-        decls = []
-
-        while True:
-            if self.peek('EOF'):
-                break
-            else:
-                decls.append(self.parse_decl())
-
-        return Program(decls)
-
-    def parse_stmt_block(self):
-        self.expect('OP_BRACE_O')
-
-        stmts = []
-
-        while True:
-            if self.accept('OP_BRACE_C'):
-                break
-            else:
-                stmts.append(self.parse_stmt())
-                pass
-
-        return StmtBlock(stmts)
-
-    def parse_stmt_if(self):
-        self.expect('KW_IF')
-        self.expect('OP_PAREN_O')
-        cond = self.parse_expr()
-        self.expect('OP_PAREN_C')
-        body = self.parse_stmt_block()
-
-        branches = [IfBranch(cond, body)]
-
-        if self.peek('KW_ELIF'):
-
-            while self.accept('KW_ELIF'):
-                self.expect('OP_PAREN_O')
-                cond = self.parse_expr()
-                self.expect('OP_PAREN_C')
-                body = self.parse_stmt_block()
-                branches.append(IfBranch(cond, body))
-
-        stmt_block = None
-
-        if self.peek('KW_ELSE'):
-            self.expect('KW_ELSE')
-            stmt_block = self.parse_stmt_block()
-
-        return StmtIf(branches, stmt_block)
-
-    # def parse_stmt_for(self):
-    #     self.expect('KW_FOR')
-    #     self.expect('OP_PAREN_O')
-    #     for_init = self.parse_for_init()
-    #     self.expect('OP_SEMICOLON')
-    #     for_cond = self.parse_for_cond()
-    #     self.expect('OP_SEMICOLON')
-    #     for_incr = self.parse_for_incr()
-    #     self.expect('OP_PAREN_C')
-    #
-    #     for_body = self.parse_stmt_block()
-    #
-    #     return StmtFor(for_init, for_cond, for_incr, for_body)
-
-    def parse_for_cond(self):
-        if self.peek('IDENT'):
-            for assign_op in assign_ops.keys():
-                if self.peek2(assign_op):
-                    return self.parse_stmt_assign()
-        else:
-            self.result = self.parse_expr()
-            self.expect('OP_SEMICOLON')
-            return self.result
-
-    def parse_stmt_while(self):
-        self.expect('KW_WHILE')
-        self.expect('OP_PAREN_O')
-        cond = self.parse_expr()
-        self.expect('OP_PAREN_C')
-        body = self.parse_stmt_block()
-        return StmtWhile(cond, body)
-
-    def parse_stmt_break(self):
-        break_kw = self.expect('KW_BREAK')
-        print(type(break_kw))
-        return StmtBreak(break_kw)
-
-    def parse_stmt_continue(self):
-        continue_kw = self.expect('KW_CONTINUE')
-        return StmtContinue(continue_kw)
-
-    def parse_stmt_ret(self):
-        return_kw = self.expect('KW_RETURN')
-
-        if self.curr_token.type != 'OP_SEMICOLON':
-            value = self.parse_expr()
-        else:
-            value = None
-
-        return StmtReturn(return_kw, value)
-
-    def parse_stmt_var_decl(self):
-        type_ = self.parse_type()
-        name = self.expect('IDENT')
-        return StmtVarDecl(name, type_)
-
-    def parse_type(self):
-        token_type = self.curr_token.type
-        if token_type in primary_types_keywords.keys():
-            self.expect(token_type)
-            return TypePrim(primary_types_keywords[token_type])
-        else:
-            self.err('type name')
 
     # helper functions
     def peek(self, token_type):
