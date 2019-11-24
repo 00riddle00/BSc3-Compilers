@@ -221,7 +221,8 @@ class Lexer:
         self.tokens.append(
             Token(token_type, self.buffer, self.curr_input.name, self.curr_input.curr_ln,
                   self.curr_input.offset_token_start))
-        print(f'{token_type}-{self.curr_input.offset_token_start}-{self.curr_input.offset}-{self.curr_input.get_char_pos()}')
+        print(
+            f'{token_type}-{self.curr_input.offset_token_start}-{self.curr_input.offset}-{self.curr_input.get_char_pos()}')
         self.buffer = ''
         self.state = 'START'
         if reverse:
@@ -291,13 +292,13 @@ class Lexer:
         elif self.curr_char == '#':
             self.state = 'COMMENT_START'
         elif self.curr_char == ' ':
-            pass # ignore
+            pass  # ignore
         elif self.curr_char == '\n':
             self.curr_input.next_line()
         elif self.curr_char == '\t':
-            pass # ignore
+            pass  # ignore
         elif self.curr_char == '\r':
-            pass # ignore
+            pass  # ignore
         elif self.curr_char == '<':
             self.begin_token('OP_L')
         elif self.curr_char == '>':
