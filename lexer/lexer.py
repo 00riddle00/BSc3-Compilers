@@ -1,4 +1,3 @@
-from pprint import pprint
 from errors import LexerError, LexerDebugError, InputError
 
 # List of all lexemes

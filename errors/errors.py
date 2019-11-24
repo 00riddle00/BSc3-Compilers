@@ -131,3 +131,7 @@ class ParserError(CompilerError):
             exp = user_friendly_names[exp]
         print(f'[ParseERROR] [{self.file}:{self.line}:{self.pos}] [{self.msg}] '
               f'[expected={exp}, found={user_friendly_names[self.curr_token]}]')
+
+
+class ParserDebugError(ParserError):
+    pass

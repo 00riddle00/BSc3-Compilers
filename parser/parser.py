@@ -1,5 +1,5 @@
 from lexer import Token, Input
-from errors import ParserError
+from errors import ParserError, ParserDebugError
 from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnary, ExprBinary, \
     ExprFnCall, Param, Program, DeclFn, StmtBlock, StmtIf, StmtWhile, StmtBreak, \
     StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, IfBranch
@@ -20,6 +20,15 @@ unary_ops = {
     'OP_PTR_ADDR': 'PTR_ADDR',
 }
 
+primary_types_keyws = {
+    'KW_BOOL': 'BOOL',
+    'KW_FLOAT': 'FLOAT',
+    'KW_INT': 'INT',
+    'KW_VOID': 'VOID',
+    'KW_CHAR': 'CHAR',
+    'KW_STR': 'STR',
+}
+
 
 class Parser:
     curr_input: Input
@@ -32,36 +41,35 @@ class Parser:
         self.curr_input = curr_input
         self.tokens = tokens
         self.offset = 0
+        self.curr_token = self.tokens[self.offset]
         self.result = Node()
 
     def accept(self, token_type):
-        # todo wrap into 'current' fn
-        accepted_token = self.tokens[self.offset]
-        if accepted_token.type == token_type:
+        token = self.curr_token
+        if token.type == token_type:
             self.offset += 1
             self.curr_token = self.tokens[self.offset]
-            return accepted_token
+            return token
+        else:
+            return False
 
     def expect(self, token_type):
-        expected_token = self.tokens[self.offset]
-        if expected_token.type == token_type:
-            self.offset += 1
-            self.curr_token = self.tokens[self.offset]
-            return expected_token
+        token = self.accept(token_type)
+        if token:
+            return token
         else:
             self.err(token_type)
 
     def parse_stmt(self):
+        stmt = ''
         if self.peek('IDENT'):
             if self.peek2('OP_PAREN_O'):
                 stmt = self.parse_stmt_expr(self.parse_expr_fn_call())
             else:
                 stmt = self.parse_stmt_assign()
-        # fixme here it is specified what prefix operators are legit to be contained in a legit statement!
-        # fixme vagueness
-        elif self.token_type() in unary_ops.keys():
+        elif self.curr_token.type in unary_ops.keys():
             unary_expr = self.parse_expr_unary()
-            if self.token_type() in assign_ops.keys():
+            if self.curr_token.type in assign_ops.keys():
                 stmt = self.parse_stmt_assign(unary_expr)
             else:
                 stmt = unary_expr
@@ -77,7 +85,7 @@ class Parser:
             stmt = self.parse_stmt_continue()
         elif self.peek('KW_RETURN'):
             stmt = self.parse_stmt_ret()
-        elif self.token_type() in ['KW_BOOL', 'KW_FLOAT', 'KW_INT', 'KW_VOID', 'KW_CHAR', 'KW_STR']:
+        elif self.curr_token.type in primary_types_keyws.keys():
             stmt = self.parse_stmt_var_decl()
         else:
             self.err('legit token in the beginning of a statement')
@@ -86,15 +94,14 @@ class Parser:
         return stmt
 
     def parse_stmt_assign(self, lhs=None):
-        # todo do not allow var to be keyword (ex TRUE, NULL)
         if not lhs:
             lhs = self.parse_expr_unary()
 
         op = ''
 
-        if self.token_type() in assign_ops.keys():
-            op = assign_ops[self.token_type()]
-            self.accept(self.token_type())
+        if self.curr_token.type in assign_ops.keys():
+            op = assign_ops[self.curr_token.type]
+            self.accept(self.curr_token.type)
         else:
             self.err('assign operator')
 
@@ -219,9 +226,9 @@ class Parser:
         return self.result
 
     def parse_expr_unary(self):
-        if self.token_type() in unary_ops.keys():
-            op = unary_ops[self.token_type()]
-            self.accept(self.token_type())
+        if self.curr_token.type in unary_ops.keys():
+            op = unary_ops[self.curr_token.type]
+            self.accept(self.curr_token.type)
             if self.accept('OP_PAREN_O'):
                 expr = self.parse_expr()
                 self.accept('OP_PAREN_C')
@@ -413,7 +420,7 @@ class Parser:
     def parse_stmt_ret(self):
         return_kw = self.expect('KW_RETURN')
 
-        if self.token_type() != 'OP_SEMICOLON':
+        if self.curr_token.type != 'OP_SEMICOLON':
             value = self.parse_expr()
         else:
             value = None
@@ -426,44 +433,22 @@ class Parser:
         return StmtVarDecl(name, type_)
 
     def parse_type(self):
-        if self.peek('KW_BOOL'):
-            self.expect('KW_BOOL')
-            return TypePrim('BOOL')
-        elif self.peek('KW_FLOAT'):
-            self.expect('KW_FLOAT')
-            return TypePrim('FLOAT')
-        elif self.peek('KW_INT'):
-            self.expect('KW_INT')
-            return TypePrim('INT')
-        elif self.peek('KW_VOID'):
-            self.expect('KW_VOID')
-            return TypePrim('VOID')
-        elif self.peek('KW_CHAR'):
-            self.expect('KW_CHAR')
-            return TypePrim('CHAR')
-        elif self.peek('KW_STR'):
-            self.expect('KW_STR')
-            return TypePrim('STR')
+        token_type = self.curr_token.type
+        if token_type in primary_types_keyws.keys():
+            self.expect(token_type)
+            return TypePrim(primary_types_keyws[token_type])
         else:
             self.err('type name')
 
+    # helper functions
     def peek(self, token_type):
-        peeked_token = self.tokens[self.offset + 0]
-        return peeked_token.type == token_type
+        return self.tokens[self.offset].type == token_type
 
     def peek2(self, next_token_type):
-        next_token = self.tokens[self.offset + 1]
-        return next_token.type == next_token_type
-
-    def token_type(self):
-        return self.tokens[self.offset].type
-
-    def debug(self, msg):
-        print(f'[debug:{msg}:{self.curr_token.type}:{self.curr_token.value}]')
+        return self.tokens[self.offset + 1].type == next_token_type
 
     def err(self, exp_token=None, msg=None, debug=False):
         if debug:
-            # ...
-            raise ParserError(msg, *self.curr_token.get_info(), exp_token, self.token_type())
+            raise ParserDebugError(msg, *self.curr_token.get_char_info(), exp_token, self.curr_token.type)
         else:
-            raise ParserError(msg, *self.curr_token.get_info(), exp_token, self.token_type())
+            raise ParserError(msg, *self.curr_token.get_char_info(), exp_token, self.curr_token.type)
