@@ -231,8 +231,7 @@ class Lexer:
             print(f'{index:>3}|'
                   f' {token.line_no:>3}|'
                   f' {token.type:<22} |'
-                  f' {token.value:<14}'
-                  f' |{token.pos:<14}')
+                  f' {token.value:<14}')
 
     def lex_all(self):
 
