@@ -59,6 +59,25 @@ class Type(Node):
         super().__init__()
 
 
+class TypePointer(Type):
+
+    def __init__(self, inner):
+        self.inner = inner
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('inner', self.inner)
+
+# class TypePointer(Type):
+#
+#     def __init__(self, inner):
+#         self.inner = inner
+#         super().__init__()
+#
+#     def print_node(self, p):
+#         p.print('inner', self.inner)
+
+
 class TypePrim(Type):
 
     def __init__(self, kind):

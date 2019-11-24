@@ -2,7 +2,7 @@ from lexer import Token, Input
 from errors import ParserError, ParserDebugError
 from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnary, ExprBinary, \
     ExprFnCall, Param, Program, DeclFn, StmtBlock, StmtIf, StmtWhile, StmtBreak, \
-    StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, IfBranch
+    StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, IfBranch, TypePointer
 
 assign_ops = {
     'OP_ASSIGN_EQ': 'EQUALS',
@@ -107,9 +107,13 @@ class Parser:
 
     def parse_type(self):
         token_type = self.curr_token.type
+        print(token_type)
         if token_type in primary_types_keywords.keys():
             self.expect(token_type)
-            return TypePrim(primary_types_keywords[token_type])
+            type_ = TypePrim(primary_types_keywords[token_type])
+            while self.accept('OP_PTR'):
+                type_ = TypePointer(type_)
+            return type_
         else:
             self.err('type name')
 
