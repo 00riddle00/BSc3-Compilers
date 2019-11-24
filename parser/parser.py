@@ -202,7 +202,7 @@ class Parser:
         self.expect('KW_FOR')
         self.expect('OP_PAREN_O')
 
-        for_init = for_cond = for_incr = ''
+        for_init = for_cond = for_step = ''
 
         if not self.accept('OP_SEMICOLON'):
             if self.curr_token.type not in statement_keywords:
@@ -215,13 +215,13 @@ class Parser:
             self.expect('OP_SEMICOLON')
 
         if not self.accept('OP_PAREN_C'):
-            for_incr = self.parse_expr()
+            for_step = self.parse_expr()
 
         self.expect('OP_PAREN_C')
 
         for_body = self.parse_stmt_block()
 
-        return StmtFor(for_init, for_cond, for_incr, for_body)
+        return StmtFor(for_init, for_cond, for_step, for_body)
 
     def parse_for_cond(self):
         if self.peek('IDENT'):

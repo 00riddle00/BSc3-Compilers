@@ -124,17 +124,17 @@ class StmtIf(Stmt):
 
 class StmtFor(Stmt):
 
-    def __init__(self, for_init, for_cond, for_incr, for_body):
+    def __init__(self, for_init, for_cond, for_step, for_body):
         self.for_init = for_init
         self.for_cond = for_cond
-        self.for_incr = for_incr
+        self.for_step = for_step
         self.for_body = for_body
         super().__init__()
 
     def print_node(self, p):
         p.print('init', self.for_init)
         p.print('cond', self.for_cond)
-        p.print('increment', self.for_incr)
+        p.print('step', self.for_step)
         p.print('body', self.for_body)
 
 
