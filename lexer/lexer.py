@@ -76,8 +76,8 @@ from errors import LexerError, LexerDebugError, InputError
 
 KEYWORDS = {
     'fx': 'KW_FN',
-    'in': 'KW_FN_IN',
-    'out': 'KW_FN_OUT',
+    # 'in': 'KW_FN_IN',  # see this inbuilt fn name just as ident
+    # 'out': 'KW_FN_OUT', # see this inbuilt fn name just as ident
     'if': 'KW_IF',
     'elif': 'KW_ELIF',
     'else': 'KW_ELSE',

@@ -1,9 +1,4 @@
-
- fx main() ==> void {
-
-    if (a+b) {
-        break;
-    }
-
-
+fx main() ==> void {
+    fin(3,4);
+    in(3,4);
 }
