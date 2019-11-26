@@ -89,7 +89,7 @@ class InputError(CompilerError):
 class LexerError(CompilerError):
 
     def print_err(self):
-        print(f'[LexERROR] [file={self.file}:{self.line}:{self.pos}] [{self.msg}]')
+        print(f'LexERROR: {self.file}:{self.line}:{self.pos} {self.msg}')
 
 
 class LexerDebugError(LexerError):
@@ -124,13 +124,11 @@ class ParserError(CompilerError):
         self.curr_token = curr_token
 
     def print_err(self):
-        if not self.msg:
-            self.msg = ''
         exp = self.exp_token
         if exp in user_friendly_names.keys():
             exp = user_friendly_names[exp]
-        print(f'[ParseERROR] [{self.file}:{self.line}:{self.pos}] [{self.msg}] '
-              f'[expected={exp}, found={user_friendly_names[self.curr_token]}]')
+        print(f'ParseERROR: {self.file}:{self.line}:{self.pos} '
+              f'expected({exp}), found({user_friendly_names[self.curr_token]})')
 
 
 class ParserDebugError(ParserError):
