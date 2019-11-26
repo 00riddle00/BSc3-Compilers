@@ -85,6 +85,7 @@ class Node(object):
 
     def __init__(self, parent=None):
         self.parent = parent
+        self.target_node = None
         pass
 
     # def allocate_slots
@@ -510,6 +511,7 @@ class StmtBreak(Stmt):
     def check_types(self):
         # do nothing?
         # fixme is it correct?
+        # or target_node ??
         self.target_loop = self.ancestor_loop()  # or ancestor_while
         # @target = find_ancestor(WhileStatement)
         if not self.target_loop:
@@ -757,7 +759,8 @@ class ExprBinary(Expr):
 # ExprBinArith: TYPE + TYPE -> TYPE; is_arithmetic
 # class ExprBinArith < ExprBinary
 # end
-class ExprBinArith(ExprBinary):  # virsta abs klase. Parseryje irgi pakeisti sita, kad grazinti konkrecias klases, o ne ExprBinary
+# virsta abs klase. Parseryje irgi pakeisti sita, kad grazinti konkrecias klases, o ne ExprBinary
+class ExprBinArith(ExprBinary):
 
     # veliau turesim kiek praplesti sita aritm israisk
     def check_types(self):
@@ -786,7 +789,8 @@ class ExprBinComparison(ExprBinary):  # > < == !=
         left_type = self.left.check_types()
         right_type = self.right.check_types()
 
-        # nes desine puse netikrint, nes jei ten bus null ar pan, tai priklausys nuo LHS desine puse ir failins unify_types
+        # nes desine puse netikrint, nes jei ten bus null ar pan,
+        # tai priklausys nuo LHS desine puse ir failins unify_types
         if left_type and left_type.is_comparable():
             unify_types(left_type, right_type)
         else:
