@@ -415,7 +415,7 @@ class StmtIf(Stmt):
 
     def __init__(self, branches, stmt_block=None):
         # fixme cond=branches, body=stmtblock
-        #self.add_children(cond, body)
+        # self.add_children(cond, body)
         self.branches = branches
         self.stmt_block = stmt_block
         super().__init__()
@@ -620,6 +620,7 @@ class StmtAssign(Stmt):
         # todo return?
         # target_node jau prisyreme vardu rez metu
         # unifyt_types(@target_node&.type, value_type)
+        # cia jei target_type nera, tai nil paduoti, ir viduj jau error gausim
         if target_type:
             unify_types(target_type, value_type)
 
@@ -680,6 +681,36 @@ class ExprFnCall(Expr):
         for arg in self.args:
             arg.resolve_names(scope)
 
+    def check_types(self):
+        # masyvui args ev. velemntui pritaikau fn check_types ir nauja masyva turi
+        arg_types = [arg.check_types() for arg in self.args]
+
+        # ar daiktas i kuri kreipiames apskr. egzistuoj?
+        if not self.target_node:
+            return
+        elif not isinstance(self.target_node, DeclFn):
+            semantic_error('the call target is not a function', self.name)
+            return
+
+        # zinome, kad radome fja, i kuria kreipemes
+        # todo is type() a fn?
+        param_types = [param.type() for param in self.target_node.params]
+        if len(param_types) != len(arg_types):
+            semantic_error(f'invalid argument count; expected {len(param_types)}, got {len(arg_types)}', self.name)
+
+        # min tarp dvieju skaiciu koks?
+        param_count = min(len(param_types), len(arg_types))
+        for i in range(0, param_count):
+            param_type = param_types[i]  # arba self.target.params[i].type()
+            arg_type = arg_types[i]  # arba args[i].check_type()
+            # patikrinu bent kazkiek tai argsu kiek ju yra.
+            # pvz fjoj prasyta bent 4 param, o pateikiu bent 2 args, tai patikrinu bent tuos du
+            # jei fjojs 1 arg parasyta, o pateikiu 2, tai patikrinu tik ta viena.
+            unify_types(param_type, arg_type)
+
+        # kazka pasakau koks cia tipas etc...
+        return self.target_node.ret_type()
+
 
 class ExprBinary(Expr):
     # attr_reader :op, :left, :right
@@ -701,36 +732,6 @@ class ExprBinary(Expr):
     def resolve_names(self, scope):
         self.left.resolve_names(scope)
         self.right.resolve_names(scope)
-
-    def check_types(self):
-        # masyvui args ev. velemntui pritaikau fn check_types ir nauja masyva turi
-        arg_types = [arg.check_types() for arg in self.args]
-
-        # ar daiktas i kuri kreipiames apskr. egzistuoj?
-        if not self.target_node:
-            return
-        elif not isinstance(self.target_node, DeclFn):
-            semantic_error('call target is not a function', self.target)
-            return
-
-        # zinome, kad radome fja, i kuria kreipemes
-        # todo is type() a fn?
-        param_types = [param.type() for param in self.target_node.params]
-        if len(param_types) != len(arg_types):
-            semantic_error(f'invalid argument count; expected {len(param_types)}, got {len(arg_types)}', self.target)
-
-        # min tarp dvieju skaiciu koks?
-        param_count = min(len(param_types), len(arg_types))
-        for i in range(0, param_count):
-            param_type = param_types[i]  # arba self.target.params[i].type()
-            arg_type = arg_types[i]  # arba args[i].check_type()
-            # patikrinu bent kazkiek tai argsu kiek ju yra.
-            # pvz fjoj prasyta bent 4 param, o pateikiu bent 2 args, tai patikrinu bent tuos du
-            # jei fjojs 1 arg parasyta, o pateikiu 2, tai patikrinu tik ta viena.
-            unify_types(param_type, arg_type)
-
-        # kazka pasakau koks cia tipas etc...
-        return self.target_node.ret_type()
 
 
 # visiem binary op negalim parasyti viena tipu tikr klases
@@ -857,7 +858,8 @@ class ExprVar(Expr):
 
     def __init__(self, name):
         self.name = name
-        self.target = None
+        # todo why is that?
+        # self.target = None
         super().__init__()
 
     def print_node(self, p):
@@ -869,8 +871,8 @@ class ExprVar(Expr):
     def check_types(self):
         # t-node jau vardu rez metu priskyreme jam (varui)
         # @target_node&.type #(jei kairej nil, arba abiejose sides nil, tai skipinam unify types (remember))
-        if self.target:  # arba if @target.respond_to?(:type)
-            return self.target.type()
+        if self.target_node:  # arba if @target.respond_to?(:type)
+            return self.target_node.type()
 
 
 # or class ExprConst, ExprConstInt
