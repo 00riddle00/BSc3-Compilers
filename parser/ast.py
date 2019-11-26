@@ -503,7 +503,7 @@ class StmtBreak(Stmt):
             else:
                 curr_node = curr_node.parent
 
-        if not self.taget_node:
+        if not self.target_node:
             std_error(f'break not in a while statement: {self.break_kw.line_no}')  # or 'inside a loop'
 
     def check_types(self):
@@ -607,7 +607,7 @@ class StmtAssign(Stmt):
         print(type(self.lhs))
         # self.lhs ExprVar yra, o ne token. Turi eiti gylyn gylyn, kol token ras (ir pointeriai ten viduj, etc.
         # todo gal self.lhs.resolve_names(scope)?
-        self.target = scope.resolve(self.lhs)
+        self.target_node = scope.resolve(self.lhs)
         self.value.resolve_names(scope)
 
     def check_types(self):
@@ -676,7 +676,7 @@ class ExprFnCall(Expr):
         p.print('args', self.args)
 
     def resolve_names(self, scope):
-        self.target = scope.resolve(self.name)
+        self.target_node = scope.resolve(self.name)
         for arg in self.args:
             arg.resolve_names(scope)
 
@@ -707,7 +707,7 @@ class ExprBinary(Expr):
         arg_types = [arg.check_types() for arg in self.args]
 
         # ar daiktas i kuri kreipiames apskr. egzistuoj?
-        if not self.taget_node:
+        if not self.target_node:
             return
         elif not isinstance(self.target_node, DeclFn):
             semantic_error('call target is not a function', self.target)
@@ -864,7 +864,7 @@ class ExprVar(Expr):
         p.print('name', self.name)
 
     def resolve_names(self, scope):
-        self.target = scope.resolve(self.name)
+        self.target_node = scope.resolve(self.name)
 
     def check_types(self):
         # t-node jau vardu rez metu priskyreme jam (varui)
