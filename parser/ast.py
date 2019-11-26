@@ -1,7 +1,7 @@
 from lexer import Token
 
 # make global variable
-curr_stack_slot = 0
+# curr_stack_slot = 0
 
 
 def raise_error(msg):
@@ -219,11 +219,11 @@ class DeclFn(Decl):
     def resolve_names(self, scope):
         # scope.add(@name, self) 2017 buvo
         inner_scope = Scope(scope)
-        curr_stack_slot = 0  # todo or $slot_index
+        # curr_stack_slot = 0  # todo or $slot_index
         for param in self.params:
             inner_scope.add(param.name, param)
-        self.num_locals = curr_stack_slot
-        self.local_count = curr_stack_slot - len(self.params)
+        # self.num_locals = curr_stack_slot
+        # self.local_count = curr_stack_slot - len(self.params)
         self.body.resolve_names(inner_scope)
 
     def check_types(self):
@@ -345,8 +345,9 @@ class TypePrim(Type):
     # attr_reader :kind
     # attr_reader :kind, :token
 
-    def __init__(self, kind, token=None):
+    def __init__(self, kind):
         self.kind = kind
+        # todo is it needed? (token=None)
         # self.token = token
         super().__init__()
 
