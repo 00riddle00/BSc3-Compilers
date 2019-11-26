@@ -1,7 +1,7 @@
 from sys import argv
 
 from lexer import Input, Lexer
-from parser import Parser, ASTPrinter
+from parser import Parser, ASTPrinter, Scope
 from errors import LexerError, ParserError, InputError
 
 samples_dir = 'FXlang_samples'
@@ -24,6 +24,11 @@ try:
     root = parser.parse_program()
     printer = ASTPrinter()
     printer.print('root', root)
+
+    root_scope = Scope()
+    root.resolve_names(root_scope)
+    # root.check_types()
+
 except LexerError as le:
     le.print_err()
 except ParserError as pe:
