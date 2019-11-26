@@ -217,7 +217,6 @@ class DeclFn(Decl):
         p.print('body', self.body)
 
     def resolve_names(self, scope):
-        print(self.body)
         # scope.add(@name, self) 2017 buvo
         inner_scope = Scope(scope)
         curr_stack_slot = 0  # todo or $slot_index
@@ -563,7 +562,7 @@ class StmtVarDecl(Stmt):
     # attr_accessor :slot_index
 
     def __init__(self, name, type_, value=None):
-        self.add_children(type, value)
+        self.add_children(type_, value)
         self.name = name
         self.type = type_
         self.value = value
@@ -607,11 +606,12 @@ class StmtAssign(Stmt):
         # todo lhs=var
         print(type(self.lhs))
         # self.lhs ExprVar yra, o ne token. Turi eiti gylyn gylyn, kol token ras (ir pointeriai ten viduj, etc.
+        # todo gal self.lhs.resolve_names(scope)?
         self.target = scope.resolve(self.lhs)
         self.value.resolve_names(scope)
 
-        def check_types(self):
-            target_type = None
+    def check_types(self):
+        target_type = None
 
         if self.target_node:
             target_type = self.target_node.type()
