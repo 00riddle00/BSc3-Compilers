@@ -757,7 +757,7 @@ class ExprBinary(Expr):
 # ExprBinArith: TYPE + TYPE -> TYPE; is_arithmetic
 # class ExprBinArith < ExprBinary
 # end
-class ExprBinArith:  # virsta abs klase. Parseryje irgi pakeisti sita, kad grazinti konkrecias klases, o ne ExprBinary
+class ExprBinArith(ExprBinary):  # virsta abs klase. Parseryje irgi pakeisti sita, kad grazinti konkrecias klases, o ne ExprBinary
 
     # veliau turesim kiek praplesti sita aritm israisk
     def check_types(self):
@@ -780,7 +780,7 @@ class ExprBinArith:  # virsta abs klase. Parseryje irgi pakeisti sita, kad grazi
 # type < type -> bool; is_comparable (bool siaip jau nelabai compariname)
 # monoton didjancios
 # exprbinquality: type == type -> bool; has_value (tik = arba != (neturi buti voidas))
-class ExprBinComparison:  # > < == !=
+class ExprBinComparison(ExprBinary):  # > < == !=
 
     def check_types(self):
         left_type = self.left.check_types()
@@ -802,7 +802,7 @@ class ExprBinComparison:  # > < == !=
 # ExprBinEquality: TYPE == TYPE -> BOOL; has_value
 # class ExprBinEquality < ExprBinary
 # end
-class ExprBinEquality:
+class ExprBinEquality(ExprBinary):
 
     def check_types(self):
         left_type = self.left.check_types()
@@ -818,7 +818,7 @@ class ExprBinEquality:
 # class ExprBinLogic < ExprBinary
 # end
 # visada left=bool, right=bool
-class ExprBinLogic:
+class ExprBinLogic(ExprBinary):
 
     def check_types(self):
         left_type = self.left.check_types
