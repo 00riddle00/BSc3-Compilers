@@ -258,9 +258,6 @@ class DeclFn(Decl):
 
 class Param(Node):
 
-    #     attr_reader :target
-
-    # attr_reader :name, :type
     # attr_accessor :slot_index
 
     def __init__(self, name, type_):
@@ -343,8 +340,6 @@ class TypePointer(Type):
 
 
 class TypePrim(Type):
-    # attr_reader :kind
-    # attr_reader :kind, :token
 
     def __init__(self, kind):
         self.kind = kind
@@ -368,7 +363,6 @@ class TypePrim(Type):
 
 
 class StmtBlock(Node):
-    # attr_reader :stmts
 
     def __init__(self, stmts):
         self.add_children(*stmts)
@@ -463,7 +457,6 @@ class StmtFor(Stmt):
 # tikr tipus salygoje
 # ...
 class StmtWhile(Stmt):
-    # attr_reader :cond, :body
 
     def __init__(self, cond, body):
         self.add_children(cond, body)
@@ -487,7 +480,6 @@ class StmtWhile(Stmt):
 
 # fixme from old file
 class StmtBreak(Stmt):
-    # attr_reader :break_kw
 
     def __init__(self, break_kw):
         self.break_kw = break_kw
@@ -589,7 +581,6 @@ class StmtVarDecl(Stmt):
 
 
 class StmtAssign(Stmt):
-    # attr_reader :target, :value
 
     def __init__(self, lhs, op, value):
         self.add_children(value)
@@ -633,7 +624,6 @@ class StmtAssign(Stmt):
 # end
 
 class StmtExpr(Stmt):
-    # attr_reader :expr
 
     def __init__(self, expr):
         self.add_children(expr)
@@ -667,7 +657,6 @@ class Expr(Node):
 
 # foo(a, b, c + 5)
 class ExprFnCall(Expr):
-    # attr_reader :target, :args
 
     def __init__(self, name, args):
         self.add_children(*args)
@@ -716,7 +705,6 @@ class ExprFnCall(Expr):
 
 
 class ExprBinary(Expr):
-    # attr_reader :op, :left, :right
 
     def __init__(self, kind, op, left, right):
         self.add_children(left, right)
@@ -859,7 +847,6 @@ class ExprUnary(Expr):
 
 
 class ExprVar(Expr):
-    # attr_reader :name
 
     def __init__(self, name):
         self.name = name
@@ -882,7 +869,6 @@ class ExprVar(Expr):
 
 # or class ExprConst, ExprConstInt
 class ExprLit(Expr):
-    # attr_reader :lit
 
     def __init__(self, lit, kind):
         self.lit = lit
