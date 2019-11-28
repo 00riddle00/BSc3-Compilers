@@ -1,5 +1,11 @@
-
 fx main() ==> void {
-    int a;
-    a = 2;
+
+    $($(a)) = ++b();
+
+    if (a+b) {
+        a %= ++d;
+        return a+b*c;
+    } else {
+        return a+b*c;
+    }
 }

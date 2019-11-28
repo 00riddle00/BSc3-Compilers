@@ -1,5 +1,6 @@
 from lexer import Token
 
+
 # make global variable
 # curr_stack_slot = 0
 
@@ -598,10 +599,10 @@ class StmtAssign(Stmt):
 
     def resolve_names(self, scope):
         # todo lhs=var
-        print(type(self.lhs))
         # self.lhs ExprVar yra, o ne token. Turi eiti gylyn gylyn, kol token ras (ir pointeriai ten viduj, etc.
-        # todo gal self.lhs.resolve_names(scope)?
-        self.target_node = scope.resolve(self.lhs)
+        # todo put this under suspection
+        self.lhs.resolve_names(scope)
+        # self.target_node = scope.resolve(self.lhs)
         self.value.resolve_names(scope)
 
     def check_types(self):
