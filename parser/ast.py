@@ -28,6 +28,7 @@ def semantic_error(message, token=None):
 # Node.check_type_eq() <- gal i vidu ikelti?
 def unify_types(type_0, type_1):
     # def unify_types(type_0, type_1, token=None):
+    # todo error?
     if not type_0 or not type_1:
         pass  # do nothing
     elif type_0.__class__ != type_1.__class__:
@@ -317,6 +318,9 @@ class TypePointer(Type):
     def print_node(self, p):
         p.print('inner', self.inner)
 
+    def has_value(self):
+        return self.inner.has_value()
+
     # todo is it needed?
     # def resolve_names(self, scope):
     #     ...
@@ -597,7 +601,7 @@ class StmtAssign(Stmt):
     def resolve_names(self, scope):
         # todo lhs=var
         # self.lhs ExprVar yra, o ne token. Turi eiti gylyn gylyn, kol token ras (ir pointeriai ten viduj, etc.
-        # todo put this under suspection
+        # todo put this under suspicion
         self.lhs.resolve_names(scope)
         # self.target_node = scope.resolve(self.lhs)
         self.value.resolve_names(scope)
@@ -605,6 +609,7 @@ class StmtAssign(Stmt):
     def check_types(self):
         target_type = None
 
+        print("here")
         if self.target_node:
             target_type = self.target_node.type()
             # target_type = @target.type
@@ -615,6 +620,8 @@ class StmtAssign(Stmt):
         # cia jei target_type nera, tai nil paduoti, ir viduj jau error gausim
         if target_type:
             unify_types(target_type, value_type)
+        else:
+            raise_error("no target type")
 
 
 # def to_s
@@ -899,7 +906,7 @@ class ExprLit(Expr):
             return TYPE_INT
         elif self.lit.type == 'LIT_FLOAT':
             return TYPE_FLOAT
-        elif self.lit.type == 'LIT_BOOL':
+        elif self.lit.type in ['KW_TRUE', 'KW_FALSE']:
             return TYPE_BOOL
         elif self.lit.type == 'LIT_CHAR':
             return TYPE_CHAR

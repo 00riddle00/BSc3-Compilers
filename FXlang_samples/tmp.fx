@@ -1,9 +1,10 @@
 
 fx main(int a, int b) ==> int {
 
-   # int c = a;
-   # int c = 2;
-   int c = "tru";
+   int$ c;
+   $c = 2;
+   #int z = 2;
+   #c = &z;
 
     ###
     if (a+b+c) {
