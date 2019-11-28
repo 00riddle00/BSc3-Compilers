@@ -235,28 +235,6 @@ class DeclFn(Decl):
         self.body.check_types()
 
 
-# class BuiltinFunctionDef < Node
-#     attr_reader :name
-#     attr_reader :params
-#     attr_reader :ret_type
-#     attr_reader :builtin
-#
-#     def initialize(name, params, ret_type, builtin)
-#         @name = name
-#         @params = params
-#         @ret_type = ret_type
-#         @builtin = builtin
-#     end
-#
-#     def print(p)
-#         p.block(self, ':') do
-#         p.print_field("name", @name)
-#         p.print_field("params", @params)
-#         p.print_field("ret_type", @ret_type)
-#         end
-#     end
-#     end
-
 class Param(Node):
 
     # attr_accessor :slot_index
@@ -457,6 +435,12 @@ class StmtFor(Stmt):
         p.print('cond', self.for_cond)
         p.print('step', self.for_step)
         p.print('body', self.for_body)
+
+    def resolve_names(self, scope):
+        self.for_init.resolve_names(scope)
+        self.for_cond.resolve_names(scope)
+        self.for_step.resolve_names(scope)
+        self.for_body.resolve_names(scope)
 
 
 # panasiai kaip su if
@@ -677,6 +661,7 @@ class ExprFnCall(Expr):
     def print_node(self, p):
         p.print('name', self.name)
         p.print('args', self.args)
+        # p.print('builtin', self.builtin)
 
     def resolve_names(self, scope):
         if not self.builtin:

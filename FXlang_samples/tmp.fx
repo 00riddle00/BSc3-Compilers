@@ -26,14 +26,13 @@ fx print_info(int p, int q, char separator) ==> void {
   string insight = "some r@ndom \"w\\sdom\"\"";
 
   if (p == 3 AND q != 2 OR p == 2 AND q > 0) {
-    disp("Some insight->\t", insight, "\n");
-  }
-  elif(p < 3 OR p >= 5 OR q <= p) {
+    disp("Some insight->\t", insight); #, "\n");
+  } ###elif(p < 3 OR p >= 5 OR q <= p) {
     disp(0, "ut", "of", "options");
   } else {
     disp("no result, hence no finish line");
     return;
-  }
+  }###
 
   # finish line
   disp(10*($separator));
@@ -48,7 +47,8 @@ fx calc(int a, int b, float c, bool e) ==> int {
     if (c > a) {
       a *= 2;
     } elif (negative(a)) {
-      break;
+      return;
+      # break;
     }
 
     while (--a > 10) {
@@ -78,13 +78,15 @@ fx negative(int num) ==> bool {
 
 fx main() ==> int {
 
-  glob = -1;
-
   char$ sep;
 
   $(sep) = '\t';
   $(sep) = '@';
 
+  int glob = 10;
+
+  int num1;
+  int num2;
   disp("Enter two numbers separated by comma > ");
   in(num1, ",", num2);
 

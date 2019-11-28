@@ -17,8 +17,9 @@ class ASTPrinter:
         elif not obj:
             self.print_single(title, 'NULL')
         else:
+            print(f'bad argument {obj.__class__}')
             print(f'bad argument {obj.__class__.__name__}')
-            exit(1)
+            # exit(1)
 
     def print_array(self, title, array):
         if not array:
