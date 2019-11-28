@@ -1,18 +1,15 @@
 
-
 ###
 this comment spans
 
 three lines \n \n \n \n \n \n \n
 ###
 
-
-
 fx get_all_atoms() ==> string {
   return "
     ! | # | @ | $ | % | & | ' | ( | ) | * | , | . | / | : |
     ; | < | = | > | ? | @ | [ | ] | ^ | ` | { | } | | | ~ |
-    | _ | + | - | '' | | \" | \\ | (space) | \\n | \\r | \\t
+    | _ | + | - | \" | \\ | (space) | \\n | \\r | \\t
     A | B | C | D | E | F | G | H | I | J | K | L | M | N |
     O | P | Q | R | S | T | U | V | W | X | Y | Z
     a | b | c | d | e | f | g | h | i | j | k | l | m | n |
@@ -26,13 +23,13 @@ fx print_info(int p, int q, char separator) ==> void {
   string insight = "some r@ndom \"w\\sdom\"\"";
 
   if (p == 3 AND q != 2 OR p == 2 AND q > 0) {
-    disp("Some insight->\t", insight); #, "\n");
-  } ###elif(p < 3 OR p >= 5 OR q <= p) {
+    disp("Some insight->\t", insight, "\n");
+  } elif(p < 3 OR p >= 5 OR q <= p) {
     disp(0, "ut", "of", "options");
   } else {
     disp("no result, hence no finish line");
     return;
-  }###
+  }
 
   # finish line
   disp(10*($separator));
@@ -48,7 +45,6 @@ fx calc(int a, int b, float c, bool e) ==> int {
       a *= 2;
     } elif (negative(a)) {
       return;
-      # break;
     }
 
     while (--a > 10) {
