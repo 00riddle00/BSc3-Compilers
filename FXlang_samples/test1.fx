@@ -1,25 +1,26 @@
-fx test() ==> void {
+fx test(int a, int b) ==> void {
 
     if (a+b) {
-        break;
+        return 2;
     } elif (a-b) {
-        break;
+        return 3;
     } elif (a*b) {
-        break;
+        return 4;
     } else {
-      break;
+      b = ++a;
+      return 5;
     }
 
     a += 2;
     int a;
-    return a > 2;
+    return 2;
 }
 
 fx main(int a, float b) ==> int {
 
     if (a+b) {
-        break;
+        return 8;
     }
 
-    return (1 + 2) * z;
+    return (1 + 2) * b;
 }

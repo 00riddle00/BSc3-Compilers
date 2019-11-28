@@ -406,31 +406,36 @@ class IfBranch(Node):
         p.print('cond', self.cond)
         p.print('body', self.body)
 
+    def resolve_names(self, scope):
+        self.cond.resolve_names(scope)
+        self.body.resolve_names(scope)
+
 
 class StmtIf(Stmt):
     # attr_reader :cond, :body
 
-    def __init__(self, branches, stmt_block=None):
-        # fixme cond=branches, body=stmtblock
+    def __init__(self, branches, else_block=None):
+        # fixme cond=branches, body=else_block
         # self.add_children(cond, body)
         self.branches = branches
-        self.stmt_block = stmt_block
+        self.else_block = else_block
         super().__init__()
 
     def print_node(self, p):
         for ind in range(len(self.branches)):
             p.print(f'branch[{ind}]', self.branches[ind])
-        if self.stmt_block:
-            p.print(f'else', self.stmt_block)
+        if self.else_block:
+            p.print(f'else', self.else_block)
 
     def resolve_names(self, scope):
-        # fixme cond=branches, body=stmtblock
-        # self.cond.resolve_names(scope)
-        # self.body.resolve_names(scope)
-        pass
+        # fixme cond=branches, body=else_block
+        for branch in self.branches:
+            branch.resolve_names(scope)
+        if self.else_block:
+            self.else_block.resolve_names(scope)
 
     def check_types(self):
-        # fixme cond=branches, body=stmtblock
+        # fixme cond=branches, body=else_block
         # cond_type = self.cond.check_types()
         # unify_types(cond_type, TYPE_BOOL)
         # todo return?
