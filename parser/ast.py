@@ -82,7 +82,6 @@ class Scope:
 # abstract
 # virtual Type* check_types() = 0;
 class Node(object):
-    # attr_accessor :parent
 
     def __init__(self, parent=None):
         self.parent = parent
@@ -112,11 +111,9 @@ class Node(object):
     #     output(indent, "?????")
     # end
     def resolve_names(self, scope):
-        # todo class or class_name?
-        raise_error(f'resolve names not implemented for: {self.__class__}')
         # raise NotImplementedError.new
+        raise_error(f'resolve names not implemented for: {self.__class__.__name__}')
 
-    # todo children -> *args?
     def add_children(self, *children):
         for child in children:
             if not child:
@@ -311,11 +308,17 @@ class Type(Node):
 class TypePointer(Type):
 
     def __init__(self, inner):
+        # todo is add_children needed here?
+        self.add_children(inner)
         self.inner = inner
         super().__init__()
 
     def print_node(self, p):
         p.print('inner', self.inner)
+
+    # todo is it needed?
+    # def resolve_names(self, scope):
+    #     ...
 
 
 class TypePrim(Type):
@@ -344,7 +347,6 @@ class TypePrim(Type):
 class StmtBlock(Node):
 
     def __init__(self, stmts):
-        print('a', stmts)
         self.add_children(stmts)
         # self.add_children(*stmts)
         self.stmts = stmts
@@ -483,7 +485,6 @@ class StmtBreak(Stmt):
     def resolve_names(self, scope):
         curr_node = self.parent
         while curr_node:
-            print(curr_node)
             if isinstance(curr_node, StmtWhile) or isinstance(curr_node, StmtFor):
                 self.target_node = curr_node
                 break
@@ -652,6 +653,7 @@ class Expr(Node):
 class ExprFnCall(Expr):
 
     def __init__(self, name, args):
+        self.add_children(args)
         self.add_children(*args)
         self.name = name
         self.args = args
@@ -840,6 +842,7 @@ class ExprBinLogic(ExprBinary):
 class ExprUnary(Expr):
 
     def __init__(self, inner, op):
+        self.add_children(inner)
         self.inner = inner
         self.op = op
         super().__init__()
