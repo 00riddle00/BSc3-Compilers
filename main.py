@@ -12,11 +12,6 @@ if len(argv) == 2:
 
 try:
     _input = Input(file_to_lex)
-except InputError as ie:
-    ie.print_err()
-    exit(1)
-
-try:
     lexer = Lexer([_input])
     lexer.lex_all()
     lexer.dump_tokens()
@@ -27,8 +22,10 @@ try:
 
     root_scope = Scope()
     root.resolve_names(root_scope)
-    # root.check_types()
-
+    root.check_types()
+# todo wrap in CompilerError
+except InputError as ie:
+    ie.print_err()
 except LexerError as le:
     le.print_err()
 except ParserError as pe:

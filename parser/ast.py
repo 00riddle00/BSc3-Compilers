@@ -228,7 +228,6 @@ class DeclFn(Decl):
     def check_types(self):
         for param in self.params:
             param.check_types()
-        # todo return?
         self.body.check_types()
 
 
@@ -237,6 +236,7 @@ class Param(Node):
     # attr_accessor :slot_index
 
     def __init__(self, name, type_):
+        # todo is this add_children needed here?
         self.add_children(type_)
         self.name = name
         self.type = type_
@@ -250,9 +250,10 @@ class Param(Node):
     #         scope.add(@name, self)
     #         end
     #     end
+
     def check_types(self):
-        # todo implement
-        pass  # check not void
+        if not self.type.has_value():
+            semantic_error(f'parameter\'s type cannot be void or pointer to void')
 
 
 # abstract
@@ -492,7 +493,7 @@ class StmtBreak(Stmt):
                 curr_node = curr_node.parent
 
         if not self.target_node:
-            std_error(f'break not in a while statement: {self.break_kw.line_no}')  # or 'inside a loop'
+            std_error(f'break not inside a loop statement: {self.break_kw.line_no}')
 
     def check_types(self):
         # do nothing?
@@ -551,6 +552,7 @@ class StmtVarDecl(Stmt):
     # attr_accessor :slot_index
 
     def __init__(self, name, type_, value=None):
+        # todo do I need to add type_ here?
         self.add_children(type_, value)
         self.name = name
         self.type = type_
@@ -569,9 +571,11 @@ class StmtVarDecl(Stmt):
             self.value.resolve_names(scope)
 
     def check_types(self):
+        if not self.type.has_value():
+            semantic_error(f'variable\'s type cannot be void or pointer to void')
         if self.value:
             value_type = self.value.check_types()
-            unify_types(value_type, self.type)
+            unify_types(self.type, value_type)
 
 
 class StmtAssign(Stmt):
@@ -876,7 +880,6 @@ class ExprVar(Expr):
             return self.target_node.type()
 
 
-# or class ExprConst, ExprConstInt
 class ExprLit(Expr):
 
     def __init__(self, lit, kind):
@@ -894,10 +897,22 @@ class ExprLit(Expr):
     def check_types(self):
         if self.lit.type == 'LIT_INT':
             return TYPE_INT
+        elif self.lit.type == 'LIT_FLOAT':
+            return TYPE_FLOAT
+        elif self.lit.type == 'LIT_BOOL':
+            return TYPE_BOOL
+        elif self.lit.type == 'LIT_CHAR':
+            return TYPE_CHAR
+        elif self.lit.type == 'LIT_STR':
+            return TYPE_STRING
         else:
-            raise_error('bad ExprLit token')
+            raise_error('Bad ExprLit token')
 
 
-TYPE_BOOL = TypePrim('BOOL')
 TYPE_VOID = TypePrim('VOID')
 TYPE_INT = TypePrim('INT')
+TYPE_FLOAT = TypePrim('FLOAT')
+TYPE_BOOL = TypePrim('BOOL')
+TYPE_CHAR = TypePrim('CHAR')
+TYPE_STRING = TypePrim('STRING')
+
