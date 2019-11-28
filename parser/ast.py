@@ -344,7 +344,9 @@ class TypePrim(Type):
 class StmtBlock(Node):
 
     def __init__(self, stmts):
-        self.add_children(*stmts)
+        print('a', stmts)
+        self.add_children(stmts)
+        # self.add_children(*stmts)
         self.stmts = stmts
         super().__init__()
 
@@ -376,6 +378,7 @@ class Stmt(Node):
 class IfBranch(Node):
 
     def __init__(self, cond, body):
+        self.add_children(cond, body)
         self.cond = cond
         self.body = body
         super().__init__()
@@ -390,11 +393,9 @@ class IfBranch(Node):
 
 
 class StmtIf(Stmt):
-    # attr_reader :cond, :body
 
     def __init__(self, branches, else_block=None):
-        # fixme cond=branches, body=else_block
-        # self.add_children(cond, body)
+        self.add_children(branches, else_block)
         self.branches = branches
         self.else_block = else_block
         super().__init__()
@@ -424,6 +425,7 @@ class StmtIf(Stmt):
 class StmtFor(Stmt):
 
     def __init__(self, for_init, for_cond, for_step, for_body):
+        self.add_children(for_init, for_cond, for_step, for_body)
         self.for_init = for_init
         self.for_cond = for_cond
         self.for_step = for_step
@@ -481,7 +483,8 @@ class StmtBreak(Stmt):
     def resolve_names(self, scope):
         curr_node = self.parent
         while curr_node:
-            if isinstance(curr_node, StmtWhile):
+            print(curr_node)
+            if isinstance(curr_node, StmtWhile) or isinstance(curr_node, StmtFor):
                 self.target_node = curr_node
                 break
             else:
