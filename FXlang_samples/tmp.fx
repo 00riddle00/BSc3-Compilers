@@ -1,4 +1,4 @@
-fx main() ==> void {
+fx main(int a, int b) ==> void {
 
     $($(a)) = ++b();
 

@@ -846,6 +846,9 @@ class ExprUnary(Expr):
         p.print('inner', self.inner)
         p.print_single('op', self.op)
 
+    def resolve_names(self, scope):
+        self.inner.resolve_names(scope)
+
 
 class ExprVar(Expr):
 
