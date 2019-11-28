@@ -42,12 +42,12 @@ fx print_info(int p, int q, char separator) ==> void {
 fx calc(int a, int b, float c, bool e) ==> int {
   int i;
 
-  for (i = 0; i < 10;) {
+  for (i = 0; i < 10; ++i) {
     a /= b;
 
     if (c > a) {
       a *= 2;
-    } else if (negative(a)) {
+    } elif (negative(a)) {
       break;
     }
 
@@ -80,17 +80,17 @@ fx main() ==> int {
 
   glob = -1;
 
-  char *sep[2];
+  char$ sep;
 
-  *(sep[0]) = '\t';
-  *(sep[1]) = '@';
+  $(sep) = '\t';
+  $(sep) = '@';
 
   disp("Enter two numbers separated by comma > ");
-  in(num1, "," num2);
+  in(num1, ",", num2);
 
-  int N_1 = num1 %= num2;
+  int N_1 = num1 % num2;
 
-  print_info(N_1, calc(N_1, -145, (+1.e10 - (-.3e-3) + glob), !(N_1 > 14)), sep[0]);
+  print_info(N_1, calc(N_1, -145, (+1.e10 - (.3e-3) + glob), !(N_1 > 14)), sep);
 
   glob = 1;
 

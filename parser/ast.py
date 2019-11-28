@@ -668,6 +668,10 @@ class ExprFnCall(Expr):
         self.add_children(*args)
         self.name = name
         self.args = args
+        if self.name.value in ('in', 'disp'):
+            self.builtin = True
+        else:
+            self.builtin = False
         super().__init__()
 
     def print_node(self, p):
@@ -675,7 +679,12 @@ class ExprFnCall(Expr):
         p.print('args', self.args)
 
     def resolve_names(self, scope):
-        self.target_node = scope.resolve(self.name)
+        if not self.builtin:
+            self.target_node = scope.resolve(self.name)
+        else:
+            # self.target_node = ???
+            pass  # todo
+
         for arg in self.args:
             arg.resolve_names(scope)
 
