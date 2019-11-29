@@ -120,6 +120,7 @@ class Parser:
             self.expect(token_type)
             type_ = TypePrim(primary_types_keywords[token_type])
             while self.accept('OP_PTR'):
+                print('TTTT', type_)
                 type_ = TypePointer(type_)
             return type_
         else:

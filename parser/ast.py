@@ -34,10 +34,17 @@ def unify_types(type_0, type_1):
     elif type_0.__class__ != type_1.__class__:
         semantic_error(f'type kind mismatch: expected {type_0.__class__}, got {type_1.__class__}')
     # cia jau zinome kad klases sutampa (TypePrim?)
+    elif isinstance(type_0, TypePointer) and isinstance(type_1, TypePointer):
+        if unify_types(type_0.inner, type_1.inner):
+            print("complete")
+        else:
+            semantic_error(f'type mismatch: expected pointer to {type_0.inner}, got pointer to {type_1.inner}')
     elif isinstance(type_0, TypePrim) and isinstance(type_1, TypePrim):
         if type_0.kind != type_1.kind:
             # ar token visgi paduoti i sem err?
             semantic_error(f'type mismatch: expected {type_0.kind}, got {type_1.kind}')
+        else:
+            return True
     else:
         raise_error('unreachable')
 
@@ -602,18 +609,21 @@ class StmtAssign(Stmt):
         # todo lhs=var
         # self.lhs ExprVar yra, o ne token. Turi eiti gylyn gylyn, kol token ras (ir pointeriai ten viduj, etc.
         # todo put this under suspicion
-        self.lhs.resolve_names(scope)
+        self.target_node = self.lhs.resolve_names(scope)
         # self.target_node = scope.resolve(self.lhs)
         self.value.resolve_names(scope)
 
     def check_types(self):
         target_type = None
 
-        print("here")
         if self.target_node:
-            target_type = self.target_node.type()
+            target_type = self.target_node.type
             # target_type = @target.type
+        print('tt', target_type)
+        print(target_type.inner.kind)
         value_type = self.value.check_types()  # jis visada kazkoks bus, nereik tikrint kasd jis su void bus
+        print('vt', value_type)
+
         # todo return?
         # target_node jau prisyreme vardu rez metu
         # unifyt_types(@target_node&.type, value_type)
@@ -863,7 +873,18 @@ class ExprUnary(Expr):
         p.print_single('op', self.op)
 
     def resolve_names(self, scope):
-        self.inner.resolve_names(scope)
+        self.target_node = self.inner.resolve_names(scope)
+        return self.target_node
+
+    def check_types(self):
+        print(self.op)
+        if self.op == 'PTR_ADDR':
+            print("YES")
+            print('a', self.target_node.type)
+            # exit(1)
+            return TypePointer(self.target_node.type)
+        if self.target_node:
+            return self.target_node.type
 
 
 class ExprVar(Expr):
@@ -879,12 +900,13 @@ class ExprVar(Expr):
 
     def resolve_names(self, scope):
         self.target_node = scope.resolve(self.name)
+        return self.target_node
 
     def check_types(self):
         # t-node jau vardu rez metu priskyreme jam (varui)
         # @target_node&.type #(jei kairej nil, arba abiejose sides nil, tai skipinam unify types (remember))
         if self.target_node:  # arba if @target.respond_to?(:type)
-            return self.target_node.type()
+            return self.target_node.type
 
 
 class ExprLit(Expr):
@@ -922,4 +944,3 @@ TYPE_FLOAT = TypePrim('FLOAT')
 TYPE_BOOL = TypePrim('BOOL')
 TYPE_CHAR = TypePrim('CHAR')
 TYPE_STRING = TypePrim('STRING')
-
