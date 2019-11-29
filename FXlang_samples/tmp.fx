@@ -5,6 +5,7 @@ fx main(int a, int b) ==> int {
    #int a;
    int$$$ c;
    $$c = &a;
+   #$$c = *a;
 
 
 

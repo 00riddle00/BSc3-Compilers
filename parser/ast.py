@@ -36,6 +36,7 @@ def unify_types(type_0, type_1):
         # ar token visgi paduoti i sem err?
         semantic_error(f'type kind mismatch: expected {type_0.kind}, got {type_1.kind}')
 
+
 # Node.check_type_eq() <- gal i vidu ikelti?
 def unify(type_0, type_1):
     # def unify_types(type_0, type_1, token=None):
@@ -105,7 +106,6 @@ class Node(object):
 
     def unwrap(self):
         return self.__class__.__name__
-
 
     # def allocate_slots
     # end
@@ -341,9 +341,9 @@ class TypePointer(Type):
 
     def unwrap(self, depth=1):
         if isinstance(self.inner, TypePointer):
-            return self.inner.unwrap(depth+1)
+            return self.inner.unwrap(depth + 1)
         elif isinstance(self.inner, TypePrim):
-            return f'{self.inner.kind}{depth*"$"}'
+            return f'{self.inner.kind}{depth * "$"}'
         else:
             raise_error('pointer to something other than primary type')
 
@@ -900,10 +900,11 @@ class ExprUnary(Expr):
     def check_types(self):
         if self.op == 'PTR_ADDR':
             # todo is it pointer, pointer value literal or just int?
+            if isinstance(self.inner, ExprUnary):
+                semantic_error('wrong value to address')
             return TypePointer(self.target_node.type)
         # todo recursion
         elif self.op == 'PTR_DEREF':
-            op = self.op
             target_inner = self.target_node.type.inner
             inner = self.inner
             # todo del PTR_ADDR galimybes??
