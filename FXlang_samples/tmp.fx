@@ -1,15 +1,29 @@
 
 fx main(int a, int b) ==> int {
 
-   char z = 2;
-   int$ c;
-   c = &z;
+   int$ a;
+   #int a;
+   int$$$ c;
+   $$c = &a;
 
 
 
-   #int z = 2;
-   #$c = 2;
+
+
+   # int z = 2;
+   #int$$ c;
+   # adresas i pointeri
+   # int $$$c;
+   #$$$c = 2;
+
    #c = &z;
+   # $$c = 2;
+
+
+
+   # int z = 2;
+   # $c = 2;
+   # c = &z;
 
     ###
     if (a+b+c) {

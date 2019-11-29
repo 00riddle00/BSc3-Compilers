@@ -25,26 +25,33 @@ def semantic_error(message, token=None):
 # gali ateiti nil nes vykdome vardu rezoliucija,
 # ne tik tipu tikrinima. ji gali feilinti. analize darom kai TIK pavyksta...
 
-# Node.check_type_eq() <- gal i vidu ikelti?
+
 def unify_types(type_0, type_1):
+    err = unify(type_0, type_1)
+    if err == 0:
+        return True
+    elif err == 1:
+        semantic_error(f'type mismatch: expected {type_0.unwrap()}, got {type_1.unwrap()}')
+    elif err == 2:
+        # ar token visgi paduoti i sem err?
+        semantic_error(f'type kind mismatch: expected {type_0.kind}, got {type_1.kind}')
+
+# Node.check_type_eq() <- gal i vidu ikelti?
+def unify(type_0, type_1):
     # def unify_types(type_0, type_1, token=None):
     # todo error?
     if not type_0 or not type_1:
-        pass  # do nothing
+        return 0
     elif type_0.__class__ != type_1.__class__:
-        semantic_error(f'type kind mismatch: expected {type_0.__class__}, got {type_1.__class__}')
+        return 1
     # cia jau zinome kad klases sutampa (TypePrim?)
     elif isinstance(type_0, TypePointer) and isinstance(type_1, TypePointer):
-        if unify_types(type_0.inner, type_1.inner):
-            print("complete")
-        else:
-            semantic_error(f'type mismatch: expected pointer to {type_0.inner}, got pointer to {type_1.inner}')
+        return unify(type_0.inner, type_1.inner)
     elif isinstance(type_0, TypePrim) and isinstance(type_1, TypePrim):
         if type_0.kind != type_1.kind:
-            # ar token visgi paduoti i sem err?
-            semantic_error(f'type mismatch: expected {type_0.kind}, got {type_1.kind}')
+            return 2
         else:
-            return True
+            return 0
     else:
         raise_error('unreachable')
 
@@ -95,6 +102,10 @@ class Node(object):
         self.parent = parent
         self.target_node = None
         pass
+
+    def unwrap(self):
+        return self.__class__.__name__
+
 
     # def allocate_slots
     # end
@@ -328,6 +339,14 @@ class TypePointer(Type):
     def has_value(self):
         return self.inner.has_value()
 
+    def unwrap(self, depth=1):
+        if isinstance(self.inner, TypePointer):
+            return self.inner.unwrap(depth+1)
+        elif isinstance(self.inner, TypePrim):
+            return f'{self.inner.kind}{depth*"$"}'
+        else:
+            raise_error('pointer to something other than primary type')
+
     # todo is it needed?
     # def resolve_names(self, scope):
     #     ...
@@ -354,6 +373,9 @@ class TypePrim(Type):
     def is_comparable(self):
         return self.kind == 'INT' or self.kind == 'BOOL'
         # return self.kind == 'FLOAT' or self.kind == 'INT' ??
+
+    def unwrap(self):
+        return self.kind
 
 
 class StmtBlock(Node):
@@ -616,13 +638,12 @@ class StmtAssign(Stmt):
     def check_types(self):
         target_type = None
 
+        # todo jei exprunary nebutinai targetnode type
         if self.target_node:
-            target_type = self.target_node.type
+            target_type = self.lhs.check_types()
             # target_type = @target.type
-        print('tt', target_type)
-        print(target_type.inner.kind)
+        # print(target_type.inner.kind)
         value_type = self.value.check_types()  # jis visada kazkoks bus, nereik tikrint kasd jis su void bus
-        print('vt', value_type)
 
         # todo return?
         # target_node jau prisyreme vardu rez metu
@@ -877,13 +898,25 @@ class ExprUnary(Expr):
         return self.target_node
 
     def check_types(self):
-        print(self.op)
         if self.op == 'PTR_ADDR':
-            print("YES")
-            print('a', self.target_node.type)
-            # exit(1)
+            # todo is it pointer, pointer value literal or just int?
             return TypePointer(self.target_node.type)
-        if self.target_node:
+        # todo recursion
+        elif self.op == 'PTR_DEREF':
+            op = self.op
+            target_inner = self.target_node.type.inner
+            inner = self.inner
+            # todo del PTR_ADDR galimybes??
+            while isinstance(inner, ExprUnary):
+                if not inner.op == "PTR_DEREF":
+                    semantic_error('value to dereference is not a pointer')
+                if isinstance(target_inner, TypePointer):
+                    inner = inner.inner
+                    target_inner = target_inner.inner
+                else:
+                    semantic_error('primary type cannot be dereferenced')
+            return target_inner
+        elif self.target_node:
             return self.target_node.type
 
 
