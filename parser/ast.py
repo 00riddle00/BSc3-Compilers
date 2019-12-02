@@ -506,15 +506,14 @@ class StmtWhile(Stmt):
         self.body.check_types()
 
 
-# fixme from old file
-class StmtBreak(Stmt):
+class StmtControlFlow(Stmt):
 
-    def __init__(self, break_kw):
-        self.break_kw = break_kw
+    def __init__(self, keyword):
+        self.keyword = keyword
         super().__init__()
 
     def print_node(self, p):
-        p.print('keyword', self.break_kw)
+        p.print('keyword', self.keyword)
 
     def resolve_names(self, scope):
         curr_node = self.parent
@@ -526,7 +525,7 @@ class StmtBreak(Stmt):
                 curr_node = curr_node.parent
 
         if not self.target_node:
-            std_error(f'break not inside a loop statement: {self.break_kw.line_no}')
+            std_error(f'{self.keyword} not inside a loop statement: {self.keyword.line_no}')
 
     def check_types(self):
         # do nothing?
@@ -535,17 +534,15 @@ class StmtBreak(Stmt):
         self.target_loop = self.ancestor_loop()  # or ancestor_while
         # @target = find_ancestor(WhileStatement)
         if not self.target_loop:
-            std_error('break not in loop')
+            std_error(f'{self.keyword} not in loop')
 
 
-class StmtContinue(Stmt):
+class StmtBreak(StmtControlFlow):
+    pass
 
-    def __init__(self, continue_kw):
-        self.continue_kw = continue_kw
-        super().__init__()
 
-    def print_node(self, p):
-        p.print('keyword', self.continue_kw)
+class StmtContinue(StmtControlFlow):
+    pass
 
 
 # koks gi pas mus ret type?
