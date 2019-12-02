@@ -1,11 +1,17 @@
 
 fx main(int a, int b) ==> int {
 
-   int$ a;
+   #int$ a;
    #int a;
-   int$$$ c;
-   $$c = &a;
+   #int$$$ c;
+   #$$c = &a;
    #$$c = *a;
+
+   int a = 5;
+   int b;
+
+   b *= a AND 3;
+
 
 
 

@@ -1,8 +1,9 @@
 from lexer import Token, Input
 from errors import ParserError, ParserDebugError
-from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnary, ExprBinary, \
-    ExprFnCall, Param, Program, DeclFn, StmtBlock, StmtIf, StmtWhile, StmtBreak, \
-    StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, IfBranch, TypePointer, StmtFor
+from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnary, ExprBinArith, ExprBinComparison, \
+    ExprBinEquality, ExprBinLogic, ExprFnCall, Param, Program, DeclFn, StmtBlock, StmtIf, \
+    StmtWhile, StmtBreak, StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, \
+    IfBranch, TypePointer, StmtFor
 
 assign_ops = {
     'OP_ASSIGN_EQ': 'EQUALS',
@@ -311,7 +312,7 @@ class Parser:
 
         while True:
             if self.accept('KW_OR'):
-                self.result = ExprBinary('logical_or', 'OR', self.result, self.parse_expr_and())
+                self.result = ExprBinLogic('logical_or', 'OR', self.result, self.parse_expr_and())
             else:
                 break
 
@@ -322,7 +323,7 @@ class Parser:
 
         while True:
             if self.accept('KW_AND'):
-                self.result = ExprBinary('logical_and', 'AND', self.result, self.parse_expr_cmp())
+                self.result = ExprBinLogic('logical_and', 'AND', self.result, self.parse_expr_cmp())
             else:
                 break
 
@@ -333,9 +334,9 @@ class Parser:
 
         while True:
             if self.accept('OP_IS_EQ'):
-                self.result = ExprBinary('cmp', 'EQUAL', self.result, self.parse_expr_rel())
+                self.result = ExprBinComparison('cmp', 'EQUAL', self.result, self.parse_expr_rel())
             elif self.accept('OP_IS_NEQ'):
-                self.result = ExprBinary('cmp', 'NOT_EQUAL', self.result, self.parse_expr_rel())
+                self.result = ExprBinComparison('cmp', 'NOT_EQUAL', self.result, self.parse_expr_rel())
             else:
                 break
 
@@ -347,13 +348,13 @@ class Parser:
         while True:
 
             if self.accept('OP_G'):
-                self.result = ExprBinary('rel', 'GREATER', self.result, self.parse_expr_sum_sub())
+                self.result = ExprBinComparison('rel', 'GREATER', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_GE'):
-                self.result = ExprBinary('rel', 'GREATER_OR_EQUAL', self.result, self.parse_expr_sum_sub())
+                self.result = ExprBinComparison('rel', 'GREATER_OR_EQUAL', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_L'):
-                self.result = ExprBinary('rel', 'LESS', self.result, self.parse_expr_sum_sub())
+                self.result = ExprBinComparison('rel', 'LESS', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_LE'):
-                self.result = ExprBinary('rel', 'LESS_OR_EQUAL', self.result, self.parse_expr_sum_sub())
+                self.result = ExprBinComparison('rel', 'LESS_OR_EQUAL', self.result, self.parse_expr_sum_sub())
             else:
                 break
 
@@ -364,9 +365,9 @@ class Parser:
 
         while True:
             if self.accept('OP_SUM'):
-                self.result = ExprBinary('arith', 'ADD', self.result, self.parse_expr_mul_div_mod())
+                self.result = ExprBinArith('arith', 'ADD', self.result, self.parse_expr_mul_div_mod())
             elif self.accept('OP_SUB'):
-                self.result = ExprBinary('arith', 'SUB', self.result, self.parse_expr_mul_div_mod())
+                self.result = ExprBinArith('arith', 'SUB', self.result, self.parse_expr_mul_div_mod())
             else:
                 break
 
@@ -377,11 +378,11 @@ class Parser:
 
         while True:
             if self.accept('OP_MUL'):
-                self.result = ExprBinary('arith', 'MUL', self.result, self.parse_expr_unary())
+                self.result = ExprBinArith('arith', 'MUL', self.result, self.parse_expr_unary())
             elif self.accept('OP_DIV'):
-                self.result = ExprBinary('arith', 'DIV', self.result, self.parse_expr_unary())
+                self.result = ExprBinArith('arith', 'DIV', self.result, self.parse_expr_unary())
             elif self.accept('OP_MOD'):
-                self.result = ExprBinary('arith', 'MOD', self.result, self.parse_expr_unary())
+                self.result = ExprBinArith('arith', 'MOD', self.result, self.parse_expr_unary())
             else:
                 break
 
