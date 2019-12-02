@@ -8,9 +8,9 @@ fx main(int a, int b) ==> int {
    #$$c = *a;
 
    int a = 5;
-   int b;
+   bool b;
 
-   b *= a AND 3;
+   b *= True AND False;
 
 
 

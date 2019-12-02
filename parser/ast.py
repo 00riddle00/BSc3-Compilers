@@ -860,10 +860,11 @@ class ExprBinEquality(ExprBinary):
 class ExprBinLogic(ExprBinary):
 
     def check_types(self):
-        left_type = self.left.check_types
-        right_type = self.right.check_types
-        unify_types(left_type, TYPE_BOOL)
-        unify_types(right_type, TYPE_BOOL)
+        left_type = self.left.check_types()
+        right_type = self.right.check_types()
+        unify_types(TYPE_BOOL, left_type)
+        # TODO reverse order everywhere as well (left-param - expected type, right-param - got)
+        unify_types(TYPE_BOOL, right_type)
         return TYPE_BOOL
 
 
