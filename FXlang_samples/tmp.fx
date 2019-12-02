@@ -1,6 +1,13 @@
 
 fx main(int a, int b) ==> int {
 
+    while (True) {
+        int c = 2 + 3;
+        c = 2 + 2;
+    }
+
+        break;
+
    # int$ a;
    # int a;
    # a = ++2;
@@ -8,21 +15,19 @@ fx main(int a, int b) ==> int {
    # $$c = &++a;
    # $$c = *a;
 
-   int a = 5;
-   int b = 3;
+   # int a = 5;
+   # int b = 3;
 
-   bool c = 5 != 3 AND 3*5 > 10;
+   # b ool c = 5 != 3 AND 3*5 > 10;
 
    # int z = 2;
-   #int$$ c;
+   # int$$ c;
    # adresas i pointeri
    # int $$$c;
-   #$$$c = 2;
+   # $$$c = 2;
 
-   #c = &z;
+   # c = &z;
    # $$c = 2;
-
-
 
    # int z = 2;
    # $c = 2;

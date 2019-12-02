@@ -157,12 +157,13 @@ class Node(object):
                 current_node = current_node.parent
 
     def ancestor_loop(self):
-        current = self.parent
-        while current:
-            if isinstance(current, StmtWhile):
-                return current
+        current_node = self.parent
+        while current_node:
+            if isinstance(current_node, StmtWhile) or isinstance(current_node, StmtFor):
+                return current_node
             else:
-                current = current.parent
+                current_node = current_node.parent
+        return current_node
 
     def print_node(self, p):
         print(f'print not implemented for {self.__class__}')
@@ -264,11 +265,6 @@ class Param(Node):
     def print_node(self, p):
         p.print('name', self.name)
         p.print('type', self.type)
-
-    #     def resolve_names(scope)
-    #         scope.add(@name, self)
-    #         end
-    #     end
 
     def check_types(self):
         if not self.type.has_value():
@@ -427,6 +423,10 @@ class IfBranch(Node):
         self.cond.resolve_names(scope)
         self.body.resolve_names(scope)
 
+    def check_types(self):
+        self.cond.check_types()
+        self.body.check_types()
+
 
 class StmtIf(Stmt):
 
@@ -450,12 +450,12 @@ class StmtIf(Stmt):
             self.else_block.resolve_names(scope)
 
     def check_types(self):
-        # fixme cond=branches, body=else_block
-        # cond_type = self.cond.check_types()
-        # unify_types(cond_type, TYPE_BOOL)
-        # todo return?
-        # self.body.check_types()
-        pass
+        for branch in self.branches:
+            cond_type = branch.cond.check_types()
+            unify_types(TYPE_BOOL, cond_type)
+            branch.body.check_types()
+        if self.else_block:
+            self.else_block.check_types()
 
 
 class StmtFor(Stmt):
@@ -516,25 +516,18 @@ class StmtControlFlow(Stmt):
         p.print('keyword', self.keyword)
 
     def resolve_names(self, scope):
-        curr_node = self.parent
-        while curr_node:
-            if isinstance(curr_node, StmtWhile) or isinstance(curr_node, StmtFor):
-                self.target_node = curr_node
-                break
-            else:
-                curr_node = curr_node.parent
+        self.target_node = self.ancestor_loop()
 
         if not self.target_node:
-            std_error(f'{self.keyword} not inside a loop statement: {self.keyword.line_no}')
+            # todo rm this hack
+            if "BREAK" in self.keyword.type:
+                kw = "break"
+            else:
+                kw = "continue"
+            semantic_error(f'{kw} not inside a loop statement: {self.keyword.line_no}')
 
     def check_types(self):
-        # do nothing?
-        # fixme is it correct?
-        # or target_node ??
-        self.target_loop = self.ancestor_loop()  # or ancestor_while
-        # @target = find_ancestor(WhileStatement)
-        if not self.target_loop:
-            std_error(f'{self.keyword} not in loop')
+        pass
 
 
 class StmtBreak(StmtControlFlow):
