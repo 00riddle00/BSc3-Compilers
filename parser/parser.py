@@ -121,7 +121,6 @@ class Parser:
             self.expect(token_type)
             type_ = TypePrim(primary_types_keywords[token_type])
             while self.accept('OP_PTR'):
-                print('TTTT', type_)
                 type_ = TypePointer(type_)
             return type_
         else:
@@ -334,9 +333,9 @@ class Parser:
 
         while True:
             if self.accept('OP_IS_EQ'):
-                self.result = ExprBinComparison('cmp', 'EQUAL', self.result, self.parse_expr_rel())
+                self.result = ExprBinEquality('eq', 'EQUAL', self.result, self.parse_expr_rel())
             elif self.accept('OP_IS_NEQ'):
-                self.result = ExprBinComparison('cmp', 'NOT_EQUAL', self.result, self.parse_expr_rel())
+                self.result = ExprBinEquality('eq', 'NOT_EQUAL', self.result, self.parse_expr_rel())
             else:
                 break
 
@@ -348,13 +347,13 @@ class Parser:
         while True:
 
             if self.accept('OP_G'):
-                self.result = ExprBinComparison('rel', 'GREATER', self.result, self.parse_expr_sum_sub())
+                self.result = ExprBinComparison('cmp', 'GREATER', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_GE'):
-                self.result = ExprBinComparison('rel', 'GREATER_OR_EQUAL', self.result, self.parse_expr_sum_sub())
+                self.result = ExprBinComparison('cmp', 'GREATER_OR_EQUAL', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_L'):
-                self.result = ExprBinComparison('rel', 'LESS', self.result, self.parse_expr_sum_sub())
+                self.result = ExprBinComparison('cmp', 'LESS', self.result, self.parse_expr_sum_sub())
             elif self.accept('OP_LE'):
-                self.result = ExprBinComparison('rel', 'LESS_OR_EQUAL', self.result, self.parse_expr_sum_sub())
+                self.result = ExprBinComparison('cmp', 'LESS_OR_EQUAL', self.result, self.parse_expr_sum_sub())
             else:
                 break
 

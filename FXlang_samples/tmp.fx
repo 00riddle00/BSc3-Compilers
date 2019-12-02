@@ -1,18 +1,17 @@
 
 fx main(int a, int b) ==> int {
 
-   #int$ a;
-   #int a;
-   #int$$$ c;
-   #$$c = &a;
-   #$$c = *a;
+   # int$ a;
+   # int a;
+   # a = ++2;
+   # int$$$ c;
+   # $$c = &++a;
+   # $$c = *a;
 
    int a = 5;
-   bool b;
+   int b = 3;
 
-   b *= True AND False;
-
-
+   bool c = 5 != 3 AND 3*5 > 10;
 
    # int z = 2;
    #int$$ c;

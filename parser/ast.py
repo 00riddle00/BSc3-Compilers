@@ -849,6 +849,7 @@ class ExprBinEquality(ExprBinary):
         left_type = self.left.check_types()
         right_type = self.right.check_types()
         if left_type and left_type.has_value():
+            # todo should i print more understandable error here?
             unify_types(left_type, right_type)
         else:
             semantic_error(f'this type has no value to compare: {left_type}')
