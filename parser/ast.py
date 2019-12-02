@@ -443,7 +443,6 @@ class StmtIf(Stmt):
             p.print(f'else', self.else_block)
 
     def resolve_names(self, scope):
-        # fixme cond=branches, body=else_block
         for branch in self.branches:
             branch.resolve_names(scope)
         if self.else_block:
@@ -480,6 +479,11 @@ class StmtFor(Stmt):
         self.for_step.resolve_names(scope)
         self.for_body.resolve_names(scope)
 
+    def check_types(self):
+        self.for_init.check_types()
+        self.for_cond.check_types()
+        self.for_step.check_types()
+        self.for_body.check_types()
 
 # panasiai kaip su if
 # tikr tipus salygoje

@@ -1,12 +1,8 @@
 
 fx main(int a, int b) ==> int {
 
-    while (True) {
-        int c = 2 + 3;
-        c = 2 + 2;
-    }
-
-        break;
+  int a = 10;
+  int i;
 
    # int$ a;
    # int a;
