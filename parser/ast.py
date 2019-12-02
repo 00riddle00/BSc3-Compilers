@@ -650,6 +650,8 @@ class StmtAssign(Stmt):
         # unifyt_types(@target_node&.type, value_type)
         # cia jei target_type nera, tai nil paduoti, ir viduj jau error gausim
         if target_type:
+            if self.op != "EQUALS" and not target_type.is_arithmetic():
+                semantic_error(f'cannot perform arithmetic assign operation with this type: {target_type.kind}')
             unify_types(target_type, value_type)
         else:
             raise_error("no target type")
@@ -803,7 +805,7 @@ class ExprBinArith(ExprBinary):
         right_type = self.right.check_types()
 
         # turet omeny kad ir voidas i kaire puse gali ateit!
-        if left_type and left_type.is_arithmetic:
+        if left_type and left_type.is_arithmetic():
             unify_types(left_type, right_type)
         else:
             # nezinom kurioj vietoj

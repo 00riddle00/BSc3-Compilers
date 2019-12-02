@@ -14,9 +14,6 @@ fx main(int a, int b) ==> int {
 
 
 
-
-
-
    # int z = 2;
    #int$$ c;
    # adresas i pointeri
