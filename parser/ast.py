@@ -843,7 +843,9 @@ class ExprUnary(Expr):
                     semantic_error('primary type cannot be dereferenced')
             return target_inner
         # todo move this mess elsewhere
-        elif self.op in ['NOT', 'DECR', 'INCR'] and isinstance(self.parent, StmtAssign):
+        elif self.op in ['NOT', 'DECR', 'INCR'] and \
+                isinstance(self.parent, StmtAssign) and \
+                self.parent.lhs == self:
             # todo is this error formulated correctly?
             semantic_error('assignment lvalue cannot be unary expression')
 

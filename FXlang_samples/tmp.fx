@@ -1,7 +1,7 @@
 
 fx main(int a, int b) ==> int {
 
-   a = ++2;
+   ++a = ++2;
 
    # a = 2 + True;
    # int$ c;
