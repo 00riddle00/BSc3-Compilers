@@ -485,6 +485,7 @@ class StmtFor(Stmt):
         self.for_step.check_types()
         self.for_body.check_types()
 
+
 # panasiai kaip su if
 # tikr tipus salygoje
 # ...
@@ -566,10 +567,15 @@ class StmtReturn(Stmt):
     def check_types(self):
         # ret_type = ancestor_fn.ret_type
         # ret_type = find_ancestor(&DeclFn)
-        ret_type = self.find_ancestor(DeclFn).ret_type()
+
+        if self.value:
+            value_type = self.value.check_types()
+        else:
+            return  # return no value
+
+        ret_type = self.find_ancestor(DeclFn).ret_type
         # todo pythonize?
         # &. iskvies fn jei n...
-        value_type = self.value.check_types() if self.value and self.value.check_types() else TypePrim('VOID')
         unify_types(ret_type, value_type)
         # unify_types(ret_type, value_type, @return_kw)
 

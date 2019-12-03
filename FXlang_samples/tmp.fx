@@ -1,8 +1,7 @@
 
 fx main(int a, int b) ==> int {
 
-  int a = 10;
-  int i;
+    return;
 
    # int$ a;
    # int a;
