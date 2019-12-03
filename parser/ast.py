@@ -93,10 +93,13 @@ class Scope:
             self.members[name.value] = node
         else:
             # todo ensure print line
-            semantic_error(f'duplicate variable: {name.value}', name)
+            global curr_token
+            curr_token = name
+            semantic_error2(f'duplicate variable: {name.value}')
 
     def resolve(self, name):
         if not isinstance(name, Token):
+            # todo raise normal error
             raise TypeError
 
         if name.value in self.members.keys():
@@ -107,7 +110,9 @@ class Scope:
             # todo return?
             return self.parent_scope.resolve(name)
         else:
-            semantic_error(f'undeclared variable: {name.value}', name)
+            global curr_token
+            curr_token = name
+            semantic_error2(f'undeclared variable: {name.value}')
             # return nil
 
 
@@ -286,7 +291,9 @@ class Param(Node):
 
     def check_types(self):
         if not self.type.has_value():
-            semantic_error(f'parameter\'s type cannot be void or pointer to void')
+            global curr_token
+            curr_token = self.name
+            semantic_error2(f'parameter\'s type cannot be void or pointer to void')
 
 
 class StmtBlock(Node):
