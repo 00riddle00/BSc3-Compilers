@@ -723,10 +723,11 @@ class ExprFnCall(Expr):
             arg.resolve_names(scope)
 
     def check_types(self):
-        # masyvui args ev. velemntui pritaikau fn check_types ir nauja masyva turi
+        # masyvui args every elementui pritaikau fn check_types ir nauja masyva turi
         arg_types = [arg.check_types() for arg in self.args]
 
         # ar daiktas i kuri kreipiames apskr. egzistuoj?
+        # TODO cia bus built-in f-ja tikriausiai
         if not self.target_node:
             return
         elif not isinstance(self.target_node, DeclFn):
@@ -735,7 +736,7 @@ class ExprFnCall(Expr):
 
         # zinome, kad radome fja, i kuria kreipemes
         # todo is type() a fn?
-        param_types = [param.type() for param in self.target_node.params]
+        param_types = [param.type for param in self.target_node.params]
         if len(param_types) != len(arg_types):
             semantic_error(f'invalid argument count; expected {len(param_types)}, got {len(arg_types)}', self.name)
 
@@ -750,7 +751,7 @@ class ExprFnCall(Expr):
             unify_types(param_type, arg_type)
 
         # kazka pasakau koks cia tipas etc...
-        return self.target_node.ret_type()
+        return self.target_node.ret_type
 
 
 class ExprBinary(Expr):
