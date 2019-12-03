@@ -1,6 +1,7 @@
+from pprint import pprint
+
 from lexer import Token
 from errors import SemanticError
-
 
 # make global variable
 # curr_stack_slot = 0
@@ -14,15 +15,16 @@ def raise_error(msg):
     exit(1)
 
 
-def std_error(msg):
-    print(msg)
-    exit(1)
-
-
 def semantic_error(message, token=None):
     line_no = token.line_no if (token and token.line_no) else '?'
-    std_error(f'???:{line_no}: semantic error: {message}')
+    print(f'???:{line_no}: semantic error: {message}')
     exit(1)
+
+
+def semantic_error2(msg):
+    # line_no = token.line_no if (token and token.line_no) else '?'
+    global curr_token
+    raise SemanticError(msg, *curr_token.get_char_info())
 
 
 # ar dvi sakos sutampa
@@ -38,14 +40,7 @@ def unify_types(type_0, type_1):
     elif err == 1:
         semantic_error(f'type mismatch: expected({type_0.unwrap()}), got({type_1.unwrap()})')
     elif err == 2:
-        # ar token visgi paduoti i sem err?
-        # print(type(type_1))
-        # print(vars(type_1))
-        # todo is this "global" kw needed here?
-        global curr_token
-
-        raise SemanticError(f'type kind mismatch: expected({type_0.kind}), got({type_1.kind})',
-                            *curr_token.get_char_info())
+        semantic_error2(f'type kind mismatch: expected({type_0.kind}), got({type_1.kind})')
 
 
 # Node.check_type_eq() <- gal i vidu ikelti?
@@ -200,6 +195,8 @@ class Program(Node):
     def resolve_names(self, scope):
         for decl in self.decls:
             scope.add(decl.name, decl)
+            if 'main' not in scope.members.keys():
+                semantic_error('no "main" function in a program')
         for decl in self.decls:
             decl.resolve_names(scope)
 
@@ -711,6 +708,7 @@ class ExprBinArith(ExprBinary):
     # veliau turesim kiek praplesti sita aritm israisk
     def check_types(self):
         global curr_token
+
         curr_token = self.right.lit
         left_type = self.left.check_types()
         right_type = self.right.check_types()
@@ -720,7 +718,9 @@ class ExprBinArith(ExprBinary):
             unify_types(left_type, right_type)
         else:
             # nezinom kurioj vietoj
-            semantic_error(f'cannot perform arithmetic operations with this type: {left_type}')
+            # todo pointers error (kind->unwrap)
+            curr_token = self.left.lit
+            semantic_error(f'cannot perform arithmetic operations with this type: {left_type.kind}')
 
         return left_type  # nres reik grazinti tipa taip mums
 
