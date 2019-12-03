@@ -1,11 +1,11 @@
 
 fx main(int a, int b) ==> int {
 
-    int$ c;
-    $c = 4;
+    a = 2 + True;
 
-    a = foo(2,3) + $c;
-
+   # int$ c;
+   # $c = 4;
+   # a = foo(2,3) + $c;
 
    # int$ a;
    # int a;
@@ -17,7 +17,7 @@ fx main(int a, int b) ==> int {
    # int a = 5;
    # int b = 3;
 
-   # b ool c = 5 != 3 AND 3*5 > 10;
+   # bool c = 5 != 3 AND 3*5 > 10;
 
    # int z = 2;
    # int$$ c;
@@ -41,6 +41,6 @@ fx main(int a, int b) ==> int {
     ###
 }
 
-fx foo(int c, int d) ==> int {
-    return;
-}
+# fx foo(int c, int d) ==> int {
+#    return;
+# }

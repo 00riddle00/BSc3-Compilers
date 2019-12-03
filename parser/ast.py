@@ -1,8 +1,12 @@
 from lexer import Token
+from errors import SemanticError
 
 
 # make global variable
 # curr_stack_slot = 0
+
+# move this variable to TypeChecker class or somewhere else
+global curr_token
 
 
 def raise_error(msg):
@@ -26,15 +30,22 @@ def semantic_error(message, token=None):
 # ne tik tipu tikrinima. ji gali feilinti. analize darom kai TIK pavyksta...
 
 
+# todo remove additional unify function and stupid error codes
 def unify_types(type_0, type_1):
     err = unify(type_0, type_1)
     if err == 0:
         return True
     elif err == 1:
-        semantic_error(f'type mismatch: expected {type_0.unwrap()}, got {type_1.unwrap()}')
+        semantic_error(f'type mismatch: expected({type_0.unwrap()}), got({type_1.unwrap()})')
     elif err == 2:
         # ar token visgi paduoti i sem err?
-        semantic_error(f'type kind mismatch: expected {type_0.kind}, got {type_1.kind}')
+        # print(type(type_1))
+        # print(vars(type_1))
+        # todo is this "global" kw needed here?
+        global curr_token
+
+        raise SemanticError(f'type kind mismatch: expected({type_0.kind}), got({type_1.kind})',
+                            *curr_token.get_char_info())
 
 
 # Node.check_type_eq() <- gal i vidu ikelti?
@@ -269,109 +280,6 @@ class Param(Node):
     def check_types(self):
         if not self.type.has_value():
             semantic_error(f'parameter\'s type cannot be void or pointer to void')
-
-
-# abstract
-class Type(Node):
-
-    # def == (other)
-    #     self.class == other.class
-    # end
-
-    def __init__(self):
-        pass
-        super().__init__()
-
-    def is_arithmetic(self):
-        return False
-
-    def has_value(self):
-        return False
-
-    def is_comparable(self):
-        return False
-
-
-# class TypeBool < TypePrim # or tsg Type?
-#     def print(p)
-#         end
-#
-#     def to_s
-#         'bool'
-#     end
-# end
-#
-# class TypeInt < TypePrim
-#     def print(p)
-#         end
-#
-#     def to_s
-#         'int'
-#     end
-# end
-#
-# class TypeVoid < TypePrim
-#     def print(p)
-#         end
-#
-#     def to_s
-#         'void'
-#     end
-# end
-#
-
-
-class TypePointer(Type):
-
-    def __init__(self, inner):
-        # todo is add_children needed here?
-        self.add_children(inner)
-        self.inner = inner
-        super().__init__()
-
-    def print_node(self, p):
-        p.print('inner', self.inner)
-
-    def has_value(self):
-        return self.inner.has_value()
-
-    def unwrap(self, depth=1):
-        if isinstance(self.inner, TypePointer):
-            return self.inner.unwrap(depth + 1)
-        elif isinstance(self.inner, TypePrim):
-            return f'{self.inner.kind}{depth * "$"}'
-        else:
-            raise_error('pointer to something other than primary type')
-
-    # todo is it needed?
-    # def resolve_names(self, scope):
-    #     ...
-
-
-class TypePrim(Type):
-
-    def __init__(self, kind):
-        self.kind = kind
-        # todo is it needed? (token=None)
-        # self.token = token
-        super().__init__()
-
-    def print_node(self, p):
-        p.print_single('kind', self.kind)
-
-    def is_arithmetic(self):
-        return self.kind == 'FLOAT' or self.kind == 'INT'
-
-    # jei tipas reiksme tures su kuria operacijas galim atlikti
-    def has_value(self):
-        return self.kind != 'VOID'
-
-    def is_comparable(self):
-        return self.kind == 'INT' or self.kind == 'BOOL'
-        # return self.kind == 'FLOAT' or self.kind == 'INT' ??
-
-    def unwrap(self):
-        return self.kind
 
 
 class StmtBlock(Node):
@@ -802,6 +710,8 @@ class ExprBinArith(ExprBinary):
 
     # veliau turesim kiek praplesti sita aritm israisk
     def check_types(self):
+        global curr_token
+        curr_token = self.right.lit
         left_type = self.left.check_types()
         right_type = self.right.check_types()
 
@@ -977,6 +887,110 @@ class ExprLit(Expr):
             raise_error('Bad ExprLit token')
 
 
+# abstract
+class Type(Node):
+
+    # def == (other)
+    #     self.class == other.class
+    # end
+
+    def __init__(self):
+        pass
+        super().__init__()
+
+    def is_arithmetic(self):
+        return False
+
+    def has_value(self):
+        return False
+
+    def is_comparable(self):
+        return False
+
+
+# class TypeBool < TypePrim # or tsg Type?
+#     def print(p)
+#         end
+#
+#     def to_s
+#         'bool'
+#     end
+# end
+#
+# class TypeInt < TypePrim
+#     def print(p)
+#         end
+#
+#     def to_s
+#         'int'
+#     end
+# end
+#
+# class TypeVoid < TypePrim
+#     def print(p)
+#         end
+#
+#     def to_s
+#         'void'
+#     end
+# end
+#
+
+
+class TypePointer(Type):
+
+    def __init__(self, inner):
+        # todo is add_children needed here?
+        self.add_children(inner)
+        self.inner = inner
+        super().__init__()
+
+    def print_node(self, p):
+        p.print('inner', self.inner)
+
+    def has_value(self):
+        return self.inner.has_value()
+
+    def unwrap(self, depth=1):
+        if isinstance(self.inner, TypePointer):
+            return self.inner.unwrap(depth + 1)
+        elif isinstance(self.inner, TypePrim):
+            return f'{self.inner.kind}{depth * "$"}'
+        else:
+            raise_error('pointer to something other than primary type')
+
+    # todo is it needed?
+    # def resolve_names(self, scope):
+    #     ...
+
+
+class TypePrim(Type):
+
+    def __init__(self, kind):
+        self.kind = kind
+        # todo is it needed? (token=None)
+        # self.token = token
+        super().__init__()
+
+    def print_node(self, p):
+        p.print_single('kind', self.kind)
+
+    def is_arithmetic(self):
+        return self.kind == 'FLOAT' or self.kind == 'INT'
+
+    # jei tipas reiksme tures su kuria operacijas galim atlikti
+    def has_value(self):
+        return self.kind != 'VOID'
+
+    def is_comparable(self):
+        return self.kind == 'INT' or self.kind == 'BOOL'
+        # return self.kind == 'FLOAT' or self.kind == 'INT' ??
+
+    def unwrap(self):
+        return self.kind
+
+
+# todo move these definitions and others to centralized place somewhere
 TYPE_VOID = TypePrim('VOID')
 TYPE_INT = TypePrim('INT')
 TYPE_FLOAT = TypePrim('FLOAT')

@@ -80,6 +80,12 @@ class CompilerError(BaseException):
         pass
 
 
+class SemanticError(CompilerError):
+
+    def print_err(self):
+        print(f'SemanticERROR: {self.file}:{self.line}:{self.pos} {self.msg}')
+
+
 class InputError(CompilerError):
 
     def print_err(self):
@@ -89,7 +95,7 @@ class InputError(CompilerError):
 class LexerError(CompilerError):
 
     def print_err(self):
-        print(f'LexERROR: {self.file}:{self.line}:{self.pos} {self.msg}')
+        print(f'LexerERROR: {self.file}:{self.line}:{self.pos} {self.msg}')
 
 
 class LexerDebugError(LexerError):
@@ -127,7 +133,7 @@ class ParserError(CompilerError):
         exp = self.exp_token
         if exp in user_friendly_names.keys():
             exp = user_friendly_names[exp]
-        print(f'ParseERROR: {self.file}:{self.line}:{self.pos} '
+        print(f'ParserERROR: {self.file}:{self.line}:{self.pos} '
               f'expected({exp}), found({user_friendly_names[self.curr_token]})')
 
 

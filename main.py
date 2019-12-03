@@ -2,7 +2,7 @@ from sys import argv
 
 from lexer import Input, Lexer
 from parser import Parser, ASTPrinter, Scope
-from errors import LexerError, ParserError, InputError
+from errors import LexerError, ParserError, InputError, SemanticError
 
 samples_dir = 'FXlang_samples'
 
@@ -30,3 +30,5 @@ except LexerError as le:
     le.print_err()
 except ParserError as pe:
     pe.print_err()
+except SemanticError as se:
+    se.print_err()
