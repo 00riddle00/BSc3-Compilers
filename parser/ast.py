@@ -9,6 +9,16 @@ from errors import SemanticError
 # move this variable to TypeChecker class or somewhere else
 global curr_token
 
+# todo move these definitions and others to centralized place somewhere
+# todo maybe this dict is useless
+unary_ops = {
+    'OP_INCR': 'INCR',
+    'OP_DECR': 'DECR',
+    'OP_NOT': 'NOT',
+    'OP_PTR': 'PTR_DEREF',
+    'OP_PTR_ADDR': 'PTR_ADDR',
+}
+
 
 def raise_error(msg):
     print(msg)
@@ -519,7 +529,7 @@ class StmtVarDecl(Stmt):
 class StmtAssign(Stmt):
 
     def __init__(self, lhs, op, value):
-        self.add_children(value)
+        self.add_children(lhs, value)
         self.lhs = lhs
         self.op = op
         self.value = value
@@ -832,6 +842,11 @@ class ExprUnary(Expr):
                 else:
                     semantic_error('primary type cannot be dereferenced')
             return target_inner
+        # todo move this mess elsewhere
+        elif self.op in ['NOT', 'DECR', 'INCR'] and isinstance(self.parent, StmtAssign):
+            # todo is this error formulated correctly?
+            semantic_error('assignment lvalue cannot be unary expression')
+
         elif self.target_node:
             return self.target_node.type
 
