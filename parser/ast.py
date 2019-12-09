@@ -29,12 +29,6 @@ def semantic_error(message, token=None):
     exit(1)
 
 
-def semantic_error2(msg):
-    # line_no = token.line_no if (token and token.line_no) else '?'
-    global curr_token
-    raise SemanticError(msg, *curr_token.get_char_info())
-
-
 def semantic_error3(msg, token=None):
     # line_no = token.line_no if (token and token.line_no) else '?'
     raise SemanticError(msg, *token.get_char_info())
@@ -54,7 +48,7 @@ def unify_types(type_0, type_1):
         semantic_error(f'type mismatch: expected({type_0.unwrap()}), got({type_1.unwrap()})')
     elif err == 2:
         # todo this error intersects with the logic of type being able to participate in certain
-        # ...todo operation, ex bool cannot be used in arithmetic, etc.
+        # ...todo operation, ex bool cannot be used in arithmetic, cannot compare values, etc.
         semantic_error(f'type kind mismatch: expected({type_0.kind}), got({type_1.kind})')
 
 
@@ -752,8 +746,6 @@ class ExprBinArith(ExprBinary):
 class ExprBinComparison(ExprBinary):  # > < == !=
 
     def check_types(self):
-        global curr_token
-        print('t', type(self.left))
         left_type = self.left.check_types()
         right_type = self.right.check_types()
 
@@ -764,9 +756,8 @@ class ExprBinComparison(ExprBinary):  # > < == !=
             unify_types(left_type, right_type)
         else:
             # fixme this does not return object with token attribute
-            curr_token = left_type
             # nezinom kurioj vietoj
-            semantic_error(f'cannot compare values of this type: {left_type.kind}')
+            semantic_error3(f'cannot compare values of this type: {left_type.kind}', self.left.get_token())
 
         # unify_types(left_type, right_type)
         # TypeBool.new
@@ -786,7 +777,7 @@ class ExprBinEquality(ExprBinary):
             # todo should i print more understandable error here?
             unify_types(left_type, right_type)
         else:
-            semantic_error(f'this type has no value to compare: {left_type.kind}')
+            semantic_error3(f'this type has no value to compare: {left_type.kind}', self.left.get_token())
         return TypePrim('BOOL')
 
 

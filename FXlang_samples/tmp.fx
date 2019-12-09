@@ -1,7 +1,7 @@
 
 fx main(int a, int b) ==> int {
 
-
+    a = a + 'a';
 
 }
 
