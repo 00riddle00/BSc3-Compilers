@@ -827,31 +827,39 @@ class ExprUnary(Expr):
         return self.target_node
 
     def get_token(self):
-        # todo implement
-        pass
+        inner = self.inner
+        while isinstance(inner, TypePointer):
+            print("while")
+            inner = inner.inner
+        return inner.get_token()
 
     def check_types(self):
         if self.op == 'PTR_ADDR':
             # todo is it pointer, pointer value literal or just int?
             if isinstance(self.inner, ExprUnary):
-                # todo add token info for error handling here
-                semantic_error('wrong value to address')
+                # todo now exprUnary name token is used for error, not the token
+                # todo ...going after the PTR_ADDR operator
+                semantic_error3('wrong value to address', self.inner.get_token())
             return TypePointer(self.target_node.type)
         # todo recursion
         elif self.op == 'PTR_DEREF':
+            if not isinstance(self.target_node.type, TypePointer):
+                semantic_error3('variable to dereference is not a pointer type', self.get_token())
+
             target_inner = self.target_node.type.inner
             inner = self.inner
             # todo del PTR_ADDR galimybes??
             while isinstance(inner, ExprUnary):
                 if not inner.op == "PTR_DEREF":
                     # todo add token info for error handling here
-                    semantic_error('value to dereference is not a pointer')
-                if isinstance(target_inner, TypePointer):
+                    # to prevent ex. $++a;
+                    semantic_error3('value to dereference is not a pointer', self.get_token())
+                elif isinstance(target_inner, TypePointer):
                     inner = inner.inner
                     target_inner = target_inner.inner
                 else:
                     # todo add token info for error handling here
-                    semantic_error('primary type cannot be dereferenced')
+                    semantic_error3(f'primary type ({target_inner.kind}) cannot be dereferenced', self.get_token())
             return target_inner
         # todo move this mess elsewhere
         elif self.op in ['NOT', 'DECR', 'INCR'] and \
@@ -859,7 +867,7 @@ class ExprUnary(Expr):
                 self.parent.lhs == self:
             # todo is this error formulated correctly?
             # todo add token info for error handling here
-            semantic_error('assignment lvalue cannot be unary expression')
+            semantic_error3('assignment lvalue cannot be unary expression', self.get_token())
 
         elif self.target_node:
             return self.target_node.type

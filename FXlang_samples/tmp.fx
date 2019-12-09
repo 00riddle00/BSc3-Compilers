@@ -1,7 +1,7 @@
 
-fx main(int a, int b) ==> int {
+fx main(int$ a, int b) ==> int {
 
-    a = a + 'a';
+    ++a = 2;
 
 }
 
@@ -9,6 +9,8 @@ fx main(int a, int b) ==> int {
 fx foo(int c, int d) ==> int {
  return;
 }
+   # $++a = 2;
+   # a = &++b;
    # char b = 't';
    # a = b + a;
    # a = "true" + a;
