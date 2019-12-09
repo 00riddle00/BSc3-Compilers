@@ -53,6 +53,8 @@ def unify_types(type_0, type_1):
     elif err == 1:
         semantic_error(f'type mismatch: expected({type_0.unwrap()}), got({type_1.unwrap()})')
     elif err == 2:
+        # todo this error intersects with the logic of type being able to participate in certain
+        # ...todo operation, ex bool cannot be used in arithmetic, etc.
         semantic_error(f'type kind mismatch: expected({type_0.kind}), got({type_1.kind})')
 
 
@@ -572,7 +574,8 @@ class StmtAssign(Stmt):
         # cia jei target_type nera, tai nil paduoti, ir viduj jau error gausim
         if target_type:
             if self.op != "EQUALS" and not target_type.is_arithmetic():
-                semantic_error3(f'cannot perform arithmetic assign operation with this type: {target_type.kind}', self.lhs.name)
+                semantic_error3(f'cannot perform arithmetic assign operation with this type: {target_type.kind}',
+                                self.lhs.name)
             unify_types(target_type, value_type)
         else:
             raise_error("no target type")
@@ -723,10 +726,7 @@ class ExprBinArith(ExprBinary):
 
     # veliau turesim kiek praplesti sita aritm israisk
     def check_types(self):
-        global curr_token
 
-        # fixme is there only literals?
-        curr_token = self.right.lit
         left_type = self.left.check_types()
         right_type = self.right.check_types()
 
@@ -736,8 +736,9 @@ class ExprBinArith(ExprBinary):
         else:
             # nezinom kurioj vietoj
             # todo pointers error (kind->unwrap)
-            curr_token = self.left.lit
-            semantic_error2(f'cannot perform arithmetic operations with this type: {left_type.kind}')
+            print("here")
+            semantic_error3(f'cannot perform arithmetic operations with this type: {left_type.kind}',
+                            self.left.get_token())
 
         return left_type  # nres reik grazinti tipa taip mums
 
@@ -834,6 +835,10 @@ class ExprUnary(Expr):
         self.target_node = self.inner.resolve_names(scope)
         return self.target_node
 
+    def get_token(self):
+        # todo implement
+        pass
+
     def check_types(self):
         if self.op == 'PTR_ADDR':
             # todo is it pointer, pointer value literal or just int?
@@ -880,6 +885,9 @@ class ExprVar(Expr):
     def print_node(self, p):
         p.print('name', self.name)
 
+    def get_token(self):
+        return self.name
+
     def resolve_names(self, scope):
         self.target_node = scope.resolve(self.name)
         return self.target_node
@@ -887,6 +895,7 @@ class ExprVar(Expr):
     def check_types(self):
         # t-node jau vardu rez metu priskyreme jam (varui)
         # @target_node&.type #(jei kairej nil, arba abiejose sides nil, tai skipinam unify types (remember))
+        # todo add raise_error on else
         if self.target_node:  # arba if @target.respond_to?(:type)
             return self.target_node.type
 
@@ -901,6 +910,11 @@ class ExprLit(Expr):
     def print_node(self, p):
         p.print('lit', self.lit)
         p.print_single('kind', self.kind)
+
+    # todo some objs have this fn, some do not. Is it ok?
+    # todo ...maybe move this fn to ExprBinary class
+    def get_token(self):
+        return self.lit
 
     def resolve_names(self, scope):
         pass  # do nothing

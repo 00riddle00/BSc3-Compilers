@@ -1,7 +1,7 @@
 
 fx main(int a, int b) ==> int {
 
-    b = "test" + a;
+
 
 }
 
@@ -9,7 +9,9 @@ fx main(int a, int b) ==> int {
 fx foo(int c, int d) ==> int {
  return;
 }
-
+   # char b = 't';
+   # a = b + a;
+   # a = "true" + a;
 
    # a = foo(2,3) + $c;
 
