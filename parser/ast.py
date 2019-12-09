@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from lexer import Token
 from errors import SemanticError
 
@@ -451,7 +449,9 @@ class StmtControlFlow(Stmt):
                 kw = "break"
             else:
                 kw = "continue"
-            semantic_error(f'{kw} not inside a loop statement: {self.keyword.line_no}')
+            global curr_token
+            curr_token = self.keyword
+            semantic_error2(f'{kw} not inside a loop statement: {self.keyword.line_no}')
 
     def check_types(self):
         pass
@@ -527,7 +527,9 @@ class StmtVarDecl(Stmt):
 
     def check_types(self):
         if not self.type.has_value():
-            semantic_error(f'variable\'s type cannot be void or pointer to void')
+            global curr_token
+            curr_token = self.name
+            semantic_error2(f'variable\'s type cannot be void or pointer to void')
         if self.value:
             value_type = self.value.check_types()
             unify_types(self.type, value_type)
@@ -573,7 +575,9 @@ class StmtAssign(Stmt):
         # cia jei target_type nera, tai nil paduoti, ir viduj jau error gausim
         if target_type:
             if self.op != "EQUALS" and not target_type.is_arithmetic():
-                semantic_error(f'cannot perform arithmetic assign operation with this type: {target_type.kind}')
+                global curr_token
+                curr_token = self.lhs.name
+                semantic_error2(f'cannot perform arithmetic assign operation with this type: {target_type.kind}')
             unify_types(target_type, value_type)
         else:
             raise_error("no target type")
@@ -645,6 +649,7 @@ class ExprFnCall(Expr):
             arg.resolve_names(scope)
 
     def check_types(self):
+        global curr_token
         # masyvui args every elementui pritaikau fn check_types ir nauja masyva turi
         arg_types = [arg.check_types() for arg in self.args]
 
@@ -653,14 +658,16 @@ class ExprFnCall(Expr):
         if not self.target_node:
             return
         elif not isinstance(self.target_node, DeclFn):
-            semantic_error('the call target is not a function', self.name)
+            curr_token = self.name
+            semantic_error2('the call target is not a function')
             return
 
         # zinome, kad radome fja, i kuria kreipemes
         # todo is type() a fn?
         param_types = [param.type for param in self.target_node.params]
         if len(param_types) != len(arg_types):
-            semantic_error(f'invalid argument count; expected {len(param_types)}, got {len(arg_types)}', self.name)
+            curr_token = self.name
+            semantic_error2(f'invalid argument count; expected {len(param_types)}, got {len(arg_types)}')
 
         # min tarp dvieju skaiciu koks?
         param_count = min(len(param_types), len(arg_types))
@@ -726,6 +733,7 @@ class ExprBinArith(ExprBinary):
     def check_types(self):
         global curr_token
 
+        # todo is there only literals?
         curr_token = self.right.lit
         left_type = self.left.check_types()
         right_type = self.right.check_types()
@@ -737,7 +745,7 @@ class ExprBinArith(ExprBinary):
             # nezinom kurioj vietoj
             # todo pointers error (kind->unwrap)
             curr_token = self.left.lit
-            semantic_error(f'cannot perform arithmetic operations with this type: {left_type.kind}')
+            semantic_error2(f'cannot perform arithmetic operations with this type: {left_type.kind}')
 
         return left_type  # nres reik grazinti tipa taip mums
 
@@ -751,16 +759,21 @@ class ExprBinArith(ExprBinary):
 class ExprBinComparison(ExprBinary):  # > < == !=
 
     def check_types(self):
+        global curr_token
+        print('t', type(self.left))
         left_type = self.left.check_types()
         right_type = self.right.check_types()
 
+        # todo define curr_token for errors
         # nes desine puse netikrint, nes jei ten bus null ar pan,
         # tai priklausys nuo LHS desine puse ir failins unify_types
         if left_type and left_type.is_comparable():
             unify_types(left_type, right_type)
         else:
+            # fixme this does not return object with token attribute
+            curr_token = left_type
             # nezinom kurioj vietoj
-            semantic_error(f'cannot compare values of this type: {left_type}')
+            semantic_error(f'cannot compare values of this type: {left_type.kind}')
 
         # unify_types(left_type, right_type)
         # TypeBool.new
@@ -780,7 +793,7 @@ class ExprBinEquality(ExprBinary):
             # todo should i print more understandable error here?
             unify_types(left_type, right_type)
         else:
-            semantic_error(f'this type has no value to compare: {left_type}')
+            semantic_error(f'this type has no value to compare: {left_type.kind}')
         return TypePrim('BOOL')
 
 
@@ -833,6 +846,7 @@ class ExprUnary(Expr):
         if self.op == 'PTR_ADDR':
             # todo is it pointer, pointer value literal or just int?
             if isinstance(self.inner, ExprUnary):
+                # todo add token info for error handling here
                 semantic_error('wrong value to address')
             return TypePointer(self.target_node.type)
         # todo recursion
@@ -842,11 +856,13 @@ class ExprUnary(Expr):
             # todo del PTR_ADDR galimybes??
             while isinstance(inner, ExprUnary):
                 if not inner.op == "PTR_DEREF":
+                    # todo add token info for error handling here
                     semantic_error('value to dereference is not a pointer')
                 if isinstance(target_inner, TypePointer):
                     inner = inner.inner
                     target_inner = target_inner.inner
                 else:
+                    # todo add token info for error handling here
                     semantic_error('primary type cannot be dereferenced')
             return target_inner
         # todo move this mess elsewhere
@@ -854,6 +870,7 @@ class ExprUnary(Expr):
                 isinstance(self.parent, StmtAssign) and \
                 self.parent.lhs == self:
             # todo is this error formulated correctly?
+            # todo add token info for error handling here
             semantic_error('assignment lvalue cannot be unary expression')
 
         elif self.target_node:
@@ -990,10 +1007,10 @@ class TypePointer(Type):
 
 class TypePrim(Type):
 
-    def __init__(self, kind):
+    def __init__(self, kind, token=None):
         self.kind = kind
-        # todo is it needed? (token=None)
-        # self.token = token
+        # todo is token attribute needed?
+        self.token = token
         super().__init__()
 
     def print_node(self, p):
@@ -1007,8 +1024,8 @@ class TypePrim(Type):
         return self.kind != 'VOID'
 
     def is_comparable(self):
+        # todo return self.kind == 'FLOAT' or self.kind == 'INT' ??
         return self.kind == 'INT' or self.kind == 'BOOL'
-        # return self.kind == 'FLOAT' or self.kind == 'INT' ??
 
     def unwrap(self):
         return self.kind

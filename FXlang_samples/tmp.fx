@@ -1,10 +1,23 @@
 
 fx main(int a, int b) ==> int {
 
-   # a = 2 + True;
+   int$ c = &++a;
+
+
+
+
+}
+
+
+fx foo(int c, int d) ==> int {
+  return;
+}
+
+
+   # a = foo(2,3) + $c;
+
    # int$ c;
    # $c = 4;
-   # a = foo(2,3) + $c;
 
    # int$ a;
    # int a;
@@ -38,8 +51,4 @@ fx main(int a, int b) ==> int {
 
     return (1 + 2) * b;
     ###
-}
 
-# fx foo(int c, int d) ==> int {
-#    return;
-# }

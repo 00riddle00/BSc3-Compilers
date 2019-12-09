@@ -118,8 +118,8 @@ class Parser:
     def parse_type(self):
         token_type = self.curr_token.type
         if token_type in primary_types_keywords.keys():
-            self.expect(token_type)
-            type_ = TypePrim(primary_types_keywords[token_type])
+            token = self.expect(token_type)
+            type_ = TypePrim(primary_types_keywords[token_type], token)
             while self.accept('OP_PTR'):
                 type_ = TypePointer(type_)
             return type_
