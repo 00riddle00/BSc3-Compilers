@@ -1,13 +1,13 @@
 
-fx main(int$ a, int b) ==> int {
+fx main(int a, int b) ==> int {
 
-    ++a = 2;
+    a = &a + &b;
 
 }
 
 
-fx foo(int c, int d) ==> int {
- return;
+fx foo(int c, int d) ==> bool {
+ return True;
 }
    # $++a = 2;
    # a = &++b;

@@ -40,7 +40,7 @@ def semantic_error3(msg, token=None):
 
 
 # todo remove additional unify function and stupid error codes
-def unify_types(type_0, type_1):
+def unify_types(type_0, type_1, token=None):
     err = unify(type_0, type_1)
     if err == 0:
         return True
@@ -49,7 +49,7 @@ def unify_types(type_0, type_1):
     elif err == 2:
         # todo this error intersects with the logic of type being able to participate in certain
         # ...todo operation, ex bool cannot be used in arithmetic, cannot compare values, etc.
-        semantic_error(f'type kind mismatch: expected({type_0.kind}), got({type_1.kind})')
+        semantic_error3(f'type kind mismatch: expected({type_0.kind}), got({type_1.kind})', token)
 
 
 # Node.check_type_eq() <- gal i vidu ikelti?
@@ -630,6 +630,9 @@ class ExprFnCall(Expr):
         p.print('args', self.args)
         # p.print('builtin', self.builtin)
 
+    def get_token(self):
+        return self.name
+
     def resolve_names(self, scope):
         if not self.builtin:
             self.target_node = scope.resolve(self.name)
@@ -726,7 +729,7 @@ class ExprBinArith(ExprBinary):
 
         # turet omeny kad ir voidas i kaire puse gali ateit!
         if left_type and left_type.is_arithmetic():
-            unify_types(left_type, right_type)
+            unify_types(left_type, right_type, self.right.get_token())
         else:
             # nezinom kurioj vietoj
             # todo pointers error (kind->unwrap)
