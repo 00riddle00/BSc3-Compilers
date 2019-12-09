@@ -1,16 +1,13 @@
 
 fx main(int a, int b) ==> int {
 
-   int$ c = &++a;
-
-
-
+    b = "test" + a;
 
 }
 
 
 fx foo(int c, int d) ==> int {
-  return;
+ return;
 }
 
 

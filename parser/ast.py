@@ -35,6 +35,11 @@ def semantic_error2(msg):
     raise SemanticError(msg, *curr_token.get_char_info())
 
 
+def semantic_error3(msg, token=None):
+    # line_no = token.line_no if (token and token.line_no) else '?'
+    raise SemanticError(msg, *token.get_char_info())
+
+
 # ar dvi sakos sutampa
 # gali ateiti nil nes vykdome vardu rezoliucija,
 # ne tik tipu tikrinima. ji gali feilinti. analize darom kai TIK pavyksta...
@@ -48,7 +53,7 @@ def unify_types(type_0, type_1):
     elif err == 1:
         semantic_error(f'type mismatch: expected({type_0.unwrap()}), got({type_1.unwrap()})')
     elif err == 2:
-        semantic_error2(f'type kind mismatch: expected({type_0.kind}), got({type_1.kind})')
+        semantic_error(f'type kind mismatch: expected({type_0.kind}), got({type_1.kind})')
 
 
 # Node.check_type_eq() <- gal i vidu ikelti?
@@ -90,10 +95,7 @@ class Scope:
         if name.value not in self.members.keys() or not self.members[name.value]:
             self.members[name.value] = node
         else:
-            # todo ensure print line
-            global curr_token
-            curr_token = name
-            semantic_error2(f'duplicate variable: {name.value}')
+            semantic_error3(f'duplicate variable: {name.value}', name)
 
     def resolve(self, name):
         if not isinstance(name, Token):
@@ -108,9 +110,7 @@ class Scope:
             # todo return?
             return self.parent_scope.resolve(name)
         else:
-            global curr_token
-            curr_token = name
-            semantic_error2(f'undeclared variable: {name.value}')
+            semantic_error3(f'undeclared variable: {name.value}', name)
             # return nil
 
 
@@ -208,8 +208,9 @@ class Program(Node):
     def resolve_names(self, scope):
         for decl in self.decls:
             scope.add(decl.name, decl)
-            if 'main' not in scope.members.keys():
-                semantic_error('no "main" function in a program')
+        if 'main' not in scope.members.keys():
+            # todo is it correct to show token pos of last decl name?
+            semantic_error3('no "main" function in a program', decl.name)
         for decl in self.decls:
             decl.resolve_names(scope)
 
@@ -289,9 +290,8 @@ class Param(Node):
 
     def check_types(self):
         if not self.type.has_value():
-            global curr_token
-            curr_token = self.name
-            semantic_error2(f'parameter\'s type cannot be void or pointer to void')
+            # todo show pos of param type not of param name
+            semantic_error3(f'parameter\'s type cannot be void or pointer to void', self.name)
 
 
 class StmtBlock(Node):
@@ -449,9 +449,7 @@ class StmtControlFlow(Stmt):
                 kw = "break"
             else:
                 kw = "continue"
-            global curr_token
-            curr_token = self.keyword
-            semantic_error2(f'{kw} not inside a loop statement: {self.keyword.line_no}')
+            semantic_error3(f'"{kw}" not inside a loop statement', self.keyword)
 
     def check_types(self):
         pass
@@ -527,9 +525,8 @@ class StmtVarDecl(Stmt):
 
     def check_types(self):
         if not self.type.has_value():
-            global curr_token
-            curr_token = self.name
-            semantic_error2(f'variable\'s type cannot be void or pointer to void')
+            # todo maybe print token of a type, not of a name
+            semantic_error3(f'variable\'s type cannot be void or pointer to void', self.name)
         if self.value:
             value_type = self.value.check_types()
             unify_types(self.type, value_type)
@@ -575,9 +572,7 @@ class StmtAssign(Stmt):
         # cia jei target_type nera, tai nil paduoti, ir viduj jau error gausim
         if target_type:
             if self.op != "EQUALS" and not target_type.is_arithmetic():
-                global curr_token
-                curr_token = self.lhs.name
-                semantic_error2(f'cannot perform arithmetic assign operation with this type: {target_type.kind}')
+                semantic_error3(f'cannot perform arithmetic assign operation with this type: {target_type.kind}', self.lhs.name)
             unify_types(target_type, value_type)
         else:
             raise_error("no target type")
@@ -649,7 +644,6 @@ class ExprFnCall(Expr):
             arg.resolve_names(scope)
 
     def check_types(self):
-        global curr_token
         # masyvui args every elementui pritaikau fn check_types ir nauja masyva turi
         arg_types = [arg.check_types() for arg in self.args]
 
@@ -658,16 +652,14 @@ class ExprFnCall(Expr):
         if not self.target_node:
             return
         elif not isinstance(self.target_node, DeclFn):
-            curr_token = self.name
-            semantic_error2('the call target is not a function')
+            semantic_error3('the call target is not a function', self.name)
             return
 
         # zinome, kad radome fja, i kuria kreipemes
         # todo is type() a fn?
         param_types = [param.type for param in self.target_node.params]
         if len(param_types) != len(arg_types):
-            curr_token = self.name
-            semantic_error2(f'invalid argument count; expected {len(param_types)}, got {len(arg_types)}')
+            semantic_error3(f'invalid argument count; expected {len(param_types)}, got {len(arg_types)}', self.name)
 
         # min tarp dvieju skaiciu koks?
         param_count = min(len(param_types), len(arg_types))
@@ -733,7 +725,7 @@ class ExprBinArith(ExprBinary):
     def check_types(self):
         global curr_token
 
-        # todo is there only literals?
+        # fixme is there only literals?
         curr_token = self.right.lit
         left_type = self.left.check_types()
         right_type = self.right.check_types()
