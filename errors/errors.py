@@ -1,5 +1,6 @@
 from abc import abstractmethod
 from pprint import pprint
+from termcolor import cprint
 
 user_friendly_names = {
     'KW_INCLUDE': '@',
@@ -83,19 +84,20 @@ class CompilerError(BaseException):
 class SemanticError(CompilerError):
 
     def print_err(self):
-        print(f'SemanticERROR: {self.file}:{self.line}:{self.pos} {self.msg}')
+        # todo move this print_red to a sep fn
+        cprint(f'SemanticERROR: {self.file}:{self.line}:{self.pos} {self.msg}', 'red', attrs=['bold'])
 
 
 class InputError(CompilerError):
 
     def print_err(self):
-        print(f'[InputERROR] [{self.msg}]')
+        cprint(f'[InputERROR] [{self.msg}]', 'red', attrs=['bold'])
 
 
 class LexerError(CompilerError):
 
     def print_err(self):
-        print(f'LexerERROR: {self.file}:{self.line}:{self.pos} {self.msg}')
+        cprint(f'LexerERROR: {self.file}:{self.line}:{self.pos} {self.msg}', 'red', attrs=['bold'])
 
 
 class LexerDebugError(LexerError):
@@ -133,8 +135,9 @@ class ParserError(CompilerError):
         exp = self.exp_token
         if exp in user_friendly_names.keys():
             exp = user_friendly_names[exp]
-        print(f'ParserERROR: {self.file}:{self.line}:{self.pos} '
-              f'expected({exp}), found({user_friendly_names[self.curr_token]})')
+        cprint(f'ParserERROR: {self.file}:{self.line}:{self.pos} '
+               f'expected({exp}), found({user_friendly_names[self.curr_token]})',
+               'red', attrs=['bold'])
 
 
 class ParserDebugError(ParserError):

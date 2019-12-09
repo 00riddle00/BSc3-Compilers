@@ -1,4 +1,5 @@
 from errors import LexerError, LexerDebugError, InputError
+from termcolor import cprint
 
 # List of all lexemes
 
@@ -668,13 +669,14 @@ class Lexer:
 
     # print tokens
     def dump_tokens(self):
-        print(f'{"ID":>3}| {"LN":>3}| {"TYPE":<22} | {"VALUE":<14}')
+        cprint(f'{"ID":>3}| {"LN":>3}| {"TYPE":<22} | {"VALUE":<14}', 'cyan', attrs=['bold'])
 
         for index, token in enumerate(self.tokens):
-            print(f'{index:>3}|'
-                  f' {token.line_no:>3}|'
-                  f' {token.type:<22} |'
-                  f' {token.value:<14}')
+            cprint(f'{index:>3}|'
+                   f' {token.line_no:>3}|'
+                   f' {token.type:<22} |'
+                   f' {token.value:<14}',
+                   'green', attrs=['bold'])
 
     # helper functions
     def is_letter(self):

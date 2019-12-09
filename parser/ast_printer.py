@@ -1,5 +1,6 @@
 from lexer import Token
 from .ast import Node
+from termcolor import cprint
 
 
 class ASTPrinter:
@@ -35,7 +36,7 @@ class ASTPrinter:
 
     def print_single(self, title, text):
         prefix = '  ' * self.indent_level
-        print(f'{prefix}{title}: {text}')
+        cprint(f'{prefix}{title}: {text}', 'blue', attrs=['bold'])
 
     def print_token(self, title, token):
         if token.value == '':
