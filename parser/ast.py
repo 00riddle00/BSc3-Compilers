@@ -218,6 +218,10 @@ class Program(Node):
     # todo return value?
     def check_types(self):
         for decl in self.decls:
+            if decl.name.value == 'main':
+                if not decl.ret_type.kind == 'INT':
+                    # todo use type token instead of fn name in error printing
+                    semantic_error3('incorrect "main" signature - main function should return int', decl.name)
             decl.check_types()
 
 
@@ -262,6 +266,9 @@ class DeclFn(Decl):
         # scope.add(@name, self) 2017 buvo
         inner_scope = Scope(scope)
         # curr_stack_slot = 0  # todo or $slot_index
+        if self.name.value == 'main':
+            if self.params:
+                semantic_error3('incorrect "main" signature - main function should not have any parameters', self.name)
         for param in self.params:
             inner_scope.add(param.name, param)
         # self.num_locals = curr_stack_slot
@@ -492,7 +499,7 @@ class StmtReturn(Stmt):
         if self.value:
             value_type = self.value.check_types()
         else:
-            return  # return no value
+            value_type = TYPE_VOID
 
         ret_type = self.find_ancestor(DeclFn).ret_type
         # todo pythonize?
