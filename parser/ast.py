@@ -911,6 +911,8 @@ class ExprVar(Expr):
         # @target_node&.type #(jei kairej nil, arba abiejose sides nil, tai skipinam unify types (remember))
         # todo add raise_error on else
         if self.target_node:  # arba if @target.respond_to?(:type)
+            if isinstance(self.target_node, DeclFn):
+                semantic_error3('function name cannot be used as a variable', self.name)
             return self.target_node.type
 
 
