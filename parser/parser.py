@@ -22,12 +22,12 @@ unary_ops = {
 }
 
 primary_types_keywords = {
-    'KW_BOOL': 'BOOL',
-    'KW_FLOAT': 'FLOAT',
-    'KW_INT': 'INT',
-    'KW_VOID': 'VOID',
-    'KW_CHAR': 'CHAR',
-    'KW_STR': 'STR',
+    'KW_BOOL': 'bool',
+    'KW_FLOAT': 'float',
+    'KW_INT': 'int',
+    'KW_VOID': 'void',
+    'KW_CHAR': 'char',
+    'KW_STR': 'string',
 }
 
 statement_keywords = [

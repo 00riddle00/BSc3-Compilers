@@ -219,7 +219,7 @@ class Program(Node):
     def check_types(self):
         for decl in self.decls:
             if decl.name.value == 'main':
-                if not decl.ret_type.kind == 'INT':
+                if not decl.ret_type.kind == 'int':
                     # todo use type token instead of fn name in error printing
                     semantic_error3('incorrect "main" signature - main function should return int', decl.name)
             decl.check_types()
@@ -1037,24 +1037,24 @@ class TypePrim(Type):
         p.print_single('kind', self.kind)
 
     def is_arithmetic(self):
-        return self.kind == 'FLOAT' or self.kind == 'INT'
+        return self.kind == 'float' or self.kind == 'int'
 
     # jei tipas reiksme tures su kuria operacijas galim atlikti
     def has_value(self):
-        return self.kind != 'VOID'
+        return self.kind != 'void'
 
     def is_comparable(self):
         # todo return self.kind == 'FLOAT' or self.kind == 'INT' ??
-        return self.kind == 'INT' or self.kind == 'BOOL'
+        return self.kind == 'int' or self.kind == 'bool'
 
     def unwrap(self):
         return self.kind
 
 
 # todo move these definitions and others to centralized place somewhere
-TYPE_VOID = TypePrim('VOID')
-TYPE_INT = TypePrim('INT')
-TYPE_FLOAT = TypePrim('FLOAT')
-TYPE_BOOL = TypePrim('BOOL')
-TYPE_CHAR = TypePrim('CHAR')
-TYPE_STRING = TypePrim('STRING')
+TYPE_VOID = TypePrim('void')
+TYPE_INT = TypePrim('int')
+TYPE_FLOAT = TypePrim('float')
+TYPE_BOOL = TypePrim('bool')
+TYPE_CHAR = TypePrim('char')
+TYPE_STRING = TypePrim('string')

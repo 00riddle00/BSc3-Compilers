@@ -1,6 +1,7 @@
 
 fx main() ==> int {
-    return 2;
+
+    foo(foo);
 }
 
 fx foo(int a, int b) ==> int {
