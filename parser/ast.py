@@ -1,11 +1,9 @@
 from lexer import Token
 from errors import SemanticError
+from termcolor import cprint
 
 # make global variable
 # curr_stack_slot = 0
-
-# move this variable to TypeChecker class or somewhere else
-global curr_token
 
 # todo move these definitions and others to centralized place somewhere
 # todo maybe this dict is useless
@@ -29,12 +27,20 @@ def semantic_error(message, token=None):
     exit(1)
 
 
-def semantic_error3(msg, token=None):
-    # line_no = token.line_no if (token and token.line_no) else '?'
-    if token:
-        raise SemanticError(msg, *token.get_char_info())
-    else:
-        raise SemanticError(msg, 0, 0, 0)
+def semantic_error3(msg, token):
+    info = token.get_char_info()
+    file = info[0]
+    line = info[1]
+    pos = info[2]
+    cprint(f'SemanticERROR: {file}:{line}:{pos} {msg}', 'red', attrs=['bold'])
+
+# def semantic_error3(msg, token=None):
+#     # line_no = token.line_no if (token and token.line_no) else '?'
+#     if token:
+#         raise SemanticError(msg, *token.get_char_info())
+#     else:
+#         raise SemanticError(msg, 0, 0, 0)
+#         # raise SemanticError(msg, , 1, 1)
 
 
 # ar dvi sakos sutampa
@@ -196,9 +202,10 @@ class Program(Node):
     # or attr_accessor :decls
 
     # std::vector<Decl*>
-    def __init__(self, decls):
+    def __init__(self, decls, eof):
         self.add_children(*decls)
         self.decls = decls
+        self.eof = eof
         super().__init__()
 
     def print_node(self, p):
@@ -206,7 +213,8 @@ class Program(Node):
 
     def resolve_names(self, scope):
         if not self.decls:
-            semantic_error3('no "main" function in a program')
+            semantic_error3('no "main" function in a program', self.eof)
+            exit(1)
         for decl in self.decls:
             scope.add(decl.name, decl)
         if 'main' not in scope.members.keys():

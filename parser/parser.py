@@ -75,11 +75,13 @@ class Parser:
 
         while True:
             if self.peek('EOF'):
+                # todo leave this hack?
+                eof = self.tokens[self.offset]
                 break
             else:
                 decls.append(self.parse_decl())
 
-        return Program(decls)
+        return Program(decls, eof)
 
     def parse_decl(self):
         return self.parse_decl_fn()
