@@ -1,13 +1,13 @@
 
 fx main() ==> int {
 
-    int a = 2;
-    int b = a;
+    int a;
 
-    foo(bar);
-}
-
-fx foo(int a, int b) ==> int {
+    a = 'c';
 
 }
 
+
+fx foo(int c, int d) ==> int {
+   return 1;
+}

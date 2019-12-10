@@ -379,7 +379,7 @@ class StmtIf(Stmt):
     def check_types(self):
         for branch in self.branches:
             cond_type = branch.cond.check_types()
-            unify_types(TYPE_BOOL, cond_type)
+            unify_types(TYPE_BOOL, cond_type, branch.cond.get_token())
             branch.body.check_types()
         if self.else_block:
             self.else_block.check_types()
@@ -435,7 +435,7 @@ class StmtWhile(Stmt):
 
     def check_types(self):
         cond_type = self.cond.check_types()
-        unify_types(cond_type, TYPE_BOOL)
+        unify_types(cond_type, TYPE_BOOL, self.cond.get_token())
         self.body.check_types()
 
 
@@ -498,13 +498,15 @@ class StmtReturn(Stmt):
 
         if self.value:
             value_type = self.value.check_types()
+            token = self.value.get_token()
         else:
             value_type = TYPE_VOID
+            token = self.return_kw
 
         ret_type = self.find_ancestor(DeclFn).ret_type
         # todo pythonize?
         # &. iskvies fn jei n...
-        unify_types(ret_type, value_type)
+        unify_types(ret_type, value_type, token)
         # unify_types(ret_type, value_type, @return_kw)
 
 
@@ -582,7 +584,7 @@ class StmtAssign(Stmt):
             if self.op != "EQUALS" and not target_type.is_arithmetic():
                 semantic_error3(f'cannot perform arithmetic assign operation with this type: {target_type.kind}',
                                 self.lhs.name)
-            unify_types(target_type, value_type)
+            unify_types(target_type, value_type, self.value.get_token())
         else:
             raise_error("no target type")
 
@@ -681,7 +683,7 @@ class ExprFnCall(Expr):
             # patikrinu bent kazkiek tai argsu kiek ju yra.
             # pvz fjoj prasyta bent 4 param, o pateikiu bent 2 args, tai patikrinu bent tuos du
             # jei fjojs 1 arg parasyta, o pateikiu 2, tai patikrinu tik ta viena.
-            unify_types(param_type, arg_type)
+            unify_types(param_type, arg_type, self.args[i].get_token())
 
         # kazka pasakau koks cia tipas etc...
         return self.target_node.ret_type
@@ -702,6 +704,9 @@ class ExprBinary(Expr):
         p.print_single('op', self.op)
         p.print('left', self.left)
         p.print('right', self.right)
+
+    def get_token(self):
+        return self.left.get_token()
 
     def resolve_names(self, scope):
         self.left.resolve_names(scope)
@@ -745,7 +750,6 @@ class ExprBinArith(ExprBinary):
         else:
             # nezinom kurioj vietoj
             # todo pointers error (kind->unwrap)
-            print("here")
             semantic_error3(f'cannot perform arithmetic operations with this type: {left_type.kind}',
                             self.left.get_token())
 
@@ -777,7 +781,7 @@ class ExprBinComparison(ExprBinary):  # > < == !=
         # unify_types(left_type, right_type)
         # TypeBool.new
         # TYPE_BOOL
-        return TypePrim('BOOL')
+        return TypePrim('bool')
 
 
 # ExprBinEquality: TYPE == TYPE -> BOOL; has_value
@@ -793,7 +797,7 @@ class ExprBinEquality(ExprBinary):
             unify_types(left_type, right_type)
         else:
             semantic_error3(f'this type has no value to compare: {left_type.kind}', self.left.get_token())
-        return TypePrim('BOOL')
+        return TypePrim('bool')
 
 
 # ExprBinLogic: BOOL || BOOL -> BOOL
@@ -805,9 +809,9 @@ class ExprBinLogic(ExprBinary):
     def check_types(self):
         left_type = self.left.check_types()
         right_type = self.right.check_types()
-        unify_types(TYPE_BOOL, left_type)
+        unify_types(TYPE_BOOL, left_type, self.left.get_token())
         # TODO reverse order everywhere as well (left-param - expected type, right-param - got)
-        unify_types(TYPE_BOOL, right_type)
+        unify_types(TYPE_BOOL, right_type, self.right.get_token())
         return TYPE_BOOL
 
 
@@ -868,6 +872,8 @@ class ExprUnary(Expr):
                 if not inner.op == "PTR_DEREF":
                     # todo add token info for error handling here
                     # to prevent ex. $++a;
+                    # todo but if a is int, not a pointer, then we get the error above (var deref is not a pointer type),
+                    # ...and it is not correct
                     semantic_error3('value to dereference is not a pointer', self.get_token())
                 elif isinstance(target_inner, TypePointer):
                     inner = inner.inner
