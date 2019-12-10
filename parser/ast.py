@@ -31,7 +31,10 @@ def semantic_error(message, token=None):
 
 def semantic_error3(msg, token=None):
     # line_no = token.line_no if (token and token.line_no) else '?'
-    raise SemanticError(msg, *token.get_char_info())
+    if token:
+        raise SemanticError(msg, *token.get_char_info())
+    else:
+        raise SemanticError(msg, 0, 0, 0)
 
 
 # ar dvi sakos sutampa
@@ -202,6 +205,8 @@ class Program(Node):
         p.print('decls', self.decls)
 
     def resolve_names(self, scope):
+        if not self.decls:
+            semantic_error3('no "main" function in a program')
         for decl in self.decls:
             scope.add(decl.name, decl)
         if 'main' not in scope.members.keys():
