@@ -1,3 +1,5 @@
-fx main(int a) ==> int {
-  return;
+fx main() ==> int {
+
+    foo(foo);
 }
+

@@ -927,6 +927,8 @@ class ExprVar(Expr):
         if self.target_node:  # arba if @target.respond_to?(:type)
             if isinstance(self.target_node, DeclFn):
                 semantic_error3('function name cannot be used as a variable', self.name)
+                # fixme temp fix here
+                return None
             return self.target_node.type
 
 
