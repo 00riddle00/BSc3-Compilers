@@ -95,7 +95,7 @@ class Scope:
 
     def add(self, name, node):
         if not isinstance(name, Token) or not isinstance(node, Node):
-            raise TypeError
+            raise TypeErr
 
         # if node.respond_to?(:stack_slot):
         # node.stack_slot = $curr_stack_slot
@@ -111,7 +111,7 @@ class Scope:
     def resolve(self, name):
         if not isinstance(name, Token):
             # todo raise normal error
-            raise TypeError
+            raise TypeErr
 
         if name.value in self.members.keys():
             # todo check for None/False
@@ -883,11 +883,11 @@ class ExprUnary(Expr):
         elif self.op == 'PTR_DEREF':
             if not self.target_node:
                 semantic_error3('cannot dereference that which follows the dereference operator', self.get_token())
-                return TypeError(self.get_token())
+                return TypeErr(self.get_token())
             if not isinstance(self.target_node.type, TypePointer):
                 semantic_error3('variable to dereference is not a pointer type', self.get_token())
                 # todo duplicates here, since it is already type error, because it is function name withotu parenthesis?
-                return TypeError(self.get_token())
+                return TypeErr(self.get_token())
             # todo break here, return errtype
 
             target_inner = self.target_node.type.inner
@@ -917,7 +917,7 @@ class ExprUnary(Expr):
                 return self.target_node.type
             else:
                 semantic_error3('cannot apply unary operator on that which follows the operator', self.get_token())
-                return TypeError(self.get_token())
+                return TypeErr(self.get_token())
         else:
             raise_error('wrong unary operator')
 
@@ -948,11 +948,11 @@ class ExprVar(Expr):
             if isinstance(self.target_node, DeclFn):
                 semantic_error3('function name cannot be used as a variable', self.name)
                 # fixme temp fix here
-                return TypeError(self.name)
+                return TypeErr(self.name)
             return self.target_node.type
         # todo repeat for every class
         else:
-            return TypeError(self.name)
+            return TypeErr(self.name)
 
 
 class ExprLit(Expr):
@@ -1086,13 +1086,13 @@ class TypePrim(Type):
 
     def is_comparable(self):
         # todo return self.kind == 'FLOAT' or self.kind == 'INT' ??
-        return self.kind == 'int' or self.kind == 'bool'
+        return self.kind == 'int' or self.kind == 'float'
 
     def unwrap(self):
         return self.kind
 
 
-class TypeError(Type):
+class TypeErr(Type):
 
     def __init__(self, token):
         self.kind = 'ERROR'

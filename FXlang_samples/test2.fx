@@ -1,16 +1,29 @@
+
+fx test(int a, int b) ==> int {
+
+    if (a+b > 0) {
+        return 2;
+    } elif (a-b > 0) {
+        return 3;
+    } elif (a*b > 0) {
+        return 4;
+    } else {
+      b = ++a;
+      return 5;
+    }
+
+    a += 2;
+    int a;
+    return 2;
+}
+
 fx main() ==> int {
 
-    int a;
-    int b;
-    int d = 1;
-    int c = 2;
+    int c = 4;
 
-    if (a==c) {
-        a %= ++d;
-        return a+b*c;
-    } elif (a == d) {
-        return ++d;
-    } else {
-        return a+b*c;
+    if (2 + 3 > 4) {
+        return 8;
     }
+
+    return (1 + 2) * c;
 }

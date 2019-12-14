@@ -1,32 +1,16 @@
-
 fx main() ==> int {
 
-   int a;
-   int b = 8 * 25;
+    int a;
+    int b;
+    int d = 1;
+    int c = 2;
 
-   int$ c;
-   $c = 4;
-
-    if (a < b) {
-        return 1;
-    } elif (a > b) {
-        return 0;
+    if (a==c) {
+        a %= ++d;
+        return a+b*c;
+    } elif (a == d) {
+        return ++d;
     } else {
-        return -1;
+        return a+b*c;
     }
-
-    b = foo(14, 4*35) - 13;
-
-    for (int i = 0; i < 10; ++i) {
-          if (i > 0 AND True) {
-              break;
-          } else {
-              continue;
-          }
-    }
-}
-
-
-fx foo(int c, int d) ==> int {
-   return 0;
 }
