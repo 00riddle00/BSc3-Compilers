@@ -1,32 +1,72 @@
+# testing various cases
 
-fx main(int a, int b) ==> int {
+fx main() ==> int {
 
-   int$ c;
-   $c = 4;
+   # $++a = 2;
+   # a = &++b;
+   # char b = 't';
+   # a = b + a;
+   # a = "true" + a;
 
-   int b = 8 * 25;
+   # a = foo(2,3) + $c;
 
-    if (a < b) {
-        return 1;
-    } elif (a > b) {
-        return 0;
-    } else {
-        return;
-    }
+   # int$ c;
+   # $c = 4;
 
-    b = foo(14, 4*35) - 13;
+   # int$ a;
+   # int a;
+   # a = ++2;
+   # int$$$ c;
+   # $$c = &++a;
+   # $$c = *a;
 
-    for (int i = 0; i < 10; ++i) {
-          if (i > 0 AND True) {
-              break;
-          } else {
-              continue;
-          }
-    }
+   # int a = 5;
+   # int b = 3;
 
-}
+   # bool c = 5 != 3 AND 3*5 > 10;
 
+   # int z = 2;
+   # int$$ c;
+   # adresas i pointeri
+   # int $$$c;
+   # $$$c = 2;
 
-fx foo(int c, int d) ==> int {
-   return;
+   # c = &z;
+   # $$c = 2;
+
+   # int z = 2;
+   # $c = 2;
+   # c = &z;
+
+   # int a = $$(a + 2);
+   # int a = $a + 2;
+   # foo($a + 2);
+
+    # int a;
+    # ++a = 3;
+
+    # ++a = 3;
+
+    # int a = ++(a + 2); # should not work
+
+    # int a = b + c;
+
+    # int$$ a;
+    # int b;
+    # $($(a)) = ++b;
+
+    # ++(($a));
+    # ++($($($a)));
+    # $a = 2;
+    # $($$a) = 3;
+    # $a = $($foo(++b));
+    # $(a) = $($b) + ++c;
+    # $a = $(a+b);
+    # a = $(a+b);
+    # $(foo(123)) = 456;
+    # ++a = foo(bar(&b));
+
+    # a = &a + &b;
+    # int a = $$(a + 2);
+
 }

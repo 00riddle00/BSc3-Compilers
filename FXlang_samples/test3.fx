@@ -1,20 +1,32 @@
-fx main(int a, float b, int c) ==> void {
-    ++(($a));
-    ++($($($a)));
-    $a = 2;
-    $($$a) = 3;
-    $a = $($foo(++b));
-    $(a) = $($b) + ++c;
-    $a = $(a+b);
-    a = $(a+b);
-    $(foo(123)) = 456;
-    ++a = foo(bar(&b));
+
+fx main() ==> int {
+
+   int a;
+   int b = 8 * 25;
+
+   int$ c;
+   $c = 4;
+
+    if (a < b) {
+        return 1;
+    } elif (a > b) {
+        return 0;
+    } else {
+        return -1;
+    }
+
+    b = foo(14, 4*35) - 13;
+
+    for (int i = 0; i < 10; ++i) {
+          if (i > 0 AND True) {
+              break;
+          } else {
+              continue;
+          }
+    }
 }
 
-fx foo(int b) ==> int {
-    return ++b;
-}
 
-fx bar(int p) ==> int {
-    return ++p;
+fx foo(int c, int d) ==> int {
+   return 0;
 }

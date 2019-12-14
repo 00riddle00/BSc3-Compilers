@@ -18,7 +18,7 @@ fx get_all_atoms() ==> string {
   ";
 }
 
-fx print_info(int p, int q, char separator) ==> void {
+fx print_info(int p, int q, char$ separator) ==> void {
 
   string insight = "some r@ndom \"w\\sdom\"\"";
 
@@ -32,7 +32,7 @@ fx print_info(int p, int q, char separator) ==> void {
   }
 
   # finish line
-  disp(10*($separator));
+  disp($separator);
 }
 
 fx calc(int a, int b, float c, bool e) ==> int {
@@ -41,10 +41,10 @@ fx calc(int a, int b, float c, bool e) ==> int {
   for (i = 0; i < 10; ++i) {
     a /= b;
 
-    if (c > a) {
+    if (b > a) {
       a *= 2;
     } elif (negative(a)) {
-      return;
+      return 0;
     }
 
     while (--a > 10) {
@@ -54,7 +54,7 @@ fx calc(int a, int b, float c, bool e) ==> int {
     b -= 11;
     a += b;
 
-    if (e AND c > 0) {
+    if (e AND b > 0) {
       a += 3;
     }
 
@@ -88,7 +88,7 @@ fx main() ==> int {
 
   int N_1 = num1 % num2;
 
-  print_info(N_1, calc(N_1, -145, (+1.e10 - (.3e-3) + glob), !(N_1 > 14)), sep);
+  print_info(N_1, calc(N_1, -145, (+1.e10 - (.3e-3)), !(N_1 > 14)), sep);
 
   glob = 1;
 

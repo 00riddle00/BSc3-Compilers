@@ -1,15 +1,9 @@
-fx main(int a, int b) ==> void {
 
-    $($(a)) = ++b;
-    int d = 1;
-    int c = 2;
+fx main() ==> int {
 
-    if (a==c) {
-        a %= ++d;
-        return a+b*c;
-    } elif (a == d) {
-        return a+b*c;
-    } else {
-        return a+b*c;
-    }
 }
+
+fx foo(int a) ==> bool {
+    return !(a > 14);
+}
+
