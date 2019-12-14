@@ -398,7 +398,7 @@ class Parser:
                 self.accept('OP_PAREN_C')
                 return ExprUnary(expr, op)
             else:
-                expr = self.parse_expr()
+                expr = self.parse_expr_unary()
                 return ExprUnary(expr, op)
         else:
             return self.parse_expr_primary()

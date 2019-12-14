@@ -2,8 +2,13 @@ from lexer import Token
 from errors import SemanticError
 from termcolor import cprint
 
+
 # make global variable
 # curr_stack_slot = 0
+
+def deb(msg):
+    print(msg)
+
 
 # todo move these definitions and others to centralized place somewhere
 # todo maybe this dict is useless
@@ -24,7 +29,7 @@ def raise_error(msg):
 def semantic_error(message, token=None):
     line_no = token.line_no if (token and token.line_no) else '?'
     print(f'???:{line_no}: semantic error: {message}')
-    exit(1)
+    # exit(1)
 
 
 def semantic_error3(msg, token):
@@ -33,6 +38,7 @@ def semantic_error3(msg, token):
     line = info[1]
     pos = info[2]
     cprint(f'SemanticERROR: {file}:{line}:{pos} {msg}', 'red', attrs=['bold'])
+
 
 # def semantic_error3(msg, token=None):
 #     # line_no = token.line_no if (token and token.line_no) else '?'
@@ -115,6 +121,7 @@ class Scope:
             # todo return?
             return self.parent_scope.resolve(name)
         else:
+            # todo print the same undeclared variable only once, with all its usages
             semantic_error3(f'undeclared variable: {name.value}', name)
             # return nil
 
@@ -214,6 +221,7 @@ class Program(Node):
     def resolve_names(self, scope):
         if not self.decls:
             semantic_error3('no "main" function in a program', self.eof)
+            # todo throw exception here
             exit(1)
         for decl in self.decls:
             scope.add(decl.name, decl)
@@ -260,6 +268,8 @@ class DeclFn(Decl):
         self.params = params
         self.ret_type = ret_type
         self.body = body
+        # todo remove?
+        self.type = None
         # todo whatis?
         # self.entry_label = Label.new
         super().__init__()
@@ -705,6 +715,7 @@ class ExprBinary(Expr):
         self.op = op
         self.left = left
         self.right = right
+        self.type = None
         super().__init__()
 
     def print_node(self, p):
@@ -855,8 +866,8 @@ class ExprUnary(Expr):
 
     def get_token(self):
         inner = self.inner
+        # todo remove this while loop
         while isinstance(inner, TypePointer):
-            print("while")
             inner = inner.inner
         return inner.get_token()
 
@@ -870,8 +881,14 @@ class ExprUnary(Expr):
             return TypePointer(self.target_node.type)
         # todo recursion
         elif self.op == 'PTR_DEREF':
+            if not self.target_node:
+                semantic_error3('cannot dereference that which follows the dereference operator', self.get_token())
+                return TypeError(self.get_token())
             if not isinstance(self.target_node.type, TypePointer):
                 semantic_error3('variable to dereference is not a pointer type', self.get_token())
+                # todo duplicates here, since it is already type error, because it is function name withotu parenthesis?
+                return TypeError(self.get_token())
+            # todo break here, return errtype
 
             target_inner = self.target_node.type.inner
             inner = self.inner
@@ -928,7 +945,7 @@ class ExprVar(Expr):
             if isinstance(self.target_node, DeclFn):
                 semantic_error3('function name cannot be used as a variable', self.name)
                 # fixme temp fix here
-                return None
+                return TypeError(self.name)
             return self.target_node.type
 
 
@@ -1064,6 +1081,26 @@ class TypePrim(Type):
     def is_comparable(self):
         # todo return self.kind == 'FLOAT' or self.kind == 'INT' ??
         return self.kind == 'int' or self.kind == 'bool'
+
+    def unwrap(self):
+        return self.kind
+
+
+class TypeError(Type):
+
+    def __init__(self, token):
+        self.kind = 'ERROR'
+        self.token = token
+        super().__init__()
+
+    def is_arithmetic(self):
+        return False
+
+    def has_value(self):
+        return False
+
+    def is_comparable(self):
+        return False
 
     def unwrap(self):
         return self.kind
