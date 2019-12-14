@@ -1,10 +1,11 @@
-fx test(int a, int b) ==> void {
 
-    if (a+b) {
+fx test(int a, int b) ==> int {
+
+    if (a+b > 0) {
         return 2;
-    } elif (a-b) {
+    } elif (a-b > 0) {
         return 3;
-    } elif (a*b) {
+    } elif (a*b > 0) {
         return 4;
     } else {
       b = ++a;
@@ -16,11 +17,13 @@ fx test(int a, int b) ==> void {
     return 2;
 }
 
-fx main(int a, float b) ==> int {
+fx main() ==> int {
 
-    if (a+b) {
+    int c = 4;
+
+    if (2 + 3 > 4) {
         return 8;
     }
 
-    return (1 + 2) * b;
+    return (1 + 2) * c;
 }

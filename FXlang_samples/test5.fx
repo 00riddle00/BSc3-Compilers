@@ -58,6 +58,8 @@ fx foo(int c, int d) ==> bool {
 
     # int a = ++(a + 2); # should not work
 
+    # int a = b + c;
+
     ###
     if (a+b+c) {
         return 8;

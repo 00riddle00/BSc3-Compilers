@@ -950,6 +950,9 @@ class ExprVar(Expr):
                 # fixme temp fix here
                 return TypeError(self.name)
             return self.target_node.type
+        # todo repeat for every class
+        else:
+            return TypeError(self.name)
 
 
 class ExprLit(Expr):
