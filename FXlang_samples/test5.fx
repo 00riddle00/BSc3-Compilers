@@ -47,6 +47,17 @@ fx foo(int c, int d) ==> bool {
    # $c = 2;
    # c = &z;
 
+   # int a = $$(a + 2);
+   # int a = $a + 2;
+   # foo($a + 2);
+
+    # int a;
+    # ++a = 3;
+
+    # ++a = 3;
+
+    # int a = ++(a + 2); # should not work
+
     ###
     if (a+b+c) {
         return 8;

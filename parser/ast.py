@@ -908,15 +908,18 @@ class ExprUnary(Expr):
                     semantic_error3(f'primary type ({target_inner.kind}) cannot be dereferenced', self.get_token())
             return target_inner
         # todo move this mess elsewhere
-        elif self.op in ['NOT', 'DECR', 'INCR'] and \
-                isinstance(self.parent, StmtAssign) and \
-                self.parent.lhs == self:
-            # todo is this error formulated correctly?
-            # todo add token info for error handling here
-            semantic_error3('assignment lvalue cannot be unary expression', self.get_token())
-
-        elif self.target_node:
-            return self.target_node.type
+        elif self.op in ['NOT', 'DECR', 'INCR']:
+            if isinstance(self.parent, StmtAssign) and self.parent.lhs == self:
+                # todo is this error formulated correctly?
+                # todo add token info for error handling here
+                semantic_error3('assignment lvalue cannot be unary expression', self.get_token())
+            elif self.target_node:
+                return self.target_node.type
+            else:
+                semantic_error3('cannot apply unary operator on that which follows the operator', self.get_token())
+                return TypeError(self.get_token())
+        else:
+            raise_error('wrong unary operator')
 
 
 class ExprVar(Expr):
