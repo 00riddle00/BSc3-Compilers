@@ -142,3 +142,12 @@ class ParserError(CompilerError):
 
 class ParserDebugError(ParserError):
     pass
+
+
+class InternalError(CompilerError):
+
+    def __init__(self, msg):
+        super().__init__(msg)
+
+    def print_err(self):
+        cprint(f'InternalERROR: {self.msg}', 'yellow', attrs=['bold'])

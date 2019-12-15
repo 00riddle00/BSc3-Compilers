@@ -1,1 +1,1 @@
-from .errors import InputError, LexerError, LexerDebugError, ParserError, ParserDebugError, SemanticError
+from .errors import InputError, LexerError, LexerDebugError, ParserError, ParserDebugError, SemanticError, InternalError

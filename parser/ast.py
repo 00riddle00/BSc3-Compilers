@@ -1,5 +1,5 @@
 from lexer import Token
-from errors import SemanticError
+from errors import SemanticError, InternalError
 from termcolor import cprint
 
 
@@ -19,11 +19,6 @@ unary_ops = {
     'OP_PTR': 'PTR_DEREF',
     'OP_PTR_ADDR': 'PTR_ADDR',
 }
-
-
-def raise_error(msg):
-    print(msg)
-    exit(1)
 
 
 def semantic_error(message, token=None):
@@ -84,7 +79,7 @@ def unify(type_0, type_1):
         else:
             return 0
     else:
-        raise_error('unreachable')
+        raise InternalError('unreachable')
 
 
 class Scope:
@@ -162,7 +157,7 @@ class Node(object):
     # end
     def resolve_names(self, scope):
         # raise NotImplementedError.new
-        raise_error(f'resolve names not implemented for: {self.__class__.__name__}')
+        raise InternalError(f'resolve names not implemented for: {self.__class__.__name__}')
 
     def add_children(self, *children):
         for child in children:
@@ -174,7 +169,7 @@ class Node(object):
             elif isinstance(child, Node):
                 child.parent = self
             else:
-                raise_error('bad child')
+                raise InternalError('bad child')
 
     # or ancestor_class = node_class
     # or ancestor_fn
@@ -201,7 +196,7 @@ class Node(object):
 
     def check_types(self):
         # raise NotImplementedError
-        raise_error(f'check_types not implemented for {self.__class__}')
+        raise InternalError(f'check_types not implemented for {self.__class__}')
 
 
 class Program(Node):
@@ -220,9 +215,7 @@ class Program(Node):
 
     def resolve_names(self, scope):
         if not self.decls:
-            semantic_error3('no "main" function in a program', self.eof)
-            # todo throw exception here
-            exit(1)
+            raise SemanticError('no "main" function in a program', *self.eof.get_char_info())
         for decl in self.decls:
             scope.add(decl.name, decl)
         if 'main' not in scope.members.keys():
@@ -604,7 +597,7 @@ class StmtAssign(Stmt):
                                 self.lhs.name)
             unify_types(target_type, value_type, self.value.get_token())
         else:
-            raise_error("no target type")
+            raise InternalError("no target type")
 
 
 # def to_s
@@ -925,7 +918,7 @@ class ExprUnary(Expr):
                 return type_
 
         else:
-            raise_error('wrong unary operator')
+            raise InternalError('wrong unary operator')
 
 
 class ExprVar(Expr):
@@ -949,7 +942,7 @@ class ExprVar(Expr):
     def check_types(self):
         # t-node jau vardu rez metu priskyreme jam (varui)
         # @target_node&.type #(jei kairej nil, arba abiejose sides nil, tai skipinam unify types (remember))
-        # todo add raise_error on else
+        # todo add raise InternalError on else
         if self.target_node:  # arba if @target.respond_to?(:type)
             if isinstance(self.target_node, DeclFn):
                 semantic_error3('function name cannot be used as a variable', self.name)
@@ -992,7 +985,7 @@ class ExprLit(Expr):
         elif self.lit.type == 'LIT_STR':
             return TYPE_STRING
         else:
-            raise_error('Bad ExprLit token')
+            raise InternalError('Bad ExprLit token')
 
 
 # abstract
@@ -1065,7 +1058,7 @@ class TypePointer(Type):
         elif isinstance(self.inner, TypePrim):
             return f'{self.inner.kind}{depth * "$"}'
         else:
-            raise_error('pointer to something other than primary type')
+            raise InternalError('pointer to something other than primary type')
 
     # todo is it needed?
     # def resolve_names(self, scope):
