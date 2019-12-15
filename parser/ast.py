@@ -10,21 +10,9 @@ def deb(msg):
     print(msg)
 
 
-# todo move these definitions and others to centralized place somewhere
-# todo maybe this dict is useless
-unary_ops = {
-    'OP_INCR': 'INCR',
-    'OP_DECR': 'DECR',
-    'OP_NOT': 'NOT',
-    'OP_PTR': 'PTR_DEREF',
-    'OP_PTR_ADDR': 'PTR_ADDR',
-}
-
-
 def semantic_error(message, token=None):
     line_no = token.line_no if (token and token.line_no) else '?'
     print(f'???:{line_no}: semantic error: {message}')
-    # exit(1)
 
 
 def semantic_error3(msg, token):
@@ -35,23 +23,10 @@ def semantic_error3(msg, token):
     cprint(f'SemanticERROR: {file}:{line}:{pos} {msg}', 'red', attrs=['bold'])
 
 
-# def semantic_error3(msg, token=None):
-#     # line_no = token.line_no if (token and token.line_no) else '?'
-#     if token:
-#         raise SemanticError(msg, *token.get_char_info())
-#     else:
-#         raise SemanticError(msg, 0, 0, 0)
-#         # raise SemanticError(msg, , 1, 1)
-
-
-# ar dvi sakos sutampa
-# gali ateiti nil nes vykdome vardu rezoliucija,
-# ne tik tipu tikrinima. ji gali feilinti. analize darom kai TIK pavyksta...
-
-
 # todo remove additional unify function and stupid error codes
 def unify_types(type_0, type_1, token=None):
     err = unify(type_0, type_1)
+    # todo what does this do?
     if err == 0:
         return True
     elif err == 1:

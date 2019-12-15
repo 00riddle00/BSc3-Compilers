@@ -1,4 +1,5 @@
 from lexer import Token
+from errors import InternalError
 from .ast import Node
 from termcolor import cprint
 
@@ -18,8 +19,7 @@ class ASTPrinter:
         elif not obj:
             self.print_single(title, 'NULL')
         else:
-            print(f'bad argument {obj.__class__.__name__}')
-            exit(1)
+            raise InternalError(f'bad argument {obj.__class__.__name__}')
 
     def print_array(self, title, array):
         if not array:
