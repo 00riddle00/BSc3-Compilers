@@ -913,11 +913,17 @@ class ExprUnary(Expr):
                 # todo is this error formulated correctly?
                 # todo add token info for error handling here
                 semantic_error3('assignment lvalue cannot be unary expression', self.get_token())
-            elif self.target_node:
-                return self.target_node.type
+            if not self.op == 'NOT':
+                if self.target_node:
+                    return self.target_node.type
+                else:
+                    semantic_error3('cannot apply unary operator on that which follows the operator', self.get_token())
+                    return TypeErr(self.get_token())
             else:
-                semantic_error3('cannot apply unary operator on that which follows the operator', self.get_token())
-                return TypeErr(self.get_token())
+                type_ = self.inner.check_types()
+                unify_types(TYPE_BOOL, type_, self.get_token())
+                return type_
+
         else:
             raise_error('wrong unary operator')
 
