@@ -1,7 +1,9 @@
 fx main() ==> int {
 
-    int $a;
-    ++($($($a))); # should not work
+    int$ a;
+    int$ b = &$a;
+    # int $a;
+    # ++($($($a))); # should not work
 
 }
 

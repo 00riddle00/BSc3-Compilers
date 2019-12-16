@@ -849,6 +849,7 @@ class ExprUnary(Expr):
             return TypePointer(self.target_node.type)
         # todo recursion
         elif self.op == 'PTR_DEREF':
+            deb('here')
             if not self.target_node:
                 semantic_error3('cannot dereference that which follows the dereference operator', self.get_token())
                 return TypeErr(self.get_token())
@@ -877,11 +878,13 @@ class ExprUnary(Expr):
             return target_inner
         # todo move this mess elsewhere
         elif self.op in ['NOT', 'DECR', 'INCR']:
+            deb('in')
             if isinstance(self.parent, StmtAssign) and self.parent.lhs == self:
                 # todo is this error formulated correctly?
                 # todo add token info for error handling here
                 semantic_error3('assignment lvalue cannot be unary expression', self.get_token())
-            if not self.op == 'NOT':
+                return TypeErr(self.get_token())
+            elif not self.op == 'NOT':
                 if self.target_node:
                     return self.target_node.type
                 else:
