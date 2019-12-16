@@ -108,6 +108,12 @@ class Node(object):
     def unwrap(self):
         return self.__class__.__name__
 
+    def has_address(self):
+        return False
+
+    def is_mutable(self):
+        return False
+
     # def allocate_slots
     # end
 
@@ -816,6 +822,7 @@ class ExprBinLogic(ExprBinary):
 # end
 # end
 
+
 class ExprUnary(Expr):
 
     def __init__(self, inner, op):
@@ -840,63 +847,75 @@ class ExprUnary(Expr):
         return inner.get_token()
 
     def check_types(self):
-        if self.op == 'PTR_ADDR':
-            # todo is it pointer, pointer value literal or just int?
-            if isinstance(self.inner, ExprUnary):
-                # todo now exprUnary name token is used for error, not the token
-                # todo ...going after the PTR_ADDR operator
-                semantic_error3('wrong value to address', self.inner.get_token())
-            return TypePointer(self.target_node.type)
-        # todo recursion
-        elif self.op == 'PTR_DEREF':
-            deb('here')
-            if not self.target_node:
-                semantic_error3('cannot dereference that which follows the dereference operator', self.get_token())
+        if isinstance(self.parent, StmtAssign) and self.parent.lhs == self:
+            # todo is this error formulated correctly?
+            # todo add token info for error handling here
+            semantic_error3('assignment lvalue cannot be unary expression', self.get_token())
+            return TypeErr(self.get_token())
+        elif not self.op == 'NOT':
+            if self.target_node:
+                return self.target_node.type
+            else:
+                semantic_error3('cannot apply unary operator on that which follows the operator', self.get_token())
                 return TypeErr(self.get_token())
-            if not isinstance(self.target_node.type, TypePointer):
-                semantic_error3('variable to dereference is not a pointer type', self.get_token())
-                # todo duplicates here, since it is already type error, because it is function name withotu parenthesis?
-                return TypeErr(self.get_token())
-            # todo break here, return errtype
+        else:
+            type_ = self.inner.check_types()
+            unify_types(TYPE_BOOL, type_, self.get_token())
+            return type_
 
-            target_inner = self.target_node.type.inner
+
+class ExprDeref(ExprUnary):
+
+    def has_address(self):
+        return True
+
+    def is_mutable(self):
+        return True
+
+    def check_types(self):
+        # todo maybe useless check, since has_address() exists
+        if not self.target_node:
+            semantic_error3('cannot dereference that which follows the dereference operator', self.get_token())
+            return TypeErr(self.get_token())
+        elif not isinstance(self.target_node.type, TypePointer):
+            semantic_error3('value to dereference is not a pointer', self.get_token())
+            # todo duplicates here, since it is already type error, because it is function name without parenthesis?
+            return TypeErr(self.get_token())
+        # todo del PTR_ADDR galimybes??
+        elif self.inner.has_address():
             inner = self.inner
-            # todo del PTR_ADDR galimybes??
-            while isinstance(inner, ExprUnary):
-                if not inner.op == "PTR_DEREF":
-                    # todo add token info for error handling here
-                    # to prevent ex. $++a;
-                    # todo but if a is int, not a pointer, then we get the error above (var deref is not a pointer type),
-                    # ...and it is not correct
-                    semantic_error3('value to dereference is not a pointer', self.get_token())
-                elif isinstance(target_inner, TypePointer):
+            target_inner = self.target_node.type.inner
+            while isinstance(inner, ExprDeref):
+                if isinstance(target_inner, TypePointer):
                     inner = inner.inner
                     target_inner = target_inner.inner
                 else:
                     # todo add token info for error handling here
                     semantic_error3(f'primary type ({target_inner.kind}) cannot be dereferenced', self.get_token())
-            return target_inner
-        # todo move this mess elsewhere
-        elif self.op in ['NOT', 'DECR', 'INCR']:
-            deb('in')
-            if isinstance(self.parent, StmtAssign) and self.parent.lhs == self:
-                # todo is this error formulated correctly?
-                # todo add token info for error handling here
-                semantic_error3('assignment lvalue cannot be unary expression', self.get_token())
-                return TypeErr(self.get_token())
-            elif not self.op == 'NOT':
-                if self.target_node:
-                    return self.target_node.type
-                else:
-                    semantic_error3('cannot apply unary operator on that which follows the operator', self.get_token())
                     return TypeErr(self.get_token())
-            else:
-                type_ = self.inner.check_types()
-                unify_types(TYPE_BOOL, type_, self.get_token())
-                return type_
-
+            return target_inner
         else:
-            raise InternalError('wrong unary operator')
+            # todo add token info for error handling here
+            # todo to prevent ex. $++a;
+            # todo but if a is int, not a pointer, then we get the error above (var deref is not a pointer type),
+            # todo ...and it is not correct
+            semantic_error3('value to dereference is not a pointer', self.get_token())
+            return TypeErr(self.get_token())
+
+
+class ExprAddress(ExprUnary):
+
+    def has_address(self):
+        return True
+
+    def check_types(self):
+        if self.inner.has_address():
+            return TypePointer(self.inner.check_types())
+            # todo is it pointer, pointer value literal or just int?
+        else:
+            # todo now exprUnary name token is used for error, not the token
+            # todo ...going after the PTR_ADDR operator
+            semantic_error3('wrong value to address', self.inner.get_token())
 
 
 class ExprVar(Expr):
@@ -912,6 +931,12 @@ class ExprVar(Expr):
 
     def get_token(self):
         return self.name
+
+    def has_address(self):
+        return True
+
+    def is_mutable(self):
+        return True
 
     def resolve_names(self, scope):
         self.target_node = scope.resolve(self.name)

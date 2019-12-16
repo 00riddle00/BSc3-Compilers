@@ -1,6 +1,6 @@
 from lexer import Token, Input
 from errors import ParserError, ParserDebugError
-from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnary, ExprBinArith, ExprBinComparison, \
+from .ast import Node, TypePrim, ExprLit, ExprVar, ExprUnary, ExprDeref, ExprAddress, ExprBinArith, ExprBinComparison, \
     ExprBinEquality, ExprBinLogic, ExprFnCall, Param, Program, DeclFn, StmtBlock, StmtIf, \
     StmtWhile, StmtBreak, StmtContinue, StmtReturn, StmtExpr, StmtAssign, StmtVarDecl, \
     IfBranch, TypePointer, StmtFor
@@ -20,6 +20,8 @@ unary_ops = {
     'OP_PTR': 'PTR_DEREF',
     'OP_PTR_ADDR': 'PTR_ADDR',
 }
+
+
 
 primary_types_keywords = {
     'KW_BOOL': 'bool',
@@ -393,12 +395,12 @@ class Parser:
         if self.curr_token.type in unary_ops.keys():
             op = unary_ops[self.curr_token.type]
             self.accept(self.curr_token.type)
-            if self.accept('OP_PAREN_O'):
-                expr = self.parse_expr()
-                self.accept('OP_PAREN_C')
-                return ExprUnary(expr, op)
+            expr = self.parse_expr()
+            if op == 'PTR_DEREF':
+                return ExprDeref(expr, op)
+            elif op == 'PTR_ADDR':
+                return ExprAddress(expr, op)
             else:
-                expr = self.parse_expr_unary()
                 return ExprUnary(expr, op)
         else:
             return self.parse_expr_primary()

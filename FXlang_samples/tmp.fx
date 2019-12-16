@@ -1,13 +1,8 @@
 fx main() ==> int {
-
-    int$ a;
-    int$ b = &$a;
-    # int $a;
-    # ++($($($a))); # should not work
-
+    int $a;
+    int b = 2;
+    $a = $foo(++b);
 }
-
-
-fx foo(int a) ==> int {
-   return 1;
+fx foo(int a) ==> int$ {
+    return &a;
 }
